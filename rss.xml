@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+<title>감정쓰레기통</title>
+<link>https://emotional-trash-can.app</link>
+<description>익명 감정 배출 및 실시간 3D 쓰레기산 시각화 서비스. 전 세계 사람들이 버린 감정 쓰레기 모음.</description>
+<language>ko-KR</language>
+<atom:link href="https://emotional-trash-can.app/rss.xml" rel="self" type="application/rss+xml" />
+<copyright>© 2026 감정쓰레기통</copyright>
+<lastBuildDate>Wed, 31 May 2026 00:00:00 +0900</lastBuildDate>
+<generator>감정쓰레기통 RSS Generator</generator>
+<item>
+<title>감정쓰레기통 시작하기</title>
+<link>https://emotional-trash-can.app</link>
+<description>회원가입 없이 5000자까지 자유롭게 감정을 쏟아내세요. 3D 쓰레기산에 실시간으로 시각화됩니다.</description>
+<category>Mental Health</category>
+<pubDate>Wed, 31 May 2026 00:00:00 +0900</pubDate>
+<guid isPermaLink="true">https://emotional-trash-can.app</guid>
+</item>
+<item>
+<title>AI 반응 모드 - 더 세게 토해내</title>
+<link>https://emotional-trash-can.app</link>
+<description>부드러운 위로 대신 사용자의 감정에 함께 분노해주는 AI 모드. 무료, API 키 불필요.</description>
+<category>Features</category>
+<pubDate>Wed, 31 May 2026 00:00:00 +0900</pubDate>
+<guid isPermaLink="true">https://emotional-trash-can.app#ai-rage</guid>
+</item>
+<item>
+<title>AI 반응 모드 - 냉정한 분석</title>
+<link>https://emotional-trash-can.app</link>
+<description>감정을 객관적이고 건조한 어조로 분석해주는 AI 모드. 무료, API 키 불필요.</description>
+<category>Features</category>
+<pubDate>Wed, 31 May 2026 00:00:00 +0900</pubDate>
+<guid isPermaLink="true">https://emotional-trash-can.app#ai-cold</guid>
+</item>
+<item>
+<title>감정 소각 기능</title>
+<link>https://emotional-trash-can.app</link>
+<description>내 쓰레기통의 감정을 불꽃 애니메이션과 함께 태우는 추가 카타르시스 기능.</description>
+<category>Features</category>
+<pubDate>Wed, 31 May 2026 00:00:00 +0900</pubDate>
+<guid isPermaLink="true">https://emotional-trash-can.app#burn</guid>
+</item>
+<item>
+<title>레벨 시스템</title>
+<link>https://emotional-trash-can.app</link>
+<description>LV.1 일반 쓰레기부터 LV.10 감정 쓰레기 신까지 10단계 등급 시스템.</description>
+<category>Features</category>
+<pubDate>Wed, 31 May 2026 00:00:00 +0900</pubDate>
+<guid isPermaLink="true">https://emotional-trash-can.app#level</guid>
+</item>
+</channel>
+</rss>

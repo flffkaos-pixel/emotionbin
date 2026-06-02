@@ -1,0 +1,7 @@
+# ads.txt - Google AdSense 인증 파일
+# https://support.google.com/adsense/answer/7532444
+#
+# 이 사이트는 현재 광고를 게재하지 않습니다.
+# 추후 Google AdSense를 사용할 경우 다음과 같이 추가하세요:
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+#

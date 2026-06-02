@@ -1,0 +1,53 @@
+User-agent: *
+Allow: /
+Disallow: /dump-modal
+
+# 네이버 검색로봇
+User-agent: Naverbot
+Allow: /
+
+# 구글 검색로봇
+User-agent: Googlebot
+Allow: /
+
+# 빙 검색로봇
+User-agent: Bingbot
+Allow: /
+
+# AI 크롤러 (GEO)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+# 악성 봇 차단
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+Sitemap: https://emotional-trash-can.app/sitemap.xml
+Sitemap: https://emotional-trash-can.app/rss.xml
