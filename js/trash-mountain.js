@@ -183,17 +183,56 @@ function getTagColor(tags) {
   return DEFAULT_COLOR;
 }
 
-function getTrashGeometry(weight) {
+function getTrashGeometry(weight, contentLength) {
   const w = weight / 200;
-  const types = [
-    () => new THREE.BoxGeometry(0.3 + w * 0.4, 0.3 + w * 0.4, 0.3 + w * 0.4),
-    () => new THREE.SphereGeometry(0.25 + w * 0.3, 4, 4),
-    () => new THREE.DodecahedronGeometry(0.25 + w * 0.3),
-    () => new THREE.CylinderGeometry(0.2 + w * 0.25, 0.3 + w * 0.35, 0.4 + w * 0.5),
-    () => new THREE.IcosahedronGeometry(0.25 + w * 0.3),
-    () => new THREE.TorusGeometry(0.2 + w * 0.25, 0.1 + w * 0.1, 6, 6),
-  ];
-  const fn = types[Math.floor(Math.random() * types.length)];
+
+  const trashTypes = {
+    tiny: [
+      () => new THREE.TetrahedronGeometry(0.2 + w * 0.15),
+      () => new THREE.SphereGeometry(0.15 + w * 0.15, 4, 4),
+      () => new THREE.CylinderGeometry(0.05 + w * 0.08, 0.08 + w * 0.1, 0.25 + w * 0.2, 6),
+    ],
+    small: [
+      () => new THREE.BoxGeometry(0.3 + w * 0.25, 0.2 + w * 0.15, 0.3 + w * 0.25),
+      () => new THREE.OctahedronGeometry(0.2 + w * 0.2),
+      () => new THREE.CylinderGeometry(0.2 + w * 0.15, 0.25 + w * 0.2, 0.3 + w * 0.2, 8),
+    ],
+    medium: [
+      () => new THREE.BoxGeometry(0.4 + w * 0.35, 0.35 + w * 0.3, 0.4 + w * 0.35),
+      () => new THREE.TorusGeometry(0.25 + w * 0.2, 0.08 + w * 0.08, 8, 8),
+      () => new THREE.DodecahedronGeometry(0.3 + w * 0.25),
+      () => new THREE.CylinderGeometry(0.25 + w * 0.2, 0.15 + w * 0.15, 0.5 + w * 0.35, 6),
+    ],
+    large: [
+      () => new THREE.BoxGeometry(0.6 + w * 0.4, 0.15 + w * 0.15, 0.45 + w * 0.35),
+      () => new THREE.BoxGeometry(0.15 + w * 0.15, 0.55 + w * 0.4, 0.15 + w * 0.15),
+      () => new THREE.IcosahedronGeometry(0.35 + w * 0.3),
+      () => new THREE.TorusKnotGeometry(0.25 + w * 0.15, 0.06 + w * 0.06, 20, 8),
+    ],
+    huge: [
+      () => new THREE.BoxGeometry(0.8 + w * 0.5, 0.6 + w * 0.45, 0.3 + w * 0.25),
+      () => new THREE.BoxGeometry(0.5 + w * 0.35, 0.8 + w * 0.5, 0.5 + w * 0.35),
+      () => new THREE.DodecahedronGeometry(0.5 + w * 0.4),
+      () => new THREE.CylinderGeometry(0.3 + w * 0.25, 0.4 + w * 0.35, 0.8 + w * 0.5, 10),
+    ],
+  };
+
+  let category;
+  if (contentLength <= 50) {
+    category = trashTypes.tiny;
+  } else if (contentLength <= 200) {
+    category = trashTypes.small;
+  } else if (contentLength <= 500) {
+    category = trashTypes.medium;
+  } else {
+    category = trashTypes.large;
+  }
+
+  if (contentLength >= 1000) {
+    category = trashTypes.huge;
+  }
+
+  const fn = category[Math.floor(Math.random() * category.length)];
   return fn();
 }
 
@@ -213,7 +252,8 @@ function createTrashItem(data) {
   const color = getTagColor(data.tags || []);
   const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
 
-  const geo = getTrashGeometry(weight);
+  const contentLength = (data.content || '').length;
+  const geo = getTrashGeometry(weight, contentLength);
   const mat = new THREE.MeshStandardMaterial({
     color,
     roughness: 0.6 + Math.random() * 0.3,

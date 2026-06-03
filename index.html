@@ -487,8 +487,11 @@
         <form id="dump-form" onsubmit="event.preventDefault();dumpEmotion()">
           <div class="form-group">
             <label for="emotion-text" class="form-label">당신의 감정을 마음껏 쏟아내세요</label>
-            <textarea id="emotion-text" placeholder="더럽고, 추악하고, 분노 가득한 감정을 모두 여기에..." maxlength="5000" required></textarea>
-            <div class="char-count"><span id="char-count" aria-live="polite">0</span> / 5000</div>
+            <textarea id="emotion-text" placeholder="글자가 길수록 더 크고 무거운 쓰레기가 됩니다. 냉장고, TV, 자동차도 될 수 있어요." maxlength="5000" required></textarea>
+            <div class="char-count">
+            <span id="char-count" aria-live="polite">0</span> / 5000
+            <span class="trash-preview" id="trash-preview">🧃 캔</span>
+          </div>
           </div>
 
           <fieldset class="form-group">

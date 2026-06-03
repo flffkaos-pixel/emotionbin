@@ -615,11 +615,25 @@ body {
 }
 
 .char-count {
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   font-size: 0.75rem;
   color: var(--text-dim);
   margin-top: 0.3rem;
   font-family: 'Nanum Gothic Coding', monospace;
+}
+
+.trash-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  font-size: 0.7rem;
+  transition: all 0.3s ease;
 }
 
 .tag-container {
