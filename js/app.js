@@ -59,7 +59,7 @@ function updateTrashPreview(len) {
   const el = document.getElementById('trash-preview');
   let label, icon;
   if (len <= 0) {
-    icon = '🧃'; label = '캔';
+    icon = '🥫'; label = '캔';
   } else if (len <= 50) {
     icon = '🥫'; label = '캔';
   } else if (len <= 200) {

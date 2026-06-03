@@ -183,57 +183,240 @@ function getTagColor(tags) {
   return DEFAULT_COLOR;
 }
 
-function getTrashGeometry(weight, contentLength) {
+function createCanTexture(accentColor) {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 128, 0);
+  const r = (accentColor >> 16) & 0xff;
+  const g = (accentColor >> 8) & 0xff;
+  const b = accentColor & 0xff;
+  grad.addColorStop(0, `rgb(${r},${g},${b})`);
+  grad.addColorStop(0.3, '#ccc');
+  grad.addColorStop(0.5, `rgb(${r},${g},${b})`);
+  grad.addColorStop(0.7, '#aaa');
+  grad.addColorStop(1, `rgb(${r>>1},${g>>1},${b>>1})`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, 128, 128);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 20px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🍺', 64, 45);
+  ctx.font = '10px sans-serif';
+  ctx.fillText('EMOTION', 64, 80);
+  return new THREE.CanvasTexture(c);
+}
+
+function createBoxTexture(accentColor) {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#b8956a';
+  ctx.fillRect(0, 0, 128, 128);
+  const r = (accentColor >> 16) & 0xff;
+  const g = (accentColor >> 8) & 0xff;
+  const b = accentColor & 0xff;
+  ctx.strokeStyle = `rgb(${r},${g},${b})`;
+  ctx.lineWidth = 4;
+  ctx.strokeRect(10, 10, 108, 108);
+  ctx.strokeRect(20, 20, 88, 88);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.3)`;
+  ctx.fillRect(48, 48, 32, 32);
+  ctx.fillStyle = '#333';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('FRAGILE', 64, 70);
+  return new THREE.CanvasTexture(c);
+}
+
+function createTVTexture(accentColor) {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#222';
+  ctx.fillRect(0, 0, 256, 128);
+  const r = (accentColor >> 16) & 0xff;
+  const g = (accentColor >> 8) & 0xff;
+  const b = accentColor & 0xff;
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.shadowColor = `rgb(${r},${g},${b})`;
+  ctx.shadowBlur = 20;
+  ctx.fillRect(20, 10, 216, 100);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#111';
+  ctx.fillRect(100, 116, 56, 10);
+  ctx.fillRect(120, 126, 16, 2);
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(20, 10, 216, 100);
+  return new THREE.CanvasTexture(c);
+}
+
+function createCarTexture(accentColor) {
+  const c = document.createElement('canvas');
+  c.width = 128; c.height = 64;
+  const ctx = c.getContext('2d');
+  const r = (accentColor >> 16) & 0xff;
+  const g = (accentColor >> 8) & 0xff;
+  const b = accentColor & 0xff;
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.beginPath();
+  ctx.moveTo(15, 40);
+  ctx.lineTo(20, 10);
+  ctx.lineTo(60, 10);
+  ctx.lineTo(80, 40);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#333';
+  ctx.fillRect(10, 40, 108, 18);
+  ctx.fillStyle = '#555';
+  ctx.fillRect(25, 14, 30, 14);
+  ctx.fillRect(65, 14, 30, 14);
+  ctx.fillStyle = '#ffeb3b';
+  ctx.fillRect(20, 42, 18, 14);
+  ctx.fillRect(90, 42, 18, 14);
+  return new THREE.CanvasTexture(c);
+}
+
+function createFridgeTexture(accentColor) {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 128;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#e0e0e0';
+  ctx.fillRect(0, 0, 64, 128);
+  const r = (accentColor >> 16) & 0xff;
+  const g = (accentColor >> 8) & 0xff;
+  const b = accentColor & 0xff;
+  ctx.strokeStyle = `rgb(${r},${g},${b})`;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(2, 2, 60, 60);
+  ctx.strokeRect(2, 64, 60, 62);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.2)`;
+  ctx.fillRect(8, 8, 48, 48);
+  ctx.fillRect(8, 70, 48, 50);
+  ctx.fillStyle = '#999';
+  ctx.fillRect(30, 30, 4, 8);
+  ctx.fillRect(30, 90, 4, 8);
+  return new THREE.CanvasTexture(c);
+}
+
+function createTrashMesh(weight, contentLength, color, tags) {
   const w = weight / 200;
-
-  const trashTypes = {
-    tiny: [
-      () => new THREE.TetrahedronGeometry(0.2 + w * 0.15),
-      () => new THREE.SphereGeometry(0.15 + w * 0.15, 4, 4),
-      () => new THREE.CylinderGeometry(0.05 + w * 0.08, 0.08 + w * 0.1, 0.25 + w * 0.2, 6),
-    ],
-    small: [
-      () => new THREE.BoxGeometry(0.3 + w * 0.25, 0.2 + w * 0.15, 0.3 + w * 0.25),
-      () => new THREE.OctahedronGeometry(0.2 + w * 0.2),
-      () => new THREE.CylinderGeometry(0.2 + w * 0.15, 0.25 + w * 0.2, 0.3 + w * 0.2, 8),
-    ],
-    medium: [
-      () => new THREE.BoxGeometry(0.4 + w * 0.35, 0.35 + w * 0.3, 0.4 + w * 0.35),
-      () => new THREE.TorusGeometry(0.25 + w * 0.2, 0.08 + w * 0.08, 8, 8),
-      () => new THREE.DodecahedronGeometry(0.3 + w * 0.25),
-      () => new THREE.CylinderGeometry(0.25 + w * 0.2, 0.15 + w * 0.15, 0.5 + w * 0.35, 6),
-    ],
-    large: [
-      () => new THREE.BoxGeometry(0.6 + w * 0.4, 0.15 + w * 0.15, 0.45 + w * 0.35),
-      () => new THREE.BoxGeometry(0.15 + w * 0.15, 0.55 + w * 0.4, 0.15 + w * 0.15),
-      () => new THREE.IcosahedronGeometry(0.35 + w * 0.3),
-      () => new THREE.TorusKnotGeometry(0.25 + w * 0.15, 0.06 + w * 0.06, 20, 8),
-    ],
-    huge: [
-      () => new THREE.BoxGeometry(0.8 + w * 0.5, 0.6 + w * 0.45, 0.3 + w * 0.25),
-      () => new THREE.BoxGeometry(0.5 + w * 0.35, 0.8 + w * 0.5, 0.5 + w * 0.35),
-      () => new THREE.DodecahedronGeometry(0.5 + w * 0.4),
-      () => new THREE.CylinderGeometry(0.3 + w * 0.25, 0.4 + w * 0.35, 0.8 + w * 0.5, 10),
-    ],
-  };
-
+  const accentColor = color || 0x888888;
   let category;
-  if (contentLength <= 50) {
-    category = trashTypes.tiny;
-  } else if (contentLength <= 200) {
-    category = trashTypes.small;
-  } else if (contentLength <= 500) {
-    category = trashTypes.medium;
-  } else {
-    category = trashTypes.large;
+  if (contentLength <= 50) category = 'can';
+  else if (contentLength <= 200) category = 'box';
+  else if (contentLength <= 500) category = 'tv';
+  else if (contentLength <= 1000) category = 'car';
+  else category = 'fridge';
+
+  const baseMat = (texture, color, emissiveIntensity = 0.05) => new THREE.MeshStandardMaterial({
+    map: texture,
+    roughness: 0.5 + Math.random() * 0.3,
+    metalness: 0.1 + Math.random() * 0.3,
+    emissive: color,
+    emissiveIntensity: emissiveIntensity,
+  });
+
+  const group = new THREE.Group();
+
+  if (category === 'can') {
+    const tex = createCanTexture(accentColor);
+    const h = 0.3 + w * 0.4;
+    const r = 0.12 + w * 0.15;
+    const geo = new THREE.CylinderGeometry(r * 0.9, r, h, 12);
+    const mesh = new THREE.Mesh(geo, baseMat(tex, accentColor));
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    group.add(mesh);
+
+    const tabGeo = new THREE.TorusGeometry(r * 0.3, 0.02, 6, 8);
+    const tabMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.5 });
+    const tab = new THREE.Mesh(tabGeo, tabMat);
+    tab.position.y = h / 2 + 0.02;
+    tab.rotation.x = Math.PI / 2;
+    tab.castShadow = true;
+    group.add(tab);
   }
 
-  if (contentLength >= 1000) {
-    category = trashTypes.huge;
+  else if (category === 'box') {
+    const tex = createBoxTexture(accentColor);
+    const geo = new THREE.BoxGeometry(0.4 + w * 0.3, 0.3 + w * 0.2, 0.4 + w * 0.3);
+    const mesh = new THREE.Mesh(geo, baseMat(tex, accentColor));
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    group.add(mesh);
+
+    const tapeMat = new THREE.MeshStandardMaterial({ color: 0x8B7355 });
+    const tape = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.3 + w * 0.2, 0.04), tapeMat);
+    tape.position.x = 0.2 + w * 0.15;
+    tape.castShadow = true;
+    group.add(tape);
+    const tape2 = tape.clone();
+    tape2.position.x = -(0.2 + w * 0.15);
+    group.add(tape2);
   }
 
-  const fn = category[Math.floor(Math.random() * category.length)];
-  return fn();
+  else if (category === 'tv') {
+    const tex = createTVTexture(accentColor);
+    const geo = new THREE.BoxGeometry(0.8 + w * 0.4, 0.25 + w * 0.15, 0.1 + w * 0.08);
+    const mesh = new THREE.Mesh(geo, baseMat(tex, accentColor));
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    group.add(mesh);
+
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.12, 0.08), standMat);
+    stand.position.y = -(0.125 + w * 0.075 + 0.06);
+    stand.castShadow = true;
+    group.add(stand);
+  }
+
+  else if (category === 'car') {
+    const tex = createCarTexture(accentColor);
+    const bodyGeo = new THREE.BoxGeometry(0.8 + w * 0.4, 0.2 + w * 0.15, 0.35 + w * 0.2);
+    const body = new THREE.Mesh(bodyGeo, baseMat(tex, accentColor));
+    body.position.y = 0.12 + w * 0.08;
+    body.castShadow = true; body.receiveShadow = true;
+    group.add(body);
+
+    const cabinGeo = new THREE.BoxGeometry(0.35 + w * 0.2, 0.12 + w * 0.08, 0.3 + w * 0.15);
+    const cabinMat = new THREE.MeshStandardMaterial({ color: 0x4488cc, metalness: 0.3, roughness: 0.2, transparent: true, opacity: 0.6 });
+    const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+    cabin.position.set(-0.05, 0.28 + w * 0.15, 0);
+    cabin.castShadow = true;
+    group.add(cabin);
+
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+    const wheelPositions = [[-0.25, -0.04, 0.2], [0.25, -0.04, 0.2], [-0.25, -0.04, -0.2], [0.25, -0.04, -0.2]];
+    wheelPositions.forEach(pos => {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.04, 8), wheelMat);
+      wheel.rotation.x = Math.PI / 2;
+      wheel.position.set(pos[0], pos[1], pos[2]);
+      wheel.castShadow = true;
+      group.add(wheel);
+    });
+  }
+
+  else if (category === 'fridge') {
+    const tex = createFridgeTexture(accentColor);
+    const geo = new THREE.BoxGeometry(0.5 + w * 0.35, 0.9 + w * 0.5, 0.35 + w * 0.25);
+    const mesh = new THREE.Mesh(geo, baseMat(tex, accentColor));
+    mesh.castShadow = true; mesh.receiveShadow = true;
+    group.add(mesh);
+
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6 });
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.3 + w * 0.2, 0.04, 0.02), handleMat);
+    handle.position.set(0, 0.15, 0.18 + w * 0.12);
+    group.add(handle);
+    const handle2 = handle.clone();
+    handle2.position.y = -0.25;
+    group.add(handle2);
+
+    const lineMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+    const line = new THREE.Mesh(new THREE.BoxGeometry(0.5 + w * 0.35, 0.02, 0.36 + w * 0.25), lineMat);
+    line.position.y = 0.02;
+    group.add(line);
+  }
+
+  return group;
 }
 
 let pendingDumps = [];
@@ -253,17 +436,7 @@ function createTrashItem(data) {
   const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
 
   const contentLength = (data.content || '').length;
-  const geo = getTrashGeometry(weight, contentLength);
-  const mat = new THREE.MeshStandardMaterial({
-    color,
-    roughness: 0.6 + Math.random() * 0.3,
-    metalness: 0.1 + Math.random() * 0.3,
-    emissive: color,
-    emissiveIntensity: 0.05,
-  });
-  const mesh = new THREE.Mesh(geo, mat);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
+  const mesh = createTrashMesh(weight, contentLength, color, data.tags);
 
   const angle = Math.random() * Math.PI * 2;
   const dist = 8 + Math.random() * 5;
