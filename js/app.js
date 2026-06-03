@@ -67,9 +67,9 @@ function updateTrashPreview(len) {
   } else if (len <= 500) {
     icon = '📺'; label = 'TV';
   } else if (len <= 1000) {
-    icon = '🚗'; label = '자동차';
-  } else {
     icon = '🧊'; label = '냉장고';
+  } else {
+    icon = '🚗'; label = '자동차';
   }
   el.textContent = `${icon} ${label}`;
 }
