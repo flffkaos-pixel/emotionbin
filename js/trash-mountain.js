@@ -492,16 +492,18 @@ function createCarTexture(accentColor) {
   return new THREE.CanvasTexture(c);
 }
 
-function createTrashMesh(weight, contentLength, color, tags) {
+function createTrashMesh(weight, contentLength, color, tags, forceType) {
   const w = weight / 200;
   const accentColor = color || 0x888888;
   let category;
-  if (contentLength <= 50) category = 'can';
+  if (forceType && forceType !== 'auto') {
+    category = forceType;
+  } else if (contentLength <= 50) category = 'can';
   else if (contentLength <= 200) category = 'box';
   else if (contentLength <= 500) category = 'tv';
   else if (contentLength <= 1000) category = 'fridge';
   else category = 'car';
-  console.log('[DEBUG] createTrashMesh category:', category, 'contentLength:', contentLength);
+  console.log('[DEBUG] createTrashMesh category:', category, 'contentLength:', contentLength, 'forceType:', forceType);
 
   const baseMat = (texture) => new THREE.MeshStandardMaterial({
     map: texture,
@@ -721,7 +723,7 @@ function createTrashItem(data) {
 
   const contentLength = (data.content || '').length;
   console.log('[DEBUG] createTrashItem:', { contentLength, content: data.content?.substring(0, 30), weight, tags: data.tags });
-  const mesh = createTrashMesh(weight, contentLength, color, data.tags);
+  const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
   const dist = 8 + Math.random() * 5;

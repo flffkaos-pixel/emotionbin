@@ -1,6 +1,8 @@
 let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
 let selectedTags = [];
+let selectedTrashType = 'auto';
+let pendingDumpData = null;
 
 const LEVELS = [
   { level: 1, name: '일반 쓰레기', icon: '🗑️', count: 0 },
@@ -44,6 +46,18 @@ function closeDumpModal() {
   document.getElementById('dump-modal').classList.remove('active');
   document.body.style.overflow = '';
   resetForm();
+
+  if (pendingDumpData) {
+    const data = pendingDumpData;
+    pendingDumpData = null;
+    setTimeout(() => {
+      scheduleTrashItem(data);
+      updateStats();
+      updateLevel();
+      createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+      showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+    }, 350);
+  }
 }
 
 document.addEventListener('keydown', (e) => {
@@ -59,19 +73,17 @@ document.getElementById('emotion-text').addEventListener('input', () => {
 function updateTrashPreview(len) {
   const el = document.getElementById('trash-preview');
   let label, icon;
-  if (len <= 0) {
-    icon = '🥫'; label = '캔';
-  } else if (len <= 50) {
-    icon = '🥫'; label = '캔';
-  } else if (len <= 200) {
-    icon = '📦'; label = '박스';
-  } else if (len <= 500) {
-    icon = '📺'; label = 'TV';
-  } else if (len <= 1000) {
-    icon = '🧊'; label = '냉장고';
-  } else {
-    icon = '🚗'; label = '자동차';
-  }
+  if (selectedTrashType === 'can') { icon = '🥫'; label = '캔'; }
+  else if (selectedTrashType === 'box') { icon = '📦'; label = '박스'; }
+  else if (selectedTrashType === 'tv') { icon = '📺'; label = 'TV'; }
+  else if (selectedTrashType === 'fridge') { icon = '🧊'; label = '냉장고'; }
+  else if (selectedTrashType === 'car') { icon = '🚗'; label = '자동차'; }
+  else if (len <= 0) { icon = '✨'; label = '자동'; }
+  else if (len <= 50) { icon = '🥫'; label = '캔'; }
+  else if (len <= 200) { icon = '📦'; label = '박스'; }
+  else if (len <= 500) { icon = '📺'; label = 'TV'; }
+  else if (len <= 1000) { icon = '🧊'; label = '냉장고'; }
+  else { icon = '🚗'; label = '자동차'; }
   el.textContent = `${icon} ${label}`;
 }
 
@@ -107,6 +119,16 @@ document.querySelectorAll('.tag').forEach(el => {
   });
 });
 
+document.querySelectorAll('.trash-type-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.trash-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedTrashType = btn.dataset.type;
+    const len = document.getElementById('emotion-text').value.length;
+    updateTrashPreview(len);
+  });
+});
+
 async function dumpEmotion() {
   const text = document.getElementById('emotion-text').value.trim();
   if (!text) {
@@ -130,6 +152,7 @@ async function dumpEmotion() {
     weightDiff: before - after,
     timestamp: Date.now(),
     privacy,
+    trashType: selectedTrashType,
   };
 
   myTrash.unshift(data);
@@ -141,35 +164,26 @@ async function dumpEmotion() {
     localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
   }
 
+  btn.classList.remove('loading');
+
   if (selectedAIMode !== 'none') {
     await getAIResponse(text, selectedTags);
-  }
-
-  btn.classList.remove('loading');
-  if (selectedAIMode === 'none') {
+    pendingDumpData = data;
+  } else {
+    pendingDumpData = data;
     closeDumpModal();
   }
-
-  btn.classList.remove('loading');
-  // AI 응답 있을 때 모달 바로 안 닫음 (사용자가 볼 수 있게)
-  if (selectedAIMode === 'none') {
-    closeDumpModal();
-    resetForm();
-  }
-
-  scheduleTrashItem(data);
-  updateStats();
-  updateLevel();
-
-  createExplosion(window.innerWidth / 2, window.innerHeight / 2);
-  showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
 }
 
 function resetForm() {
   document.getElementById('emotion-text').value = '';
   document.getElementById('char-count').textContent = '0';
   selectedTags = [];
+  selectedTrashType = 'auto';
   document.querySelectorAll('.tag.active').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.trash-type-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === 'auto');
+  });
   document.getElementById('weight-before').value = 75;
   document.getElementById('weight-after').value = 30;
   updateWeightBars();

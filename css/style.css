@@ -692,6 +692,63 @@ body {
   border: 1px solid var(--border-color);
 }
 
+.trash-type-selector {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.5rem;
+  background: var(--bg-tertiary);
+  padding: 0.8rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.trash-type-btn {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 0.3rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all 0.2s ease;
+}
+
+.trash-type-btn:hover {
+  border-color: var(--neon-cyan);
+  background: var(--bg-elevated);
+  transform: translateY(-2px);
+}
+
+.trash-type-btn.active {
+  border-color: var(--neon-cyan);
+  background: linear-gradient(135deg, var(--bg-elevated), var(--bg-tertiary));
+  box-shadow: 0 0 12px var(--shadow-cyan);
+}
+
+.trash-type-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.trash-type-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.trash-type-btn.active .trash-type-label {
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .trash-type-selector {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .weight-slider-group {
   display: flex;
   align-items: center;

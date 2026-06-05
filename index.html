@@ -536,6 +536,36 @@
           </fieldset>
 
           <fieldset class="form-group">
+            <legend class="form-label">쓰레기 종류 선택</legend>
+            <div class="trash-type-selector" id="trash-type-selector">
+              <button type="button" class="trash-type-btn active" data-type="auto" title="글자수에 따라 자동 결정">
+                <span class="trash-type-icon">✨</span>
+                <span class="trash-type-label">자동</span>
+              </button>
+              <button type="button" class="trash-type-btn" data-type="can" title="짧은 글">
+                <span class="trash-type-icon">🥫</span>
+                <span class="trash-type-label">캔</span>
+              </button>
+              <button type="button" class="trash-type-btn" data-type="box" title="보통 글">
+                <span class="trash-type-icon">📦</span>
+                <span class="trash-type-label">박스</span>
+              </button>
+              <button type="button" class="trash-type-btn" data-type="tv" title="긴 글">
+                <span class="trash-type-icon">📺</span>
+                <span class="trash-type-label">TV</span>
+              </button>
+              <button type="button" class="trash-type-btn" data-type="fridge" title="더 긴 글">
+                <span class="trash-type-icon">🧊</span>
+                <span class="trash-type-label">냉장고</span>
+              </button>
+              <button type="button" class="trash-type-btn" data-type="car" title="엄청 긴 글">
+                <span class="trash-type-icon">🚗</span>
+                <span class="trash-type-label">자동차</span>
+              </button>
+            </div>
+          </fieldset>
+
+          <fieldset class="form-group">
             <legend class="form-label">AI 반응 모드 (선택)</legend>
             <div class="ai-mode-container">
               <button type="button" class="ai-mode-btn active" data-mode="none" onclick="selectAIMode('none')" aria-pressed="true">
@@ -610,9 +640,9 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
-  <script src="js/trash-mountain.js?v=3" defer></script>
-  <script src="js/ai.js?v=3" defer></script>
-  <script src="js/effects.js?v=3" defer></script>
-  <script src="js/app.js?v=3" defer></script>
+  <script src="js/trash-mountain.js?v=4" defer></script>
+  <script src="js/ai.js?v=4" defer></script>
+  <script src="js/effects.js?v=4" defer></script>
+  <script src="js/app.js?v=4" defer></script>
 </body>
 </html>
