@@ -1,7 +1,6 @@
 let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
 let selectedTags = [];
-let selectedTrashType = 'auto';
 let pendingDumpData = null;
 
 const LEVELS = [
@@ -31,7 +30,10 @@ function showSection(id) {
   setAutoRotate(id === 'mountain');
 
   if (id === 'top10') renderTop10();
-  if (id === 'mytrash') renderMyTrash();
+  if (id === 'mytrash') {
+    renderMyTrash();
+    setTimeout(() => rebuildDrumFromStorage(), 200);
+  }
   if (id === 'stats') renderStats();
 }
 
@@ -52,6 +54,7 @@ function closeDumpModal() {
     pendingDumpData = null;
     setTimeout(() => {
       scheduleTrashItem(data);
+      if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
       updateStats();
       updateLevel();
       createExplosion(window.innerWidth / 2, window.innerHeight / 2);
@@ -70,21 +73,20 @@ document.getElementById('emotion-text').addEventListener('input', () => {
   updateTrashPreview(len);
 });
 
+function getTrashTypeByLength(len) {
+  if (len <= 50) return { icon: '🥫', label: '캔' };
+  if (len <= 200) return { icon: '📦', label: '박스' };
+  if (len <= 500) return { icon: '📺', label: 'TV' };
+  if (len <= 1000) return { icon: '🧊', label: '냉장고' };
+  return { icon: '🚗', label: '자동차' };
+}
+
 function updateTrashPreview(len) {
   const el = document.getElementById('trash-preview');
-  let label, icon;
-  if (selectedTrashType === 'can') { icon = '🥫'; label = '캔'; }
-  else if (selectedTrashType === 'box') { icon = '📦'; label = '박스'; }
-  else if (selectedTrashType === 'tv') { icon = '📺'; label = 'TV'; }
-  else if (selectedTrashType === 'fridge') { icon = '🧊'; label = '냉장고'; }
-  else if (selectedTrashType === 'car') { icon = '🚗'; label = '자동차'; }
-  else if (len <= 0) { icon = '✨'; label = '자동'; }
-  else if (len <= 50) { icon = '🥫'; label = '캔'; }
-  else if (len <= 200) { icon = '📦'; label = '박스'; }
-  else if (len <= 500) { icon = '📺'; label = 'TV'; }
-  else if (len <= 1000) { icon = '🧊'; label = '냉장고'; }
-  else { icon = '🚗'; label = '자동차'; }
-  el.textContent = `${icon} ${label}`;
+  const hintEl = document.getElementById('trash-type-hint-value');
+  const t = getTrashTypeByLength(len);
+  el.textContent = `${t.icon} ${t.label}`;
+  if (hintEl) hintEl.textContent = `${t.icon} ${t.label}`;
 }
 
 document.getElementById('weight-before').addEventListener('input', updateWeightBars);
@@ -101,9 +103,6 @@ function updateWeightBars() {
 
 document.querySelectorAll('.tag').forEach(el => {
   el.addEventListener('click', () => {
-    el.classList.toggle('active');
-    const isActive = el.classList.contains('active');
-    el.setAttribute('aria-checked', isActive.toString());
     const tag = el.dataset.tag;
     if (selectedTags.includes(tag)) {
       selectedTags = selectedTags.filter(t => t !== tag);
@@ -116,16 +115,6 @@ document.querySelectorAll('.tag').forEach(el => {
       e.preventDefault();
       el.click();
     }
-  });
-});
-
-document.querySelectorAll('.trash-type-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.trash-type-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    selectedTrashType = btn.dataset.type;
-    const len = document.getElementById('emotion-text').value.length;
-    updateTrashPreview(len);
   });
 });
 
@@ -152,7 +141,7 @@ async function dumpEmotion() {
     weightDiff: before - after,
     timestamp: Date.now(),
     privacy,
-    trashType: selectedTrashType,
+    trashType: getTrashTypeByLength(text.length).label,
   };
 
   myTrash.unshift(data);
@@ -179,14 +168,11 @@ function resetForm() {
   document.getElementById('emotion-text').value = '';
   document.getElementById('char-count').textContent = '0';
   selectedTags = [];
-  selectedTrashType = 'auto';
   document.querySelectorAll('.tag.active').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.trash-type-btn').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.type === 'auto');
-  });
   document.getElementById('weight-before').value = 75;
   document.getElementById('weight-after').value = 30;
   updateWeightBars();
+  updateTrashPreview(0);
   document.getElementById('ai-response').style.display = 'none';
   selectAIMode('none');
 }
@@ -283,6 +269,18 @@ function burnMyTrash(id) {
   const item = myTrash.find(t => t.id === id);
   if (!item) return;
 
+  if (typeof burnInDrum === 'function' && typeof drumTrashObjects !== 'undefined' && drumTrashObjects.length > 0) {
+    burnInDrum(item, () => {
+      myTrash = myTrash.filter(t => t.id !== id);
+      localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+      renderMyTrash();
+      rebuildDrumFromStorage();
+      updateLevel();
+      showToast('🔥 감정이 불태워졌습니다', 'success');
+    });
+    return;
+  }
+
   const els = document.querySelectorAll('.mytrash-item');
   let targetEl = null;
   for (const el of els) {
@@ -327,12 +325,23 @@ function resetAllData() {
   localStorage.removeItem('all_emotional_trash');
   myTrash = [];
   allTrash = [];
+  if (typeof clearDrumTrash === 'function') clearDrumTrash();
   renderMyTrash();
   renderTop10();
   updateStats();
   updateLevel();
   updateTicker();
   showToast('🗑️ 모든 데이터가 초기화되었습니다', 'success');
+}
+
+function rebuildDrumFromStorage() {
+  if (typeof clearDrumTrash !== 'function' || typeof addTrashToDrum !== 'function') return;
+  if (typeof isDrumReady === 'undefined' || !isDrumReady) return;
+  clearDrumTrash();
+  const recent = myTrash.slice(0, 20);
+  recent.forEach((item, i) => {
+    setTimeout(() => addTrashToDrum(item), i * 120);
+  });
 }
 
 function escapeHtml(text) {
@@ -596,3 +605,9 @@ updateStats();
 updateLevel();
 updateTicker();
 updateTrashPreview(0);
+
+setTimeout(() => {
+  if (typeof rebuildDrumFromStorage === 'function' && myTrash.length > 0) {
+    rebuildDrumFromStorage();
+  }
+}, 1800);
