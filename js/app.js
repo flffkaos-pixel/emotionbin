@@ -43,6 +43,7 @@ function openDumpModal() {
 function closeDumpModal() {
   document.getElementById('dump-modal').classList.remove('active');
   document.body.style.overflow = '';
+  resetForm();
 }
 
 document.addEventListener('keydown', (e) => {
@@ -145,8 +146,16 @@ async function dumpEmotion() {
   }
 
   btn.classList.remove('loading');
-  closeDumpModal();
-  resetForm();
+  if (selectedAIMode === 'none') {
+    closeDumpModal();
+  }
+
+  btn.classList.remove('loading');
+  // AI 응답 있을 때 모달 바로 안 닫음 (사용자가 볼 수 있게)
+  if (selectedAIMode === 'none') {
+    closeDumpModal();
+    resetForm();
+  }
 
   scheduleTrashItem(data);
   updateStats();

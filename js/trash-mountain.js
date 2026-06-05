@@ -501,6 +501,7 @@ function createTrashMesh(weight, contentLength, color, tags) {
   else if (contentLength <= 500) category = 'tv';
   else if (contentLength <= 1000) category = 'fridge';
   else category = 'car';
+  console.log('[DEBUG] createTrashMesh category:', category, 'contentLength:', contentLength);
 
   const baseMat = (texture) => new THREE.MeshStandardMaterial({
     map: texture,
@@ -719,6 +720,7 @@ function createTrashItem(data) {
   const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
 
   const contentLength = (data.content || '').length;
+  console.log('[DEBUG] createTrashItem:', { contentLength, content: data.content?.substring(0, 30), weight, tags: data.tags });
   const mesh = createTrashMesh(weight, contentLength, color, data.tags);
 
   const angle = Math.random() * Math.PI * 2;
