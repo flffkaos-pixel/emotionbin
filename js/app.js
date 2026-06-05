@@ -307,6 +307,20 @@ function deleteMyTrash(id) {
   showToast('삭제되었습니다', 'success');
 }
 
+function resetAllData() {
+  if (!confirm('정말 모든 데이터를 삭제하시겠습니까?\n\n- 내 쓰레기통\n- 통계\n- 레벨\n- 공개된 쓰레기산\n\n이 작업은 되돌릴 수 없습니다.')) return;
+  localStorage.removeItem('emotional_trash');
+  localStorage.removeItem('all_emotional_trash');
+  myTrash = [];
+  allTrash = [];
+  renderMyTrash();
+  renderTop10();
+  updateStats();
+  updateLevel();
+  updateTicker();
+  showToast('🗑️ 모든 데이터가 초기화되었습니다', 'success');
+}
+
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;

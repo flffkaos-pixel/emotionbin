@@ -305,6 +305,25 @@ body {
   font-size: 0.9rem;
 }
 
+.reset-data-btn {
+  margin-top: 0.8rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.reset-data-btn:hover {
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+  box-shadow: 0 0 10px var(--shadow-red);
+}
+
 .top10-container {
   max-width: 800px;
   margin: 2rem auto;
