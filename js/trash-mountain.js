@@ -728,8 +728,8 @@ function createTrashItem(data) {
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = 4 + Math.random() * 3;
-  const startY = 12 + Math.random() * 4;
+  const dist = 3 + Math.random() * 2;
+  const startY = 5 + Math.random() * 2;
 
   mesh.position.set(
     Math.cos(angle) * dist,
@@ -740,10 +740,10 @@ function createTrashItem(data) {
 
   scene.add(mesh);
 
-  const targetX = (Math.random() - 0.5) * 4;
-  const targetZ = (Math.random() - 0.5) * 4;
-  const targetY = 0.3 + Math.random() * 1.5;
-  const duration = 2200 + Math.random() * 1200;
+  const targetX = (Math.random() - 0.5) * 3;
+  const targetZ = (Math.random() - 0.5) * 3;
+  const targetY = 0.3 + Math.random() * 1.2;
+  const duration = 1800 + Math.random() * 1000;
   const startTime = Date.now();
 
   dumpAnimations.push({
