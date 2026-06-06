@@ -31,9 +31,9 @@ function initScene() {
   scene.background = new THREE.Color(0x0a0a0a);
   scene.fog = new THREE.Fog(0x0a0a0a, 30, 60);
 
-  camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-  camera.position.set(15, 12, 20);
-  camera.lookAt(0, 0, 0);
+  camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
+  camera.position.set(10, 8, 14);
+  camera.lookAt(0, 1, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(w, h);
@@ -49,9 +49,9 @@ function initScene() {
   controls.dampingFactor = 0.05;
   controls.maxPolarAngle = Math.PI / 2.2;
   controls.minPolarAngle = 0.1;
-  controls.maxDistance = 50;
+  controls.maxDistance = 35;
   controls.minDistance = 5;
-  controls.target.set(0, 1, 0);
+  controls.target.set(0, 1.5, 0);
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.5;
 
@@ -66,10 +66,10 @@ function initScene() {
 }
 
 function setupLights() {
-  const ambient = new THREE.AmbientLight(0x222222, 0.3);
+  const ambient = new THREE.AmbientLight(0x444444, 0.7);
   scene.add(ambient);
 
-  const dirLight = new THREE.DirectionalLight(0xff6633, 1.2);
+  const dirLight = new THREE.DirectionalLight(0xfff0d0, 1.4);
   dirLight.position.set(10, 20, 10);
   dirLight.castShadow = true;
   dirLight.shadow.mapSize.width = 2048;
@@ -83,11 +83,11 @@ function setupLights() {
   dirLight.shadow.camera.far = 50;
   scene.add(dirLight);
 
-  const fillLight = new THREE.DirectionalLight(0x0066ff, 0.3);
+  const fillLight = new THREE.DirectionalLight(0x88aaff, 0.6);
   fillLight.position.set(-10, 5, -10);
   scene.add(fillLight);
 
-  const pointLight = new THREE.PointLight(0x39ff14, 0.3, 20);
+  const pointLight = new THREE.PointLight(0xffaa55, 0.5, 25);
   pointLight.position.set(0, 5, 0);
   scene.add(pointLight);
 }
@@ -495,7 +495,7 @@ function createCarTexture(accentColor) {
 
 function createTrashMesh(weight, contentLength, color, tags, forceType) {
   const w = weight / 200;
-  const lenFactor = Math.min(2.5, 0.8 + contentLength / 200);
+  const lenFactor = Math.min(3.0, 1.2 + contentLength / 150);
   const accentColor = color || 0x888888;
   let category;
   if (forceType && forceType !== 'auto') {
@@ -512,29 +512,29 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
     roughness: 0.4 + Math.random() * 0.3,
     metalness: 0.2 + Math.random() * 0.3,
     emissive: accentColor,
-    emissiveIntensity: 0.06,
+    emissiveIntensity: 0.15,
   });
 
   const group = new THREE.Group();
 
   if (category === 'can') {
     const tex = createCanTexture(accentColor);
-    const h = (0.7 + w * 0.8) * lenFactor;
-    const r = (0.28 + w * 0.3) * lenFactor;
+    const h = (1.0 + w * 1.2) * lenFactor;
+    const r = (0.4 + w * 0.5) * lenFactor;
     const geo = new THREE.CylinderGeometry(r * 0.85, r * 1.05, h, 16);
     const mesh = new THREE.Mesh(geo, baseMat(tex));
     mesh.castShadow = true; mesh.receiveShadow = true;
     group.add(mesh);
 
     const tabMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.6, roughness: 0.3 });
-    const tab = new THREE.Mesh(new THREE.TorusGeometry(r * 0.28, 0.05, 8, 10), tabMat);
-    tab.position.y = h / 2 + 0.04;
+    const tab = new THREE.Mesh(new THREE.TorusGeometry(r * 0.28, 0.08, 8, 10), tabMat);
+    tab.position.y = h / 2 + 0.06;
     tab.rotation.x = Math.PI / 2;
     tab.castShadow = true;
     group.add(tab);
 
     const rimMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.5, roughness: 0.4 });
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.06, 8, 16), rimMat);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.08, 8, 16), rimMat);
     rim.position.y = h / 2;
     rim.rotation.x = Math.PI / 2;
     group.add(rim);
@@ -542,9 +542,9 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 
   else if (category === 'box') {
     const tex = createBoxTexture(accentColor);
-    const sx = (0.8 + w * 0.7) * lenFactor;
-    const sy = (0.6 + w * 0.5) * lenFactor;
-    const sz = (0.8 + w * 0.7) * lenFactor;
+    const sx = (1.2 + w * 1.0) * lenFactor;
+    const sy = (0.9 + w * 0.7) * lenFactor;
+    const sz = (1.2 + w * 1.0) * lenFactor;
     const geo = new THREE.BoxGeometry(sx, sy, sz);
     const box = new THREE.Mesh(geo, baseMat(tex));
     box.castShadow = true; box.receiveShadow = true;
@@ -552,11 +552,11 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 
     const tapeMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.8 });
     [-1, 1].forEach(side => {
-      const t = new THREE.Mesh(new THREE.BoxGeometry(0.04, sy * 0.9, 0.08), tapeMat);
+      const t = new THREE.Mesh(new THREE.BoxGeometry(0.06, sy * 0.9, 0.12), tapeMat);
       t.position.x = side * sx * 0.45;
       t.castShadow = true;
       group.add(t);
-      const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.08, sy * 0.9, 0.04), tapeMat);
+      const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, sy * 0.9, 0.06), tapeMat);
       t2.position.z = side * sz * 0.45;
       t2.castShadow = true;
       group.add(t2);
@@ -564,7 +564,7 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 
     const cornerMat = new THREE.MeshStandardMaterial({ color: 0x9a8060, roughness: 0.9 });
     [-1, 1].forEach(sx2 => [-1, 1].forEach(sz2 => {
-      const c = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.08), cornerMat);
+      const c = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), cornerMat);
       c.position.set(sx2 * sx * 0.48, sy * 0.48, sz2 * sz * 0.48);
       group.add(c);
     }));
@@ -572,36 +572,36 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 
   else if (category === 'tv') {
     const tex = createTVTexture(accentColor);
-    const sx = (1.8 + w * 0.8) * lenFactor;
-    const sy = (0.6 + w * 0.3) * lenFactor;
-    const sz = (0.16 + w * 0.12) * lenFactor;
+    const sx = (2.5 + w * 1.2) * lenFactor;
+    const sy = (0.9 + w * 0.5) * lenFactor;
+    const sz = (0.25 + w * 0.18) * lenFactor;
     const geo = new THREE.BoxGeometry(sx, sy, sz);
     const screen = new THREE.Mesh(geo, baseMat(tex));
     screen.castShadow = true; screen.receiveShadow = true;
     group.add(screen);
 
     const bezelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3, metalness: 0.1 });
-    const bezel = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.08, sy + 0.08, sz * 0.5), bezelMat);
+    const bezel = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.12, sy + 0.12, sz * 0.5), bezelMat);
     bezel.position.z = -sz * 0.25;
     bezel.castShadow = true;
     group.add(bezel);
 
     const standMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
-    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.16, 0.12), standMat);
-    stand.position.y = -(sy * 0.5 + 0.08);
+    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.24, 0.18), standMat);
+    stand.position.y = -(sy * 0.5 + 0.12);
     stand.castShadow = true;
     group.add(stand);
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.08, 0.2), standMat);
-    base.position.y = -(sy * 0.5 + 0.16);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.12, 0.3), standMat);
+    base.position.y = -(sy * 0.5 + 0.24);
     base.castShadow = true;
     group.add(base);
   }
 
   else if (category === 'fridge') {
     const tex = createFridgeTexture(accentColor);
-    const sx = (1.0 + w * 0.7) * lenFactor;
-    const sy = (1.7 + w * 1.0) * lenFactor;
-    const sz = (0.7 + w * 0.5) * lenFactor;
+    const sx = (1.5 + w * 1.0) * lenFactor;
+    const sy = (2.5 + w * 1.5) * lenFactor;
+    const sz = (1.0 + w * 0.7) * lenFactor;
     const geo = new THREE.BoxGeometry(sx, sy, sz);
     const fridge = new THREE.Mesh(geo, baseMat(tex));
     fridge.castShadow = true; fridge.receiveShadow = true;
@@ -609,30 +609,30 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 
     const handleMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.2 });
     [-1, 1].forEach(side => {
-      const h = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.06), handleMat);
-      h.position.set(side * 0.44, 0.5, sz * 0.52);
+      const h = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.1), handleMat);
+      h.position.set(side * 0.66, 0.75, sz * 0.52);
       group.add(h);
-      const h2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.12, 0.06), handleMat);
-      h2.position.set(side * 0.44, -0.5, sz * 0.52);
+      const h2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.1), handleMat);
+      h2.position.set(side * 0.66, -0.75, sz * 0.52);
       group.add(h2);
     });
 
     const divMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.3 });
-    const div = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.04, 0.04, sz + 0.04), divMat);
-    div.position.y = 0.04;
+    const div = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.06, 0.06, sz + 0.06), divMat);
+    div.position.y = 0.06;
     group.add(div);
 
     const lightMat = new THREE.MeshStandardMaterial({
       color: 0x88ccff, emissive: 0x88ccff, emissiveIntensity: 0.1, transparent: true, opacity: 0.3
     });
-    const light = new THREE.Mesh(new THREE.SphereGeometry(0.06, 6, 6), lightMat);
+    const light = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 6), lightMat);
     light.position.set(0, sy * 0.4, sz * 0.52);
     group.add(light);
   }
 
   else if (category === 'car') {
     const tex = createCarTexture(accentColor);
-    const scale = (1.2 + w * 0.8) * lenFactor;
+    const scale = (1.8 + w * 1.2) * lenFactor;
 
     const bodyMat = new THREE.MeshStandardMaterial({
       map: tex,
@@ -728,8 +728,8 @@ function createTrashItem(data) {
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = 8 + Math.random() * 5;
-  const startY = 8 + Math.random() * 5;
+  const dist = 4 + Math.random() * 3;
+  const startY = 12 + Math.random() * 4;
 
   mesh.position.set(
     Math.cos(angle) * dist,
@@ -740,10 +740,10 @@ function createTrashItem(data) {
 
   scene.add(mesh);
 
-  const targetX = (Math.random() - 0.5) * 6;
-  const targetZ = (Math.random() - 0.5) * 6;
-  const targetY = 0.2 + Math.random() * 2;
-  const duration = 1000 + Math.random() * 1000;
+  const targetX = (Math.random() - 0.5) * 4;
+  const targetZ = (Math.random() - 0.5) * 4;
+  const targetY = 0.3 + Math.random() * 1.5;
+  const duration = 2200 + Math.random() * 1200;
   const startTime = Date.now();
 
   dumpAnimations.push({
@@ -799,7 +799,19 @@ function updateDumpAnimations() {
 }
 
 function spawnLandingImpact(x, y, z) {
-  const dustCount = 12;
+  const flashLight = new THREE.PointLight(0xffeecc, 2.5, 8);
+  flashLight.position.set(x, y + 0.5, z);
+  scene.add(flashLight);
+  landingImpacts.push({
+    mesh: flashLight,
+    vx: 0, vy: 0, vz: 0,
+    life: 1.0,
+    decay: 0.04,
+    scale: 1,
+    maxScale: 1,
+    isLight: true,
+  });
+  const dustCount = 8;
   for (let i = 0; i < dustCount; i++) {
     const dust = new THREE.Mesh(
       new THREE.SphereGeometry(0.12 + Math.random() * 0.18, 5, 5),
@@ -851,17 +863,23 @@ function updateLandingImpacts() {
   for (let i = landingImpacts.length - 1; i >= 0; i--) {
     const p = landingImpacts[i];
     p.life -= p.decay;
-    p.mesh.position.x += p.vx * 0.016;
-    p.mesh.position.y += p.vy * 0.016;
-    p.mesh.position.z += p.vz * 0.016;
-    p.vy -= 1.5 * 0.016;
-    p.scale = Math.min(p.scale + 0.06, p.maxScale);
-    p.mesh.scale.set(p.scale, p.scale, p.scale);
-    p.mesh.material.opacity = Math.max(0, p.life * (p.mesh.material.color.r > 0.5 ? 1.0 : 0.6));
+    if (p.isLight) {
+      p.mesh.intensity = Math.max(0, 2.5 * p.life);
+    } else {
+      p.mesh.position.x += p.vx * 0.016;
+      p.mesh.position.y += p.vy * 0.016;
+      p.mesh.position.z += p.vz * 0.016;
+      p.vy -= 1.5 * 0.016;
+      p.scale = Math.min(p.scale + 0.06, p.maxScale);
+      p.mesh.scale.set(p.scale, p.scale, p.scale);
+      p.mesh.material.opacity = Math.max(0, p.life * (p.mesh.material.color.r > 0.5 ? 1.0 : 0.6));
+    }
     if (p.life <= 0) {
       scene.remove(p.mesh);
-      p.mesh.geometry.dispose();
-      p.mesh.material.dispose();
+      if (!p.isLight) {
+        p.mesh.geometry.dispose();
+        p.mesh.material.dispose();
+      }
       landingImpacts.splice(i, 1);
     }
   }

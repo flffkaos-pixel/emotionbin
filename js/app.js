@@ -62,8 +62,7 @@ function closeDumpModal() {
         if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
         if (typeof updateStats === 'function') updateStats();
         if (typeof updateLevel === 'function') updateLevel();
-        if (typeof createExplosion === 'function') createExplosion(window.innerWidth / 2, window.innerHeight / 2);
-        if (typeof showToast === 'function') showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+        if (typeof showToast === 'function') showToast('🗑️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
       } catch (e) {
         console.error('[dump animation error]', e);
         if (typeof showToast === 'function') showToast('감정이 기록되었습니다 ✓', 'success');
@@ -173,8 +172,7 @@ async function dumpEmotion() {
         if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
         if (typeof updateStats === 'function') updateStats();
         if (typeof updateLevel === 'function') updateLevel();
-        if (typeof createExplosion === 'function') createExplosion(window.innerWidth / 2, window.innerHeight / 2);
-        if (typeof showToast === 'function') showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+        if (typeof showToast === 'function') showToast('🗑️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
       } catch (e) {
         console.error('[dump safety-net error]', e);
       }
