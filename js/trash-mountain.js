@@ -31,9 +31,9 @@ function initScene() {
   scene.background = new THREE.Color(0x0a0a0a);
   scene.fog = new THREE.Fog(0x0a0a0a, 30, 60);
 
-  camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 100);
-  camera.position.set(10, 8, 14);
-  camera.lookAt(0, 1, 0);
+  camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 100);
+  camera.position.set(16, 11, 22);
+  camera.lookAt(0, 3, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(w, h);
@@ -49,9 +49,9 @@ function initScene() {
   controls.dampingFactor = 0.05;
   controls.maxPolarAngle = Math.PI / 2.2;
   controls.minPolarAngle = 0.1;
-  controls.maxDistance = 35;
-  controls.minDistance = 5;
-  controls.target.set(0, 1.5, 0);
+  controls.maxDistance = 45;
+  controls.minDistance = 8;
+  controls.target.set(0, 3, 0);
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.5;
 
@@ -107,17 +107,29 @@ function createGround() {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  const ringGeo = new THREE.RingGeometry(0.5, 25, 64);
+  const ringGeo = new THREE.RingGeometry(0.5, 22, 64);
   const ringMat = new THREE.MeshBasicMaterial({
-    color: 0x1a1a1a,
+    color: 0x39ff14,
     side: THREE.DoubleSide,
     transparent: true,
-    opacity: 0.3,
+    opacity: 0.5,
   });
   const ring = new THREE.Mesh(ringGeo, ringMat);
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = -0.05;
   scene.add(ring);
+
+  const innerRingGeo = new THREE.RingGeometry(0.5, 4, 32);
+  const innerRingMat = new THREE.MeshBasicMaterial({
+    color: 0xff6633,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.4,
+  });
+  const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+  innerRing.rotation.x = -Math.PI / 2;
+  innerRing.position.y = -0.03;
+  scene.add(innerRing);
 }
 
 function createBaseTrash() {
@@ -728,8 +740,8 @@ function createTrashItem(data) {
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = 3 + Math.random() * 2;
-  const startY = 5 + Math.random() * 2;
+  const dist = 12 + Math.random() * 8;
+  const startY = 16 + Math.random() * 8;
 
   mesh.position.set(
     Math.cos(angle) * dist,
@@ -742,8 +754,9 @@ function createTrashItem(data) {
 
   const targetX = (Math.random() - 0.5) * 3;
   const targetZ = (Math.random() - 0.5) * 3;
-  const targetY = 0.3 + Math.random() * 1.2;
-  const duration = 1800 + Math.random() * 1000;
+  const targetY = 1.0 + Math.random() * 2.0;
+  const arcHeight = 3 + Math.random() * 2;
+  const duration = 2500 + Math.random() * 1200;
   const startTime = Date.now();
 
   dumpAnimations.push({
@@ -754,6 +767,7 @@ function createTrashItem(data) {
     targetX,
     targetY,
     targetZ,
+    arcHeight,
     startRot: { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z },
     startTime,
     duration,
@@ -777,15 +791,17 @@ function updateDumpAnimations() {
     const ease = 1 - Math.pow(1 - t, 3);
 
     anim.mesh.position.x = anim.startX + (anim.targetX - anim.startX) * ease;
-    anim.mesh.position.y = anim.startY + (anim.targetY - anim.startY) * ease;
     anim.mesh.position.z = anim.startZ + (anim.targetZ - anim.startZ) * ease;
+    const baseY = anim.startY + (anim.targetY - anim.startY) * ease;
+    const arcY = Math.sin(Math.PI * t) * (anim.arcHeight || 0);
+    anim.mesh.position.y = baseY + arcY;
 
     anim.mesh.rotation.x = anim.startRot.x + (Math.random() - 0.5) * 3 * ease;
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 4;
     anim.mesh.rotation.z = anim.startRot.z + (Math.random() - 0.5) * 3 * ease;
 
     const s = 0.5 + 0.5 * (1 - ease);
-    const scale = 1 + s * 0.5;
+    const scale = 0.4 + 0.6 * t;
     anim.mesh.scale.set(scale, scale, scale);
 
     if (wasNotDone && t >= 1) {
