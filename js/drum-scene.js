@@ -386,23 +386,23 @@ function animateDrum() {
 }
 
 function spawnAmbientFire() {
-  if (drumAmbientFlames.length > 25) return;
+  if (drumAmbientFlames.length > 40) return;
   const trashCount = drumTrashObjects.length;
-  const intensity = Math.min(1, 0.3 + trashCount * 0.15);
-  if (Math.random() > intensity * 0.5) return;
+  const intensity = Math.min(1, 0.6 + trashCount * 0.1);
+  if (Math.random() > intensity * 0.7) return;
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = Math.random() * DRUM_RADIUS * 0.6;
+  const dist = Math.random() * DRUM_RADIUS * 0.65;
   const x = Math.cos(angle) * dist;
   const z = Math.sin(angle) * dist;
   const baseY = 0.1 + Math.random() * 0.4;
 
   const flame = new THREE.Mesh(
-    new THREE.SphereGeometry(0.08 + Math.random() * 0.1, 6, 6),
+    new THREE.SphereGeometry(0.14 + Math.random() * 0.14, 7, 7),
     new THREE.MeshBasicMaterial({
-      color: new THREE.Color().setHSL(0.04 + Math.random() * 0.05, 1, 0.5 + Math.random() * 0.25),
+      color: new THREE.Color().setHSL(0.03 + Math.random() * 0.06, 1, 0.55 + Math.random() * 0.25),
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.95,
     })
   );
   flame.position.set(x, baseY, z);
@@ -412,13 +412,13 @@ function spawnAmbientFire() {
     baseX: x,
     baseZ: z,
     baseY,
-    vx: (Math.random() - 0.5) * 0.15,
-    vy: 0.6 + Math.random() * 0.5,
-    vz: (Math.random() - 0.5) * 0.15,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: 0.7 + Math.random() * 0.6,
+    vz: (Math.random() - 0.5) * 0.2,
     life: 1.0,
-    decay: 0.015 + Math.random() * 0.008,
-    scale: 0.8,
-    maxScale: 1.2 + Math.random() * 0.5,
+    decay: 0.012 + Math.random() * 0.006,
+    scale: 0.9,
+    maxScale: 1.6 + Math.random() * 0.6,
   });
 }
 
@@ -432,13 +432,19 @@ function updateAmbientFire() {
     f.vy *= 0.97;
     f.scale = Math.min(f.scale + 0.04, f.maxScale);
     f.mesh.scale.set(f.scale, f.scale, f.scale);
-    f.mesh.material.opacity = Math.max(0, f.life * 0.85);
+    f.mesh.material.opacity = Math.max(0, f.life * 0.95);
     if (f.life <= 0 || f.mesh.position.y > DRUM_HEIGHT * 0.95) {
       drumScene.remove(f.mesh);
       f.mesh.geometry.dispose();
       f.mesh.material.dispose();
       drumAmbientFlames.splice(i, 1);
     }
+  }
+  if (drumAmbientLight) {
+    const target = 1.0 + drumTrashObjects.length * 0.15;
+    const cur = drumAmbientLight.intensity;
+    drumAmbientLight.intensity = cur + (target - cur) * 0.1;
+    drumAmbientLight.position.y = 0.3 + Math.sin(Date.now() * 0.002) * 0.1;
   }
 }
 
