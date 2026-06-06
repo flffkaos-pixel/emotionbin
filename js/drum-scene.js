@@ -15,6 +15,10 @@ function initDrumScene() {
   if (!container) return;
   const w = container.clientWidth;
   const h = container.clientHeight;
+  if (w === 0 || h === 0) {
+    setTimeout(initDrumScene, 150);
+    return;
+  }
 
   drumScene = new THREE.Scene();
   drumScene.background = new THREE.Color(0x0a0a0a);
@@ -419,6 +423,14 @@ function getTagColor(tags) {
   return map[tags[0]] || 0x888888;
 }
 
+function ensureDrumReady() {
+  if (!isDrumReady) {
+    initDrumScene();
+  } else {
+    onDrumResize();
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initDrumScene, 1200);
+  // 초기화는 showSection('mytrash')에서 처리
 });

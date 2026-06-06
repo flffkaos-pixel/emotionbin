@@ -30,9 +30,13 @@ function showSection(id) {
   setAutoRotate(id === 'mountain');
 
   if (id === 'top10') renderTop10();
+  if (id === 'feed') renderFeed();
   if (id === 'mytrash') {
     renderMyTrash();
-    setTimeout(() => rebuildDrumFromStorage(), 200);
+    if (typeof ensureDrumReady === 'function') {
+      setTimeout(ensureDrumReady, 100);
+      setTimeout(() => rebuildDrumFromStorage(), 600);
+    }
   }
   if (id === 'stats') renderStats();
 }
@@ -53,12 +57,17 @@ function closeDumpModal() {
     const data = pendingDumpData;
     pendingDumpData = null;
     setTimeout(() => {
-      scheduleTrashItem(data);
-      if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
-      updateStats();
-      updateLevel();
-      createExplosion(window.innerWidth / 2, window.innerHeight / 2);
-      showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+      try {
+        if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
+        if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
+        if (typeof updateStats === 'function') updateStats();
+        if (typeof updateLevel === 'function') updateLevel();
+        if (typeof createExplosion === 'function') createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+        if (typeof showToast === 'function') showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+      } catch (e) {
+        console.error('[dump animation error]', e);
+        if (typeof showToast === 'function') showToast('감정이 기록되었습니다 ✓', 'success');
+      }
     }, 350);
   }
 }
@@ -155,11 +164,12 @@ async function dumpEmotion() {
 
   btn.classList.remove('loading');
 
+  pendingDumpData = data;
+
   if (selectedAIMode !== 'none') {
     await getAIResponse(text, selectedTags);
-    pendingDumpData = data;
+    setTimeout(() => closeDumpModal(), 2500);
   } else {
-    pendingDumpData = data;
     closeDumpModal();
   }
 }
@@ -227,6 +237,69 @@ function renderTop10() {
       <div class="top10-weight">-${item.weightDiff || 0}kg</div>
     </div>
   `).join('');
+}
+
+function renderFeed() {
+  const container = document.getElementById('feed-list');
+  const publicTrash = allTrash.filter(t => t.privacy === 'public');
+  const sorted = [...publicTrash].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  const recent = sorted.slice(0, 50);
+
+  if (recent.length === 0) {
+    container.innerHTML = `
+      <div class="empty-trash">
+        <span class="empty-icon">🌍</span>
+        <p>아직 공개된 감정이 없습니다<br>첫 번째로 감정을 나눠보세요</p>
+        <button class="cta-btn" onclick="openDumpModal()">감정 버리기</button>
+      </div>
+    `;
+    return;
+  }
+
+  const tagColors = {
+    '분노': '#ff1744', '짜증': '#ff6d00', '후회': '#9c27b0', '실망': '#4a148c',
+    '서운함': '#5c6bc0', '상처': '#7b1fa2', '슬픔': '#1565c0', '불안': '#827717',
+    '스트레스': '#e65100', '외로움': '#37474f', '무기력': '#616161', '지침': '#78909c',
+  };
+
+  container.innerHTML = recent.map((item, i) => `
+    <div class="feed-item" style="animation-delay: ${i * 0.03}s" data-id="${item.id}">
+      <div class="feed-header">
+        <span class="feed-anon">익명</span>
+        <span class="feed-time">${formatTime(item.timestamp)}</span>
+      </div>
+      <div class="feed-text">${escapeHtml(item.content)}</div>
+      ${item.tags && item.tags.length ? `
+        <div class="feed-tags">
+          ${item.tags.map(t => `<span class="feed-tag" style="border-color:${tagColors[t] || '#666'};color:${tagColors[t] || '#aaa'}">#${t}</span>`).join('')}
+        </div>
+      ` : ''}
+      <div class="feed-footer">
+        <span class="feed-weight">${item.weightBefore}kg → ${item.weightAfter}kg</span>
+        <div class="feed-reactions">
+          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function reactToFeed(id, type) {
+  const item = allTrash.find(t => t.id === id);
+  if (!item) return;
+  if (!item.reactions) item.reactions = {};
+  const reactedKey = `feed_reacted_${id}_${type}`;
+  if (localStorage.getItem(reactedKey)) {
+    showToast('이미 공감하셨습니다 💛', 'info');
+    return;
+  }
+  item.reactions[type] = (item.reactions[type] || 0) + 1;
+  localStorage.setItem(reactedKey, '1');
+  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  renderFeed();
+  showToast(`${type} +1 💛`, 'success');
 }
 
 function renderMyTrash() {

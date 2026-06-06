@@ -378,6 +378,7 @@
       </div>
       <div class="nav-links" role="tablist">
         <a href="#section-mountain" onclick="showSection('mountain')" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
+        <a href="#section-feed" onclick="showSection('feed')" class="nav-link" role="tab">공개 피드</a>
         <a href="#section-top10" onclick="showSection('top10')" class="nav-link" role="tab">최악의 TOP 10</a>
         <a href="#section-stats" onclick="showSection('stats')" class="nav-link" role="tab">통계</a>
         <a href="#section-mytrash" onclick="showSection('mytrash')" class="nav-link" role="tab">내 쓰레기통</a>
@@ -420,6 +421,14 @@
           </div>
         </div>
       </div>
+    </section>
+
+    <section id="section-feed" class="section" aria-label="다른 사람의 감정 피드">
+      <div class="section-header">
+        <h2>다른 사람의 감정</h2>
+        <p>익명으로 남긴 다른 사람들의 감정. 응원 한마디가 큰 위로가 됩니다.</p>
+      </div>
+      <div class="feed-container" id="feed-list" role="list"></div>
     </section>
 
     <section id="section-top10" class="section" aria-label="오늘의 최악의 쓰레기 TOP 10">
@@ -615,10 +624,10 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
-  <script src="js/trash-mountain.js?v=4" defer></script>
-  <script src="js/ai.js?v=4" defer></script>
-  <script src="js/effects.js?v=4" defer></script>
-  <script src="js/drum-scene.js?v=4" defer></script>
-  <script src="js/app.js?v=4" defer></script>
+  <script src="js/trash-mountain.js?v=5" defer></script>
+  <script src="js/ai.js?v=5" defer></script>
+  <script src="js/effects.js?v=5" defer></script>
+  <script src="js/drum-scene.js?v=5" defer></script>
+  <script src="js/app.js?v=5" defer></script>
 </body>
 </html>
