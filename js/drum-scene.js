@@ -2,10 +2,12 @@ let drumScene, drumCamera, drumRenderer, drumControls;
 let drumTrashObjects = [];
 let drumFlames = [];
 let drumSmokes = [];
+let drumAmbientFlames = [];
 let isDrumReady = false;
 let drumAnimating = false;
 let drumAnimations = [];
 let drumBaseTrash = [];
+let drumAmbientLight = null;
 
 const DRUM_RADIUS = 1.6;
 const DRUM_HEIGHT = 2.2;
@@ -58,10 +60,10 @@ function initDrumScene() {
 }
 
 function setupDrumLights() {
-  const ambient = new THREE.AmbientLight(0x222233, 0.4);
+  const ambient = new THREE.AmbientLight(0x331a0a, 0.5);
   drumScene.add(ambient);
 
-  const dirLight = new THREE.DirectionalLight(0xff8855, 1.1);
+  const dirLight = new THREE.DirectionalLight(0xffaa66, 1.3);
   dirLight.position.set(4, 8, 4);
   dirLight.castShadow = true;
   dirLight.shadow.mapSize.width = 1024;
@@ -75,14 +77,15 @@ function setupDrumLights() {
   dirLight.shadow.camera.far = 20;
   drumScene.add(dirLight);
 
-  const rimLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+  const rimLight = new THREE.DirectionalLight(0x4488ff, 0.25);
   rimLight.position.set(-4, 3, -4);
   drumScene.add(rimLight);
 
-  const pointLight = new THREE.PointLight(0xff4400, 0.4, 4);
-  pointLight.position.set(0, 0.5, 0);
+  const pointLight = new THREE.PointLight(0xff5500, 1.2, 5);
+  pointLight.position.set(0, 0.6, 0);
   drumScene.add(pointLight);
   drumScene.userData.innerLight = pointLight;
+  drumAmbientLight = pointLight;
 }
 
 function createDrum() {
@@ -128,15 +131,6 @@ function createDrum() {
     ring.castShadow = true;
     drumGroup.add(ring);
   });
-
-  const lidMat = new THREE.MeshStandardMaterial({ color: 0x1a1208, roughness: 0.7, metalness: 0.4 });
-  const lidRim = new THREE.Mesh(
-    new THREE.CylinderGeometry(DRUM_RADIUS + 0.05, DRUM_RADIUS + 0.05, 0.08, 32),
-    lidMat
-  );
-  lidRim.position.y = DRUM_HEIGHT + 0.04;
-  lidRim.castShadow = true;
-  drumGroup.add(lidRim);
 
   const innerShadowGeo = new THREE.CircleGeometry(DRUM_RADIUS * 0.95, 32);
   const innerShadow = new THREE.Mesh(innerShadowGeo, new THREE.MeshBasicMaterial({ color: 0x050505 }));
@@ -274,35 +268,35 @@ function burnInDrum(data, onComplete) {
 }
 
 function spawnDrumFlames(x, y, z) {
-  const flameCount = 18 + Math.floor(Math.random() * 12);
+  const flameCount = 30 + Math.floor(Math.random() * 20);
   for (let i = 0; i < flameCount; i++) {
     const flame = new THREE.Mesh(
-      new THREE.SphereGeometry(0.08 + Math.random() * 0.12, 6, 6),
+      new THREE.SphereGeometry(0.15 + Math.random() * 0.18, 8, 8),
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color().setHSL(0.05 + Math.random() * 0.05, 1, 0.5 + Math.random() * 0.3),
+        color: new THREE.Color().setHSL(0.05 + Math.random() * 0.05, 1, 0.55 + Math.random() * 0.3),
         transparent: true,
-        opacity: 0.9,
+        opacity: 1.0,
       })
     );
     flame.position.set(
-      x + (Math.random() - 0.5) * 0.3,
+      x + (Math.random() - 0.5) * 0.4,
       y + 0.1,
-      z + (Math.random() - 0.5) * 0.3
+      z + (Math.random() - 0.5) * 0.4
     );
     drumScene.add(flame);
     drumFlames.push({
       mesh: flame,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: 1.2 + Math.random() * 1.5,
-      vz: (Math.random() - 0.5) * 0.5,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: 1.8 + Math.random() * 2.0,
+      vz: (Math.random() - 0.5) * 0.6,
       life: 1.0,
-      decay: 0.012 + Math.random() * 0.008,
+      decay: 0.010 + Math.random() * 0.006,
       scale: 1,
-      maxScale: 1.5 + Math.random() * 0.8,
+      maxScale: 2.0 + Math.random() * 1.0,
     });
   }
 
-  const smokeCount = 5;
+  const smokeCount = 8;
   for (let i = 0; i < smokeCount; i++) {
     const smoke = new THREE.Mesh(
       new THREE.SphereGeometry(0.15 + Math.random() * 0.15, 6, 6),
@@ -375,14 +369,77 @@ function clearDrumTrash() {
   drumFlames = [];
   drumSmokes.forEach(s => { drumScene.remove(s.mesh); s.mesh.geometry.dispose(); s.mesh.material.dispose(); });
   drumSmokes = [];
+  drumAmbientFlames.forEach(f => { drumScene.remove(f.mesh); f.mesh.geometry.dispose(); f.mesh.material.dispose(); });
+  drumAmbientFlames = [];
 }
 
 function animateDrum() {
   requestAnimationFrame(animateDrum);
   if (!isDrumReady) return;
+  spawnAmbientFire();
   updateDrumAnimations();
+  updateAmbientFire();
+  updateDrumFlames();
+  updateDrumSmokes();
   drumControls.update();
   drumRenderer.render(drumScene, drumCamera);
+}
+
+function spawnAmbientFire() {
+  if (drumAmbientFlames.length > 25) return;
+  const trashCount = drumTrashObjects.length;
+  const intensity = Math.min(1, 0.3 + trashCount * 0.15);
+  if (Math.random() > intensity * 0.5) return;
+
+  const angle = Math.random() * Math.PI * 2;
+  const dist = Math.random() * DRUM_RADIUS * 0.6;
+  const x = Math.cos(angle) * dist;
+  const z = Math.sin(angle) * dist;
+  const baseY = 0.1 + Math.random() * 0.4;
+
+  const flame = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08 + Math.random() * 0.1, 6, 6),
+    new THREE.MeshBasicMaterial({
+      color: new THREE.Color().setHSL(0.04 + Math.random() * 0.05, 1, 0.5 + Math.random() * 0.25),
+      transparent: true,
+      opacity: 0.85,
+    })
+  );
+  flame.position.set(x, baseY, z);
+  drumScene.add(flame);
+  drumAmbientFlames.push({
+    mesh: flame,
+    baseX: x,
+    baseZ: z,
+    baseY,
+    vx: (Math.random() - 0.5) * 0.15,
+    vy: 0.6 + Math.random() * 0.5,
+    vz: (Math.random() - 0.5) * 0.15,
+    life: 1.0,
+    decay: 0.015 + Math.random() * 0.008,
+    scale: 0.8,
+    maxScale: 1.2 + Math.random() * 0.5,
+  });
+}
+
+function updateAmbientFire() {
+  for (let i = drumAmbientFlames.length - 1; i >= 0; i--) {
+    const f = drumAmbientFlames[i];
+    f.life -= f.decay;
+    f.mesh.position.x = f.baseX + Math.sin(Date.now() * 0.003 + i) * 0.05;
+    f.mesh.position.y += f.vy * 0.016;
+    f.mesh.position.z = f.baseZ + Math.cos(Date.now() * 0.003 + i) * 0.05;
+    f.vy *= 0.97;
+    f.scale = Math.min(f.scale + 0.04, f.maxScale);
+    f.mesh.scale.set(f.scale, f.scale, f.scale);
+    f.mesh.material.opacity = Math.max(0, f.life * 0.85);
+    if (f.life <= 0 || f.mesh.position.y > DRUM_HEIGHT * 0.95) {
+      drumScene.remove(f.mesh);
+      f.mesh.geometry.dispose();
+      f.mesh.material.dispose();
+      drumAmbientFlames.splice(i, 1);
+    }
+  }
 }
 
 function updateDrumAnimations() {

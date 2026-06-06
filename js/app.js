@@ -165,6 +165,21 @@ async function dumpEmotion() {
   btn.classList.remove('loading');
 
   pendingDumpData = data;
+  setTimeout(() => {
+    if (pendingDumpData === data) {
+      pendingDumpData = null;
+      try {
+        if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
+        if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
+        if (typeof updateStats === 'function') updateStats();
+        if (typeof updateLevel === 'function') updateLevel();
+        if (typeof createExplosion === 'function') createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+        if (typeof showToast === 'function') showToast('감정이 쓰레기통에 버려졌습니다 🗑️', 'success');
+      } catch (e) {
+        console.error('[dump safety-net error]', e);
+      }
+    }
+  }, 5000);
 
   if (selectedAIMode !== 'none') {
     await getAIResponse(text, selectedTags);
