@@ -740,8 +740,8 @@ function createTrashItem(data) {
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = 12 + Math.random() * 8;
-  const startY = 16 + Math.random() * 8;
+  const dist = 6 + Math.random() * 3;
+  const startY = 9 + Math.random() * 4;
 
   mesh.position.set(
     Math.cos(angle) * dist,
@@ -752,12 +752,14 @@ function createTrashItem(data) {
 
   scene.add(mesh);
 
-  const targetX = (Math.random() - 0.5) * 3;
-  const targetZ = (Math.random() - 0.5) * 3;
-  const targetY = 1.0 + Math.random() * 2.0;
-  const arcHeight = 3 + Math.random() * 2;
+  const targetX = (Math.random() - 0.5) * 2.5;
+  const targetZ = (Math.random() - 0.5) * 2.5;
+  const targetY = 1.0 + Math.random() * 1.8;
+  const arcHeight = 5 + Math.random() * 3;
   const duration = 2500 + Math.random() * 1200;
   const startTime = Date.now();
+
+  mesh.scale.set(0.3, 0.3, 0.3);
 
   dumpAnimations.push({
     mesh,
@@ -800,8 +802,7 @@ function updateDumpAnimations() {
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 4;
     anim.mesh.rotation.z = anim.startRot.z + (Math.random() - 0.5) * 3 * ease;
 
-    const s = 0.5 + 0.5 * (1 - ease);
-    const scale = 0.4 + 0.6 * t;
+    const scale = 0.3 + 0.7 * t;
     anim.mesh.scale.set(scale, scale, scale);
 
     if (wasNotDone && t >= 1) {
