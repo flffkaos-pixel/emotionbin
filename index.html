@@ -529,46 +529,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="form-group">
-            <legend class="form-label">감정 무게 측정</legend>
-            <div class="weight-container">
-              <div class="weight-slider-group">
-                <span class="weight-label">버리기 전</span>
-                <div class="weight-bar" aria-hidden="true">
-                  <div class="weight-fill before-fill" id="weight-before-fill"></div>
-                </div>
-                <span class="weight-value" id="weight-before-val" aria-live="polite">75kg</span>
-              </div>
-              <input type="range" id="weight-before" min="0" max="200" value="75" class="weight-slider" aria-label="버리기 전 감정 무게">
-              <div class="weight-slider-group">
-                <span class="weight-label">버린 후</span>
-                <div class="weight-bar" aria-hidden="true">
-                  <div class="weight-fill after-fill" id="weight-after-fill"></div>
-                </div>
-                <span class="weight-value" id="weight-after-val" aria-live="polite">30kg</span>
-              </div>
-              <input type="range" id="weight-after" min="0" max="200" value="30" class="weight-slider" aria-label="버린 후 감정 무게">
-            </div>
-            <p class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</p>
-          </fieldset>
-
-          <fieldset class="form-group">
-            <legend class="form-label">AI 반응 모드 (선택)</legend>
-            <div class="ai-mode-container">
-              <button type="button" class="ai-mode-btn active" data-mode="none" onclick="selectAIMode('none')" aria-pressed="true">
-                <span class="ai-icon" aria-hidden="true">🚫</span>
-                <span>사용 안함</span>
-              </button>
-              <button type="button" class="ai-mode-btn" data-mode="rage" onclick="selectAIMode('rage')" aria-pressed="false">
-                <span class="ai-icon" aria-hidden="true">🔥</span>
-                <span>더 세게 토해내</span>
-              </button>
-              <button type="button" class="ai-mode-btn" data-mode="cold" onclick="selectAIMode('cold')" aria-pressed="false">
-                <span class="ai-icon" aria-hidden="true">🧊</span>
-                <span>냉정한 분석</span>
-              </button>
-            </div>
-          </fieldset>
+          <div class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</div>
 
           <fieldset class="form-group">
             <legend class="form-label">공개 설정</legend>
@@ -585,14 +546,6 @@
               </label>
             </div>
           </fieldset>
-
-          <div id="ai-response" class="ai-response" style="display:none;" role="status" aria-live="polite">
-            <div class="ai-response-header">
-              <span class="ai-icon-big" aria-hidden="true">🤖</span>
-              <span id="ai-mode-label">AI 반응</span>
-            </div>
-            <div class="ai-response-body" id="ai-response-text"></div>
-          </div>
 
           <button type="submit" class="dump-btn" id="dump-btn">
             <span class="dump-btn-icon" aria-hidden="true">🗑️</span>

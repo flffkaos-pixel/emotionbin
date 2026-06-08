@@ -104,18 +104,6 @@ function updateTrashPreview(len) {
   if (hintEl) hintEl.textContent = `${t.icon} ${t.label}`;
 }
 
-document.getElementById('weight-before').addEventListener('input', updateWeightBars);
-document.getElementById('weight-after').addEventListener('input', updateWeightBars);
-
-function updateWeightBars() {
-  const before = parseInt(document.getElementById('weight-before').value);
-  const after = parseInt(document.getElementById('weight-after').value);
-  document.getElementById('weight-before-val').textContent = `${before}kg`;
-  document.getElementById('weight-after-val').textContent = `${after}kg`;
-  document.getElementById('weight-before-fill').style.width = `${(before / 200) * 100}%`;
-  document.getElementById('weight-after-fill').style.width = `${(after / 200) * 100}%`;
-}
-
 document.querySelectorAll('.tag').forEach(el => {
   el.addEventListener('click', () => {
     const tag = el.dataset.tag;
@@ -143,20 +131,21 @@ async function dumpEmotion() {
   const btn = document.getElementById('dump-btn');
   btn.classList.add('loading');
 
-  const before = parseInt(document.getElementById('weight-before').value);
-  const after = parseInt(document.getElementById('weight-after').value);
+  const len = text.length;
+  const weightBefore = Math.min(200, 30 + Math.floor(len / 20));
+  const weightAfter = Math.max(5, Math.floor(weightBefore * 0.4));
   const privacy = document.querySelector('input[name="privacy"]:checked').value;
 
   const data = {
     id: Date.now(),
     content: text,
     tags: [...selectedTags],
-    weightBefore: before,
-    weightAfter: after,
-    weightDiff: before - after,
+    weightBefore,
+    weightAfter,
+    weightDiff: weightBefore - weightAfter,
     timestamp: Date.now(),
     privacy,
-    trashType: getTrashTypeByLength(text.length).label,
+    trashType: getTrashTypeByLength(len).label,
   };
 
   myTrash.unshift(data);
@@ -185,19 +174,14 @@ async function dumpEmotion() {
         if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
         if (typeof updateStats === 'function') updateStats();
         if (typeof updateLevel === 'function') updateLevel();
-        if (typeof showToast === 'function') showToast('🗑️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
+        if (typeof showToast === 'function') showToast('🗐️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
       } catch (e) {
         console.error('[dump safety-net error]', e);
       }
     }
   }, 3000);
 
-  if (selectedAIMode !== 'none') {
-    await getAIResponse(text, selectedTags);
-    setTimeout(() => closeDumpModal(), 2500);
-  } else {
-    closeDumpModal();
-  }
+  closeDumpModal();
 }
 
 function resetForm() {
@@ -205,12 +189,7 @@ function resetForm() {
   document.getElementById('char-count').textContent = '0';
   selectedTags = [];
   document.querySelectorAll('.tag.active').forEach(el => el.classList.remove('active'));
-  document.getElementById('weight-before').value = 75;
-  document.getElementById('weight-after').value = 30;
-  updateWeightBars();
   updateTrashPreview(0);
-  document.getElementById('ai-response').style.display = 'none';
-  selectAIMode('none');
 }
 
 function showToast(message, type) {

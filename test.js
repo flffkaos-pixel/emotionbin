@@ -31,8 +31,6 @@ const htmlChecks = [
   { name: 'emotion-text textarea', pattern: /id="emotion-text"/, required: true },
   { name: 'dump-btn', pattern: /id="dump-btn"/, required: true },
   { name: 'trash preview', pattern: /id="trash-preview"/, required: true },
-  { name: 'weight sliders', pattern: /id="weight-(before|after)"/, required: true },
-  { name: 'AI mode buttons', pattern: /selectAIMode/, required: true },
   { name: 'nav link mountain', pattern: /showSection\('mountain'\)/, required: true },
   { name: 'nav link feed', pattern: /showSection\('feed'\)/, required: true },
   { name: 'nav link mytrash', pattern: /showSection\('mytrash'\)/, required: true },
