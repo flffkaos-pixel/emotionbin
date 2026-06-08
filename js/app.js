@@ -56,6 +56,13 @@ function closeDumpModal() {
   if (pendingDumpData) {
     const data = pendingDumpData;
     pendingDumpData = null;
+
+    if (typeof createExplosion === 'function') {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      createExplosion(cx, cy);
+    }
+
     setTimeout(() => {
       try {
         if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
@@ -67,7 +74,7 @@ function closeDumpModal() {
         console.error('[dump animation error]', e);
         if (typeof showToast === 'function') showToast('감정이 기록되었습니다 ✓', 'success');
       }
-    }, 350);
+    }, 200);
   }
 }
 
@@ -167,6 +174,9 @@ async function dumpEmotion() {
   setTimeout(() => {
     if (pendingDumpData === data) {
       pendingDumpData = null;
+      if (typeof createExplosion === 'function') {
+        createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+      }
       try {
         if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
         if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
@@ -177,7 +187,7 @@ async function dumpEmotion() {
         console.error('[dump safety-net error]', e);
       }
     }
-  }, 5000);
+  }, 3000);
 
   if (selectedAIMode !== 'none') {
     await getAIResponse(text, selectedTags);

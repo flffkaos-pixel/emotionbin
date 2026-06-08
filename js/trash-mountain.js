@@ -505,19 +505,22 @@ function createCarTexture(accentColor) {
   return new THREE.CanvasTexture(c);
 }
 
+const CATEGORY_MAP = {
+  '캔': 'can', '박스': 'box', 'TV': 'tv', '냉장고': 'fridge', '자동차': 'car',
+};
+
 function createTrashMesh(weight, contentLength, color, tags, forceType) {
   const w = weight / 200;
   const lenFactor = Math.min(3.0, 1.2 + contentLength / 150);
   const accentColor = color || 0x888888;
   let category;
   if (forceType && forceType !== 'auto') {
-    category = forceType;
+    category = CATEGORY_MAP[forceType] || forceType;
   } else if (contentLength <= 50) category = 'can';
   else if (contentLength <= 200) category = 'box';
   else if (contentLength <= 500) category = 'tv';
   else if (contentLength <= 1000) category = 'fridge';
   else category = 'car';
-  console.log('[DEBUG] createTrashMesh category:', category, 'contentLength:', contentLength, 'forceType:', forceType);
 
   const baseMat = (texture) => new THREE.MeshStandardMaterial({
     map: texture,
@@ -731,17 +734,18 @@ function processDumpAnimation() {
   createTrashItem(data);
 }
 
+let trailParticles = [];
+
 function createTrashItem(data) {
   const color = getTagColor(data.tags || []);
   const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
 
   const contentLength = (data.content || '').length;
-  console.log('[DEBUG] createTrashItem:', { contentLength, content: data.content?.substring(0, 30), weight, tags: data.tags });
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
-  const dist = 6 + Math.random() * 3;
-  const startY = 9 + Math.random() * 4;
+  const dist = 0.5 + Math.random() * 1.5;
+  const startY = 14 + Math.random() * 3;
 
   mesh.position.set(
     Math.cos(angle) * dist,
@@ -752,14 +756,14 @@ function createTrashItem(data) {
 
   scene.add(mesh);
 
-  const targetX = (Math.random() - 0.5) * 2.5;
-  const targetZ = (Math.random() - 0.5) * 2.5;
-  const targetY = 1.0 + Math.random() * 1.8;
-  const arcHeight = 5 + Math.random() * 3;
-  const duration = 2500 + Math.random() * 1200;
+  const targetX = (Math.random() - 0.5) * 1.5;
+  const targetZ = (Math.random() - 0.5) * 1.5;
+  const targetY = 0.5 + Math.random() * 1.2;
+  const arcHeight = 3 + Math.random() * 2;
+  const duration = 1800 + Math.random() * 800;
   const startTime = Date.now();
 
-  mesh.scale.set(0.3, 0.3, 0.3);
+  mesh.scale.set(0.5, 0.5, 0.5);
 
   dumpAnimations.push({
     mesh,
@@ -773,6 +777,7 @@ function createTrashItem(data) {
     startRot: { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z },
     startTime,
     duration,
+    trailColor: color,
   });
 
   trashObjects.push(mesh);
@@ -780,6 +785,40 @@ function createTrashItem(data) {
   setTimeout(() => {
     processDumpAnimation();
   }, 100 + Math.random() * 200);
+}
+
+function spawnTrailParticle(pos, color) {
+  const particle = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08 + Math.random() * 0.08, 4, 4),
+    new THREE.MeshBasicMaterial({
+      color: color || 0x39ff14,
+      transparent: true,
+      opacity: 0.6,
+    })
+  );
+  particle.position.copy(pos);
+  scene.add(particle);
+  trailParticles.push({
+    mesh: particle,
+    life: 1.0,
+    decay: 0.035 + Math.random() * 0.02,
+  });
+}
+
+function updateTrailParticles() {
+  for (let i = trailParticles.length - 1; i >= 0; i--) {
+    const p = trailParticles[i];
+    p.life -= p.decay;
+    p.mesh.material.opacity = p.life * 0.6;
+    const sc = 1 + (1 - p.life) * 0.5;
+    p.mesh.scale.set(sc, sc, sc);
+    if (p.life <= 0) {
+      scene.remove(p.mesh);
+      p.mesh.geometry.dispose();
+      p.mesh.material.dispose();
+      trailParticles.splice(i, 1);
+    }
+  }
 }
 
 function updateDumpAnimations() {
@@ -799,14 +838,18 @@ function updateDumpAnimations() {
     anim.mesh.position.y = baseY + arcY;
 
     anim.mesh.rotation.x = anim.startRot.x + (Math.random() - 0.5) * 3 * ease;
-    anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 4;
+    anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 6;
     anim.mesh.rotation.z = anim.startRot.z + (Math.random() - 0.5) * 3 * ease;
 
-    const scale = 0.3 + 0.7 * t;
+    const scale = 0.5 + 0.7 * t;
     anim.mesh.scale.set(scale, scale, scale);
 
+    if (t > 0.15 && t < 0.95 && Math.random() < 0.3) {
+      spawnTrailParticle(anim.mesh.position, anim.trailColor || 0x888888);
+    }
+
     if (wasNotDone && t >= 1) {
-      spawnLandingImpact(anim.mesh.position.x, anim.mesh.position.y, anim.mesh.position.z);
+      spawnLandingImpact(anim.mesh.position.x, anim.mesh.position.y, anim.mesh.position.z, anim.trailColor);
     }
 
     if (t >= 1) {
@@ -815,48 +858,72 @@ function updateDumpAnimations() {
   }
 }
 
-function spawnLandingImpact(x, y, z) {
-  const flashLight = new THREE.PointLight(0xffeecc, 2.5, 8);
+function spawnLandingImpact(x, y, z, accentColor) {
+  const colorObj = accentColor ? new THREE.Color(accentColor) : new THREE.Color(0xffdd44);
+
+  const flashLight = new THREE.PointLight(0xffeecc, 4.0, 10);
   flashLight.position.set(x, y + 0.5, z);
   scene.add(flashLight);
   landingImpacts.push({
     mesh: flashLight,
     vx: 0, vy: 0, vz: 0,
     life: 1.0,
-    decay: 0.04,
+    decay: 0.03,
     scale: 1,
     maxScale: 1,
     isLight: true,
   });
-  const dustCount = 8;
+
+  const ringGeo = new THREE.RingGeometry(0.1, 0.3, 24);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: colorObj,
+    transparent: true,
+    opacity: 0.8,
+    side: THREE.DoubleSide,
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.position.set(x, y + 0.05, z);
+  ring.rotation.x = -Math.PI / 2;
+  scene.add(ring);
+  landingImpacts.push({
+    mesh: ring,
+    vx: 0, vy: 0, vz: 0,
+    life: 1.0,
+    decay: 0.025,
+    scale: 1,
+    maxScale: 5.0,
+    isRing: true,
+  });
+
+  const dustCount = 14;
   for (let i = 0; i < dustCount; i++) {
     const dust = new THREE.Mesh(
-      new THREE.SphereGeometry(0.12 + Math.random() * 0.18, 5, 5),
+      new THREE.SphereGeometry(0.08 + Math.random() * 0.14, 5, 5),
       new THREE.MeshBasicMaterial({
-        color: new THREE.Color().setHSL(0.08, 0.3, 0.4 + Math.random() * 0.2),
+        color: colorObj,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.7,
       })
     );
     dust.position.set(x, y, z);
     scene.add(dust);
     landingImpacts.push({
       mesh: dust,
-      vx: (Math.random() - 0.5) * 1.5,
-      vy: 0.5 + Math.random() * 1.2,
-      vz: (Math.random() - 0.5) * 1.5,
+      vx: (Math.random() - 0.5) * 2.5,
+      vy: 0.8 + Math.random() * 2.0,
+      vz: (Math.random() - 0.5) * 2.5,
       life: 1.0,
-      decay: 0.02 + Math.random() * 0.01,
+      decay: 0.02 + Math.random() * 0.015,
       scale: 1,
-      maxScale: 2.5 + Math.random() * 1.5,
+      maxScale: 2.0 + Math.random() * 1.5,
     });
   }
-  const sparkCount = 6;
+  const sparkCount = 12;
   for (let i = 0; i < sparkCount; i++) {
     const spark = new THREE.Mesh(
-      new THREE.SphereGeometry(0.05, 4, 4),
+      new THREE.SphereGeometry(0.04, 4, 4),
       new THREE.MeshBasicMaterial({
-        color: 0xffdd44,
+        color: 0xffffff,
         transparent: true,
         opacity: 1.0,
       })
@@ -865,13 +932,13 @@ function spawnLandingImpact(x, y, z) {
     scene.add(spark);
     landingImpacts.push({
       mesh: spark,
-      vx: (Math.random() - 0.5) * 2.5,
-      vy: 0.8 + Math.random() * 1.5,
-      vz: (Math.random() - 0.5) * 2.5,
+      vx: (Math.random() - 0.5) * 3.5,
+      vy: 1.2 + Math.random() * 2.5,
+      vz: (Math.random() - 0.5) * 3.5,
       life: 1.0,
-      decay: 0.04,
+      decay: 0.05,
       scale: 1,
-      maxScale: 1.5,
+      maxScale: 1.0,
     });
   }
 }
@@ -881,12 +948,16 @@ function updateLandingImpacts() {
     const p = landingImpacts[i];
     p.life -= p.decay;
     if (p.isLight) {
-      p.mesh.intensity = Math.max(0, 2.5 * p.life);
+      p.mesh.intensity = Math.max(0, 4.0 * p.life);
+    } else if (p.isRing) {
+      p.scale = Math.min(p.scale + 0.08, p.maxScale);
+      p.mesh.scale.set(p.scale, p.scale, p.scale);
+      p.mesh.material.opacity = Math.max(0, p.life * 0.8);
     } else {
       p.mesh.position.x += p.vx * 0.016;
       p.mesh.position.y += p.vy * 0.016;
       p.mesh.position.z += p.vz * 0.016;
-      p.vy -= 1.5 * 0.016;
+      p.vy -= 1.8 * 0.016;
       p.scale = Math.min(p.scale + 0.06, p.maxScale);
       p.mesh.scale.set(p.scale, p.scale, p.scale);
       p.mesh.material.opacity = Math.max(0, p.life * (p.mesh.material.color.r > 0.5 ? 1.0 : 0.6));
@@ -916,6 +987,7 @@ function animate() {
   if (!isSceneReady) return;
 
   updateDumpAnimations();
+  updateTrailParticles();
   updateLandingImpacts();
   controls.update();
   renderer.render(scene, camera);
