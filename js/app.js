@@ -1,5 +1,26 @@
 let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
+
+function normalizeWeight(item) {
+  const len = (item.content || '').length;
+  if (!item.weightBefore || item.weightBefore < 5) {
+    item.weightBefore = Math.min(200, 30 + Math.floor(len / 20));
+  }
+  if (!item.weightAfter || item.weightAfter < 1) {
+    item.weightAfter = Math.max(5, Math.floor((item.weightBefore || 30) * 0.4));
+  }
+  item.weightDiff = (item.weightBefore || 30) - (item.weightAfter || 5);
+  return item;
+}
+
+let needsSave = false;
+allTrash.forEach(item => { const orig = item.weightBefore; normalizeWeight(item); if (item.weightBefore !== orig) needsSave = true; });
+myTrash.forEach(item => { const orig = item.weightBefore; normalizeWeight(item); if (item.weightBefore !== orig) needsSave = true; });
+if (needsSave) {
+  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+}
+
 let selectedTags = [];
 let pendingDumpData = null;
 
@@ -704,18 +725,6 @@ setInterval(() => {
 setInterval(() => {
   updateTicker();
 }, 10000);
-
-function normalizeWeight(item) {
-  const len = (item.content || '').length;
-  if (!item.weightBefore || item.weightBefore < 5) {
-    item.weightBefore = Math.min(200, 30 + Math.floor(len / 20));
-  }
-  if (!item.weightAfter || item.weightAfter < 1) {
-    item.weightAfter = Math.max(5, Math.floor((item.weightBefore || 30) * 0.4));
-  }
-  item.weightDiff = (item.weightBefore || 30) - (item.weightAfter || 5);
-  return item;
-}
 
 fbLoadPosts().then(firebasePosts => {
   if (firebasePosts.length > 0) {
