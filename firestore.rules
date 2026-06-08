@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /publicPosts/{postId} {
+      allow read: if true;
+      allow create: if request.resource.data.timestamp != null;
+      allow update: if request.resource.data.reactions != null;
+      allow delete: if false;
+    }
+  }
+}

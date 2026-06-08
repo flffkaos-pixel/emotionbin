@@ -31,11 +31,9 @@ const htmlChecks = [
   { name: 'emotion-text textarea', pattern: /id="emotion-text"/, required: true },
   { name: 'dump-btn', pattern: /id="dump-btn"/, required: true },
   { name: 'trash preview', pattern: /id="trash-preview"/, required: true },
-  { name: 'weight sliders', pattern: /id="weight-(before|after)"/, required: true },
-  { name: 'AI mode buttons', pattern: /selectAIMode/, required: true },
-  { name: 'nav link mountain', pattern: /onclick="showSection\('mountain'\)"/, required: true },
-  { name: 'nav link feed', pattern: /onclick="showSection\('feed'\)"/, required: true },
-  { name: 'nav link mytrash', pattern: /onclick="showSection\('mytrash'\)"/, required: true },
+  { name: 'nav link mountain', pattern: /showSection\('mountain'\)/, required: true },
+  { name: 'nav link feed', pattern: /showSection\('feed'\)/, required: true },
+  { name: 'nav link mytrash', pattern: /showSection\('mytrash'\)/, required: true },
   { name: 'reset data btn', pattern: /resetAllData\(\)/, required: true },
 ];
 htmlChecks.forEach(check => {
@@ -104,7 +102,7 @@ cssChecks.forEach(check => {
 console.log('\n=== 5. Script Load Order ===');
 const scriptTags = [...html.matchAll(/<script\s+src="js\/([^"?]+)[^"]*"\s+defer><\/script>/g)];
 const order = scriptTags.map(m => m[1]);
-const expectedOrder = ['trash-mountain.js', 'ai.js', 'effects.js', 'drum-scene.js', 'app.js'];
+const expectedOrder = ['firebase-db.js', 'trash-mountain.js', 'ai.js', 'effects.js', 'drum-scene.js', 'app.js'];
 const orderOk = JSON.stringify(order) === JSON.stringify(expectedOrder);
 if (orderOk) {
   passes.push('SCRIPT ORDER: ' + order.join(' → '));

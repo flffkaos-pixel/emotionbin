@@ -18,6 +18,7 @@
   --text-dim: #555555;
   --border-color: #2a2a2a;
   --border-neon: rgba(57, 255, 20, 0.3);
+  --vh: 1vh;
   --shadow-green: rgba(57, 255, 20, 0.2);
   --shadow-red: rgba(255, 23, 68, 0.2);
 }
@@ -153,6 +154,18 @@ body {
   background: rgba(255,255,255,0.05);
 }
 
+.nav-hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0.3rem;
+  font-family: inherit;
+  line-height: 1;
+}
+
 .nav-dump-btn {
   background: linear-gradient(135deg, var(--neon-green), #00c853);
   color: #000;
@@ -181,13 +194,13 @@ body {
 }
 
 #section-mountain {
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   position: relative;
 }
 
 #three-container {
   width: 100%;
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   position: relative;
 }
 
@@ -505,6 +518,12 @@ body {
   transform: scale(0.95);
 }
 
+.feed-reaction.reacted {
+  border-color: var(--neon-cyan);
+  background: rgba(57,255,20,0.12);
+  color: var(--neon-green);
+}
+
 .top10-rank {
   font-size: 1.5rem;
   font-weight: 900;
@@ -552,6 +571,19 @@ body {
   color: var(--neon-orange);
   font-weight: 700;
   white-space: nowrap;
+  display: none;
+}
+
+.top10-reactions {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.top10-reactions .feed-reaction {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
 }
 
 .mytrash-container {
@@ -1189,8 +1221,35 @@ body {
 }
 
 @media (max-width: 768px) {
+  .nav-hamburger {
+    display: block;
+  }
+
   .nav-links {
     display: none;
+    position: fixed;
+    top: 64px; left: 0; right: 0;
+    flex-direction: column;
+    background: rgba(10,10,10,0.98);
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.5rem 0;
+    z-index: 999;
+    gap: 0;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links .nav-link {
+    padding: 1rem 2rem;
+    border-radius: 0;
+    width: 100%;
+  }
+
+  .nav-links .nav-link:hover,
+  .nav-links .nav-link.active {
+    background: rgba(57,255,20,0.08);
   }
 
   .overlay-title h1 {

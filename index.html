@@ -26,6 +26,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
 
+  <script>function setVh(){document.documentElement.style.setProperty('--vh',window.innerHeight*.01+'px')}window.addEventListener('resize',setVh),window.addEventListener('orientationchange',function(){setTimeout(setVh,100)}),setVh()</script>
+
   <link rel="canonical" href="https://emotional-trash-can.app">
   <link rel="alternate" type="application/rss+xml" title="감정쓰레기통 - 최신 감정 쓰레기" href="https://emotional-trash-can.app/rss.xml">
   <link rel="sitemap" type="application/xml" href="https://emotional-trash-can.app/sitemap.xml">
@@ -376,12 +378,13 @@
         <span class="logo-text">감정<span class="neon">쓰레기통</span></span>
         <span class="level-badge" id="nav-level" title="현재 내 등급" aria-live="polite">LV.1</span>
       </div>
-      <div class="nav-links" role="tablist">
-        <a href="#section-mountain" onclick="showSection('mountain')" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
-        <a href="#section-feed" onclick="showSection('feed')" class="nav-link" role="tab">공개 피드</a>
-        <a href="#section-top10" onclick="showSection('top10')" class="nav-link" role="tab">최악의 TOP 10</a>
-        <a href="#section-stats" onclick="showSection('stats')" class="nav-link" role="tab">통계</a>
-        <a href="#section-mytrash" onclick="showSection('mytrash')" class="nav-link" role="tab">내 쓰레기통</a>
+      <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="메뉴 열기">☰</button>
+      <div class="nav-links" id="nav-links" role="tablist">
+        <a href="#section-mountain" onclick="showSection('mountain');closeMobileNav()" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
+        <a href="#section-feed" onclick="showSection('feed');closeMobileNav()" class="nav-link" role="tab">공개 피드</a>
+        <a href="#section-top10" onclick="showSection('top10');closeMobileNav()" class="nav-link" role="tab">최악의 TOP 10</a>
+        <a href="#section-stats" onclick="showSection('stats');closeMobileNav()" class="nav-link" role="tab">통계</a>
+        <a href="#section-mytrash" onclick="showSection('mytrash');closeMobileNav()" class="nav-link" role="tab">내 쓰레기통</a>
       </div>
       <button class="nav-dump-btn" onclick="openDumpModal()" aria-label="새 감정 쓰레기 버리기">+ 버리기</button>
     </nav>
@@ -526,46 +529,7 @@
             </div>
           </fieldset>
 
-          <fieldset class="form-group">
-            <legend class="form-label">감정 무게 측정</legend>
-            <div class="weight-container">
-              <div class="weight-slider-group">
-                <span class="weight-label">버리기 전</span>
-                <div class="weight-bar" aria-hidden="true">
-                  <div class="weight-fill before-fill" id="weight-before-fill"></div>
-                </div>
-                <span class="weight-value" id="weight-before-val" aria-live="polite">75kg</span>
-              </div>
-              <input type="range" id="weight-before" min="0" max="200" value="75" class="weight-slider" aria-label="버리기 전 감정 무게">
-              <div class="weight-slider-group">
-                <span class="weight-label">버린 후</span>
-                <div class="weight-bar" aria-hidden="true">
-                  <div class="weight-fill after-fill" id="weight-after-fill"></div>
-                </div>
-                <span class="weight-value" id="weight-after-val" aria-live="polite">30kg</span>
-              </div>
-              <input type="range" id="weight-after" min="0" max="200" value="30" class="weight-slider" aria-label="버린 후 감정 무게">
-            </div>
-            <p class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</p>
-          </fieldset>
-
-          <fieldset class="form-group">
-            <legend class="form-label">AI 반응 모드 (선택)</legend>
-            <div class="ai-mode-container">
-              <button type="button" class="ai-mode-btn active" data-mode="none" onclick="selectAIMode('none')" aria-pressed="true">
-                <span class="ai-icon" aria-hidden="true">🚫</span>
-                <span>사용 안함</span>
-              </button>
-              <button type="button" class="ai-mode-btn" data-mode="rage" onclick="selectAIMode('rage')" aria-pressed="false">
-                <span class="ai-icon" aria-hidden="true">🔥</span>
-                <span>더 세게 토해내</span>
-              </button>
-              <button type="button" class="ai-mode-btn" data-mode="cold" onclick="selectAIMode('cold')" aria-pressed="false">
-                <span class="ai-icon" aria-hidden="true">🧊</span>
-                <span>냉정한 분석</span>
-              </button>
-            </div>
-          </fieldset>
+          <div class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</div>
 
           <fieldset class="form-group">
             <legend class="form-label">공개 설정</legend>
@@ -582,14 +546,6 @@
               </label>
             </div>
           </fieldset>
-
-          <div id="ai-response" class="ai-response" style="display:none;" role="status" aria-live="polite">
-            <div class="ai-response-header">
-              <span class="ai-icon-big" aria-hidden="true">🤖</span>
-              <span id="ai-mode-label">AI 반응</span>
-            </div>
-            <div class="ai-response-body" id="ai-response-text"></div>
-          </div>
 
           <button type="submit" class="dump-btn" id="dump-btn">
             <span class="dump-btn-icon" aria-hidden="true">🗑️</span>
@@ -622,6 +578,9 @@
     </div>
   </footer>
 
+  <script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-app-compat.js" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore-compat.js" defer></script>
+  <script src="js/firebase-db.js?v=1" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
   <script src="js/trash-mountain.js?v=12" defer></script>

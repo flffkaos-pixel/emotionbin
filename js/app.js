@@ -1,5 +1,26 @@
 let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
+
+function normalizeWeight(item) {
+  const len = (item.content || '').length;
+  if (!item.weightBefore || item.weightBefore < 5) {
+    item.weightBefore = Math.min(200, 30 + Math.floor(len / 20));
+  }
+  if (!item.weightAfter || item.weightAfter < 1) {
+    item.weightAfter = Math.max(5, Math.floor((item.weightBefore || 30) * 0.4));
+  }
+  item.weightDiff = (item.weightBefore || 30) - (item.weightAfter || 5);
+  return item;
+}
+
+let needsSave = false;
+allTrash.forEach(item => { const orig = item.weightBefore; normalizeWeight(item); if (item.weightBefore !== orig) needsSave = true; });
+myTrash.forEach(item => { const orig = item.weightBefore; normalizeWeight(item); if (item.weightBefore !== orig) needsSave = true; });
+if (needsSave) {
+  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+}
+
 let selectedTags = [];
 let pendingDumpData = null;
 
@@ -56,6 +77,13 @@ function closeDumpModal() {
   if (pendingDumpData) {
     const data = pendingDumpData;
     pendingDumpData = null;
+
+    if (typeof createExplosion === 'function') {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      createExplosion(cx, cy);
+    }
+
     setTimeout(() => {
       try {
         if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
@@ -67,7 +95,7 @@ function closeDumpModal() {
         console.error('[dump animation error]', e);
         if (typeof showToast === 'function') showToast('감정이 기록되었습니다 ✓', 'success');
       }
-    }, 350);
+    }, 200);
   }
 }
 
@@ -97,25 +125,15 @@ function updateTrashPreview(len) {
   if (hintEl) hintEl.textContent = `${t.icon} ${t.label}`;
 }
 
-document.getElementById('weight-before').addEventListener('input', updateWeightBars);
-document.getElementById('weight-after').addEventListener('input', updateWeightBars);
-
-function updateWeightBars() {
-  const before = parseInt(document.getElementById('weight-before').value);
-  const after = parseInt(document.getElementById('weight-after').value);
-  document.getElementById('weight-before-val').textContent = `${before}kg`;
-  document.getElementById('weight-after-val').textContent = `${after}kg`;
-  document.getElementById('weight-before-fill').style.width = `${(before / 200) * 100}%`;
-  document.getElementById('weight-after-fill').style.width = `${(after / 200) * 100}%`;
-}
-
 document.querySelectorAll('.tag').forEach(el => {
   el.addEventListener('click', () => {
     const tag = el.dataset.tag;
     if (selectedTags.includes(tag)) {
       selectedTags = selectedTags.filter(t => t !== tag);
+      el.classList.remove('active');
     } else {
       selectedTags.push(tag);
+      el.classList.add('active');
     }
   });
   el.addEventListener('keydown', (e) => {
@@ -136,20 +154,21 @@ async function dumpEmotion() {
   const btn = document.getElementById('dump-btn');
   btn.classList.add('loading');
 
-  const before = parseInt(document.getElementById('weight-before').value);
-  const after = parseInt(document.getElementById('weight-after').value);
+  const len = text.length;
+  const weightBefore = Math.min(200, 30 + Math.floor(len / 20));
+  const weightAfter = Math.max(5, Math.floor(weightBefore * 0.4));
   const privacy = document.querySelector('input[name="privacy"]:checked').value;
 
   const data = {
     id: Date.now(),
     content: text,
     tags: [...selectedTags],
-    weightBefore: before,
-    weightAfter: after,
-    weightDiff: before - after,
+    weightBefore,
+    weightAfter,
+    weightDiff: weightBefore - weightAfter,
     timestamp: Date.now(),
     privacy,
-    trashType: getTrashTypeByLength(text.length).label,
+    trashType: getTrashTypeByLength(len).label,
   };
 
   myTrash.unshift(data);
@@ -159,6 +178,9 @@ async function dumpEmotion() {
     allTrash.unshift(data);
     if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
     localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    if (typeof fbSavePost === 'function') {
+      fbSavePost(data);
+    }
   }
 
   btn.classList.remove('loading');
@@ -167,24 +189,22 @@ async function dumpEmotion() {
   setTimeout(() => {
     if (pendingDumpData === data) {
       pendingDumpData = null;
+      if (typeof createExplosion === 'function') {
+        createExplosion(window.innerWidth / 2, window.innerHeight / 2);
+      }
       try {
         if (typeof scheduleTrashItem === 'function') scheduleTrashItem(data);
         if (typeof addTrashToDrum === 'function') addTrashToDrum(data);
         if (typeof updateStats === 'function') updateStats();
         if (typeof updateLevel === 'function') updateLevel();
-        if (typeof showToast === 'function') showToast('🗑️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
+        if (typeof showToast === 'function') showToast('🗐️ ' + (data.trashType || '쓰레기') + ' 추가됨', 'success');
       } catch (e) {
         console.error('[dump safety-net error]', e);
       }
     }
-  }, 5000);
+  }, 3000);
 
-  if (selectedAIMode !== 'none') {
-    await getAIResponse(text, selectedTags);
-    setTimeout(() => closeDumpModal(), 2500);
-  } else {
-    closeDumpModal();
-  }
+  closeDumpModal();
 }
 
 function resetForm() {
@@ -192,12 +212,7 @@ function resetForm() {
   document.getElementById('char-count').textContent = '0';
   selectedTags = [];
   document.querySelectorAll('.tag.active').forEach(el => el.classList.remove('active'));
-  document.getElementById('weight-before').value = 75;
-  document.getElementById('weight-after').value = 30;
-  updateWeightBars();
   updateTrashPreview(0);
-  document.getElementById('ai-response').style.display = 'none';
-  selectAIMode('none');
 }
 
 function showToast(message, type) {
@@ -236,7 +251,7 @@ function renderTop10() {
   }
 
   container.innerHTML = top10.map((item, i) => `
-    <div class="top10-item" style="animation-delay: ${i * 0.08}s">
+    <div class="top10-item" style="animation-delay: ${i * 0.08}s" data-id="${item.id}">
       <div class="top10-rank">#${i + 1}</div>
       <div class="top10-content">
         <div class="top10-text">${escapeHtml(item.content)}</div>
@@ -248,6 +263,11 @@ function renderTop10() {
         <div class="top10-meta">${formatTime(item.timestamp)}</div>
       </div>
       <div class="top10-weight">-${item.weightDiff || 0}kg</div>
+      <div class="top10-reactions">
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+      </div>
     </div>
   `).join('');
 }
@@ -289,11 +309,11 @@ function renderFeed() {
       ` : ''}
       <div class="feed-footer">
         <span class="feed-weight">${item.weightBefore}kg → ${item.weightAfter}kg</span>
-        <div class="feed-reactions">
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
-        </div>
+          <div class="feed-reactions">
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+          </div>
       </div>
     </div>
   `).join('');
@@ -304,15 +324,31 @@ function reactToFeed(id, type) {
   if (!item) return;
   if (!item.reactions) item.reactions = {};
   const reactedKey = `feed_reacted_${id}_${type}`;
-  if (localStorage.getItem(reactedKey)) {
-    showToast('이미 공감하셨습니다 💛', 'info');
-    return;
+  const alreadyReacted = localStorage.getItem(reactedKey);
+
+  if (alreadyReacted) {
+    item.reactions[type] = Math.max(0, (item.reactions[type] || 1) - 1);
+    localStorage.removeItem(reactedKey);
+    if (typeof fbUpdateReactions === 'function') {
+      fbUpdateReactions(id, type, item.reactions[type]);
+    }
+  } else {
+    item.reactions[type] = (item.reactions[type] || 0) + 1;
+    localStorage.setItem(reactedKey, '1');
+    if (typeof fbUpdateReactions === 'function') {
+      fbUpdateReactions(id, type, item.reactions[type]);
+    }
   }
-  item.reactions[type] = (item.reactions[type] || 0) + 1;
-  localStorage.setItem(reactedKey, '1');
+
   localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
-  renderFeed();
-  showToast(`${type} +1 💛`, 'success');
+
+  document.querySelectorAll(`[onclick*="reactToFeed(${id}, '${type}')"], [onclick*='reactToFeed(${id}, &quot;${type}&quot;)']`).forEach(btn => {
+    const countSpan = btn.querySelector('[data-count]');
+    if (countSpan) countSpan.textContent = item.reactions[type] || 0;
+    btn.classList.toggle('reacted', !alreadyReacted);
+  });
+
+  showToast(alreadyReacted ? `${type} 취소` : `${type} +1 💛`, 'success');
 }
 
 function renderMyTrash() {
@@ -412,6 +448,7 @@ function resetAllData() {
   myTrash = [];
   allTrash = [];
   if (typeof clearDrumTrash === 'function') clearDrumTrash();
+  if (typeof fbDeleteAllPosts === 'function') fbDeleteAllPosts();
   renderMyTrash();
   renderTop10();
   updateStats();
@@ -656,6 +693,27 @@ function updateTicker() {
   track.innerHTML = items + items;
 }
 
+function refreshActiveSection() {
+  const active = document.querySelector('.section.active');
+  if (!active) return;
+  const id = active.id?.replace('section-', '');
+  if (id === 'feed') renderFeed();
+  if (id === 'top10') renderTop10();
+  if (id === 'stats') renderStats();
+}
+
+function toggleMobileNav() {
+  document.getElementById('nav-links').classList.toggle('open');
+}
+
+function closeMobileNav() {
+  document.getElementById('nav-links').classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#navbar')) closeMobileNav();
+});
+
 setTimeout(() => {
   document.getElementById('loader').classList.add('hidden');
 }, 800);
@@ -668,26 +726,67 @@ setInterval(() => {
   updateTicker();
 }, 10000);
 
-setTimeout(() => {
-  const sampleTrash = [
+fbLoadPosts().then(firebasePosts => {
+  if (firebasePosts.length > 0) {
+    const existingIds = new Set(allTrash.map(t => t.id));
+    firebasePosts.forEach(p => {
+      normalizeWeight(p);
+      if (!existingIds.has(p.id)) {
+        allTrash.push(p);
+        existingIds.add(p.id);
+      }
+    });
+    allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    updateStats();
+    updateTicker();
+    allTrash.forEach(d => {
+      if (typeof scheduleTrashItem === 'function') scheduleTrashItem(d);
+    });
+  } else if (allTrash.length === 0) {
+    const sampleTrash = [
       { content: '오늘도 의미 없는 하루. 거울 속 내가 제일 싫다. 지친다.', tags: ['무기력', '지침'], weightBefore: 85, weightAfter: 40, timestamp: Date.now() - 300000, privacy: 'public', id: Date.now() - 1 },
-    { content: '왜 나만 이렇게 사는 거지? 모두가 나를 떠나갔다. 아무도 없어.', tags: ['외로움', '슬픔'], weightBefore: 70, weightAfter: 25, timestamp: Date.now() - 600000, privacy: 'public', id: Date.now() - 2 },
-    { content: '개같은 회사. 개같은 상사. 오늘도 참았다. 언젠간 터진다.', tags: ['분노', '짜증'], weightBefore: 120, weightAfter: 55, timestamp: Date.now() - 900000, privacy: 'public', id: Date.now() - 3 },
-    { content: '또 실수했다. 왜 나는 항상 이 모양일까. 다 내 탓이다. 아침에 눈을 뜨는 순간부터 하루 종일 후회뿐이다. 말하지 말았어야 할 말들, 하지 말았어야 할 선택들. 시간을 되돌릴 수만 있다면 모든 걸 처음부터 다시 하고 싶다. 근데 그게 안 되니까 더 좆같다. 아무리 생각해도 답은 없고, 그냥 이대로 살아야 하는 게 너무 무겁다. 언젠간 괜찮아질 거라는 말, 더 이상 믿지 않는다.', tags: ['후회', '실망'], weightBefore: 150, weightAfter: 80, timestamp: Date.now() - 1800000, privacy: 'public', id: Date.now() - 4 },
-    { content: '너만 행복하면 다야? 나는? 나는 버려도 돼?', tags: ['서운함', '상처'], weightBefore: 95, weightAfter: 45, timestamp: Date.now() - 3600000, privacy: 'public', id: Date.now() - 5 },
-    { content: '오늘 회사에서 또 당했다. 팀장은 내 아이디어를 자기가 낸 것처럼 발표했고, 옆자리 XX는 내 실수를 사무실 전체에 알렸다. 점심때는 혼자 먹었고, 핸드폰을 봐도 연락하는 사람은 아무도 없었다. 퇴근 길에 비까지 맞았다. 집에 와서도 할 일은 산더미다. 내일도 똑같은 하루가 반복될 생각을 하니 숨이 막힌다. 이 지긋지긋한 일상 언제까지 버텨야 할까. 나는 왜 이렇게 사는 걸까. 세상에 너무 많은 사람이 있는데 왜 나는 혼자인 기분일까. 다들 행복해 보이는데 나만 제자리다. 뭘 해도 재미없고, 뭘 먹어도 맛없고, 누굴 만나도 시시하다. 이게 우울증이라는 건 알지만, 극복할 의지조차 없다. 그냥 모든 게 귀찮다. 숨 쉬는 것조차 귀찮다. 아무것도 하기 싫다. 다 던져버리고 싶다. 모든 걸. 회사도, 인간관계도, 이 도시도, 나 자신도. 우주 어딘가에 아무도 없는 곳으로 떠나고 싶다.', tags: ['분노', '짜증', '스트레스', '외로움', '무기력'], weightBefore: 195, weightAfter: 75, timestamp: Date.now() - 7200000, privacy: 'public', id: Date.now() - 6 },
-  ];
-
-  sampleTrash.forEach(d => {
-    allTrash.push(d);
-    scheduleTrashItem(d);
-  });
-  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+      { content: '왜 나만 이렇게 사는 거지? 모두가 나를 떠나갔다. 아무도 없어.', tags: ['외로움', '슬픔'], weightBefore: 70, weightAfter: 25, timestamp: Date.now() - 600000, privacy: 'public', id: Date.now() - 2 },
+      { content: '개같은 회사. 개같은 상사. 오늘도 참았다. 언젠간 터진다.', tags: ['분노', '짜증'], weightBefore: 120, weightAfter: 55, timestamp: Date.now() - 900000, privacy: 'public', id: Date.now() - 3 },
+      { content: '또 실수했다. 왜 나는 항상 이 모양일까. 다 내 탓이다. 아침에 눈을 뜨는 순간부터 하루 종일 후회뿐이다. 말하지 말았어야 할 말들, 하지 말았어야 할 선택들. 시간을 되돌릴 수만 있다면 모든 걸 처음부터 다시 하고 싶다. 근데 그게 안 되니까 더 좆같다. 아무리 생각해도 답은 없고, 그냥 이대로 살아야 하는 게 너무 무겁다. 언젠간 괜찮아질 거라는 말, 더 이상 믿지 않는다.', tags: ['후회', '실망'], weightBefore: 150, weightAfter: 80, timestamp: Date.now() - 1800000, privacy: 'public', id: Date.now() - 4 },
+      { content: '너만 행복하면 다야? 나는? 나는 버려도 돼?', tags: ['서운함', '상처'], weightBefore: 95, weightAfter: 45, timestamp: Date.now() - 3600000, privacy: 'public', id: Date.now() - 5 },
+      { content: '오늘 회사에서 또 당했다. 팀장은 내 아이디어를 자기가 낸 것처럼 발표했고, 옆자리 XX는 내 실수를 사무실 전체에 알렸다. 점심때는 혼자 먹었고, 핸드폰을 봐도 연락하는 사람은 아무도 없었다. 퇴근 길에 비까지 맞았다. 집에 와서도 할 일은 산더미다. 내일도 똑같은 하루가 반복될 생각을 하니 숨이 막힌다. 이 지긋지긋한 일상 언제까지 버텨야 할까. 나는 왜 이렇게 사는 걸까. 세상에 너무 많은 사람이 있는데 왜 나는 혼자인 기분일까. 다들 행복해 보이는데 나만 제자리다. 뭘 해도 재미없고, 뭘 먹어도 맛없고, 누굴 만나도 시시하다. 이게 우울증이라는 건 알지만, 극복할 의지조차 없다. 그냥 모든 게 귀찮다. 숨 쉬는 것조차 귀찮다. 아무것도 하기 싫다. 다 던져버리고 싶다. 모든 걸. 회사도, 인간관계도, 이 도시도, 나 자신도. 우주 어딘가에 아무도 없는 곳으로 떠나고 싶다.', tags: ['분노', '짜증', '스트레스', '외로움', '무기력'], weightBefore: 195, weightAfter: 75, timestamp: Date.now() - 7200000, privacy: 'public', id: Date.now() - 6 },
+    ];
+    sampleTrash.forEach(d => {
+      allTrash.push(d);
+      scheduleTrashItem(d);
+    });
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  }
   updateStats();
   updateTicker();
-}, 1200);
+  refreshActiveSection();
 
-updateStats();
+  fbSubscribePosts(firebasePosts => {
+    if (!firebasePosts || firebasePosts.length === 0) return;
+    const existingIds = new Set(allTrash.map(t => t.id));
+    let changed = false;
+    firebasePosts.forEach(p => {
+      normalizeWeight(p);
+      if (!existingIds.has(p.id)) {
+        allTrash.push(p);
+        existingIds.add(p.id);
+        changed = true;
+        if (typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
+      }
+    });
+    if (changed) {
+      allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+      updateStats();
+      updateTicker();
+      refreshActiveSection();
+    }
+  });
+});
+
 updateLevel();
 updateTicker();
 updateTrashPreview(0);

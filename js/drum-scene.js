@@ -185,14 +185,28 @@ function addTrashToDrum(data) {
   const targetX = Math.cos(targetAngle) * targetDist;
   const targetZ = Math.sin(targetAngle) * targetDist;
   const targetY = 0.1 + Math.random() * 0.3;
-  const contentLength = (data.content || '').length;
-  const weight = data.weightAfter || 50;
 
-  const trashMesh = createTrashMesh(weight, contentLength, getTagColor(data.tags || []), data.tags);
-  const scaleFactor = 0.5;
-  trashMesh.scale.set(scaleFactor, scaleFactor, scaleFactor);
+  const color = getTagColor(data.tags || []);
+  const size = 0.08 + Math.random() * 0.14;
+  const shapes = [
+    new THREE.DodecahedronGeometry(size),
+    new THREE.BoxGeometry(size * 0.7, size * 1.2, size * 0.9),
+    new THREE.IcosahedronGeometry(size * 0.8),
+    new THREE.OctahedronGeometry(size * 0.9),
+    new THREE.TorusKnotGeometry(size * 0.6, size * 0.25, 12, 6),
+  ];
+  const geo = shapes[Math.floor(Math.random() * shapes.length)];
+  const mat = new THREE.MeshStandardMaterial({
+    color,
+    roughness: 0.5 + Math.random() * 0.4,
+    metalness: 0.2 + Math.random() * 0.3,
+  });
+  const trashMesh = new THREE.Mesh(geo, mat);
+  trashMesh.castShadow = true;
+  trashMesh.receiveShadow = true;
+
   trashMesh.position.set(startX, startY, startZ);
-  trashMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+  trashMesh.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, 0);
   drumScene.add(trashMesh);
   drumTrashObjects.push(trashMesh);
 
