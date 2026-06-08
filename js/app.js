@@ -672,6 +672,15 @@ function updateTicker() {
   track.innerHTML = items + items;
 }
 
+function refreshActiveSection() {
+  const active = document.querySelector('.section.active');
+  if (!active) return;
+  const id = active.id?.replace('section-', '');
+  if (id === 'feed') renderFeed();
+  if (id === 'top10') renderTop10();
+  if (id === 'stats') renderStats();
+}
+
 setTimeout(() => {
   document.getElementById('loader').classList.add('hidden');
 }, 800);
@@ -718,8 +727,10 @@ fbLoadPosts().then(firebasePosts => {
   }
   updateStats();
   updateTicker();
+  refreshActiveSection();
 
   fbSubscribePosts(firebasePosts => {
+    if (!firebasePosts || firebasePosts.length === 0) return;
     const existingIds = new Set(allTrash.map(t => t.id));
     let changed = false;
     firebasePosts.forEach(p => {
@@ -736,11 +747,11 @@ fbLoadPosts().then(firebasePosts => {
       localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
       updateStats();
       updateTicker();
+      refreshActiveSection();
     }
   });
 });
 
-updateStats();
 updateLevel();
 updateTicker();
 updateTrashPreview(0);
