@@ -249,7 +249,7 @@ function renderTop10() {
   }
 
   container.innerHTML = top10.map((item, i) => `
-    <div class="top10-item" style="animation-delay: ${i * 0.08}s">
+    <div class="top10-item" style="animation-delay: ${i * 0.08}s" data-id="${item.id}">
       <div class="top10-rank">#${i + 1}</div>
       <div class="top10-content">
         <div class="top10-text">${escapeHtml(item.content)}</div>
@@ -261,6 +261,11 @@ function renderTop10() {
         <div class="top10-meta">${formatTime(item.timestamp)}</div>
       </div>
       <div class="top10-weight">-${item.weightDiff || 0}kg</div>
+      <div class="top10-reactions">
+        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+      </div>
     </div>
   `).join('');
 }
@@ -428,6 +433,7 @@ function resetAllData() {
   myTrash = [];
   allTrash = [];
   if (typeof clearDrumTrash === 'function') clearDrumTrash();
+  if (typeof fbDeleteAllPosts === 'function') fbDeleteAllPosts();
   renderMyTrash();
   renderTop10();
   updateStats();
@@ -680,6 +686,18 @@ function refreshActiveSection() {
   if (id === 'top10') renderTop10();
   if (id === 'stats') renderStats();
 }
+
+function toggleMobileNav() {
+  document.getElementById('nav-links').classList.toggle('open');
+}
+
+function closeMobileNav() {
+  document.getElementById('nav-links').classList.remove('open');
+}
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#navbar')) closeMobileNav();
+});
 
 setTimeout(() => {
   document.getElementById('loader').classList.add('hidden');

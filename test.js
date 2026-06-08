@@ -33,9 +33,9 @@ const htmlChecks = [
   { name: 'trash preview', pattern: /id="trash-preview"/, required: true },
   { name: 'weight sliders', pattern: /id="weight-(before|after)"/, required: true },
   { name: 'AI mode buttons', pattern: /selectAIMode/, required: true },
-  { name: 'nav link mountain', pattern: /onclick="showSection\('mountain'\)"/, required: true },
-  { name: 'nav link feed', pattern: /onclick="showSection\('feed'\)"/, required: true },
-  { name: 'nav link mytrash', pattern: /onclick="showSection\('mytrash'\)"/, required: true },
+  { name: 'nav link mountain', pattern: /showSection\('mountain'\)/, required: true },
+  { name: 'nav link feed', pattern: /showSection\('feed'\)/, required: true },
+  { name: 'nav link mytrash', pattern: /showSection\('mytrash'\)/, required: true },
   { name: 'reset data btn', pattern: /resetAllData\(\)/, required: true },
 ];
 htmlChecks.forEach(check => {

@@ -378,12 +378,13 @@
         <span class="logo-text">감정<span class="neon">쓰레기통</span></span>
         <span class="level-badge" id="nav-level" title="현재 내 등급" aria-live="polite">LV.1</span>
       </div>
-      <div class="nav-links" role="tablist">
-        <a href="#section-mountain" onclick="showSection('mountain')" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
-        <a href="#section-feed" onclick="showSection('feed')" class="nav-link" role="tab">공개 피드</a>
-        <a href="#section-top10" onclick="showSection('top10')" class="nav-link" role="tab">최악의 TOP 10</a>
-        <a href="#section-stats" onclick="showSection('stats')" class="nav-link" role="tab">통계</a>
-        <a href="#section-mytrash" onclick="showSection('mytrash')" class="nav-link" role="tab">내 쓰레기통</a>
+      <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="메뉴 열기">☰</button>
+      <div class="nav-links" id="nav-links" role="tablist">
+        <a href="#section-mountain" onclick="showSection('mountain');closeMobileNav()" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
+        <a href="#section-feed" onclick="showSection('feed');closeMobileNav()" class="nav-link" role="tab">공개 피드</a>
+        <a href="#section-top10" onclick="showSection('top10');closeMobileNav()" class="nav-link" role="tab">최악의 TOP 10</a>
+        <a href="#section-stats" onclick="showSection('stats');closeMobileNav()" class="nav-link" role="tab">통계</a>
+        <a href="#section-mytrash" onclick="showSection('mytrash');closeMobileNav()" class="nav-link" role="tab">내 쓰레기통</a>
       </div>
       <button class="nav-dump-btn" onclick="openDumpModal()" aria-label="새 감정 쓰레기 버리기">+ 버리기</button>
     </nav>

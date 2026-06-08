@@ -81,3 +81,16 @@ async function fbUpdateReactions(postId, type, count) {
     console.warn('[FB] reaction update error:', e);
   }
 }
+
+async function fbDeleteAllPosts() {
+  if (!fbConnected) return;
+  try {
+    const snapshot = await fbDb.collection(POSTS_COLLECTION).get();
+    const batch = fbDb.batch();
+    snapshot.docs.forEach(doc => batch.delete(doc.ref));
+    await batch.commit();
+    console.log('[FB] deleted', snapshot.docs.length, 'posts');
+  } catch (e) {
+    console.warn('[FB] delete error:', e);
+  }
+}
