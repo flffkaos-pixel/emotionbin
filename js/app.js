@@ -109,8 +109,10 @@ document.querySelectorAll('.tag').forEach(el => {
     const tag = el.dataset.tag;
     if (selectedTags.includes(tag)) {
       selectedTags = selectedTags.filter(t => t !== tag);
+      el.classList.remove('active');
     } else {
       selectedTags.push(tag);
+      el.classList.add('active');
     }
   });
   el.addEventListener('keydown', (e) => {
