@@ -5,6 +5,59 @@ let ground;
 let isSceneReady = false;
 let dumpAnimations = [];
 
+const PILE_GRID = 36;
+const PILE_RADIUS = 4;
+let pileGrid = new Float32Array(PILE_GRID * PILE_GRID);
+
+function initPileGrid() {
+  pileGrid.fill(0);
+}
+
+function getPileIdx(x, z) {
+  const half = PILE_RADIUS;
+  const cell = PILE_GRID / (half * 2);
+  const gi = Math.floor((x + half) * cell);
+  const gj = Math.floor((z + half) * cell);
+  if (gi < 0 || gi >= PILE_GRID || gj < 0 || gj >= PILE_GRID) return -1;
+  return gi + gj * PILE_GRID;
+}
+
+function getPileHeight(x, z) {
+  const idx = getPileIdx(x, z);
+  return idx >= 0 ? pileGrid[idx] : 0;
+}
+
+function placeOnPile(category, objHeight) {
+  let bestX = 0, bestZ = 0, bestY = Infinity;
+  for (let attempt = 0; attempt < 25; attempt++) {
+    const g = (Math.random() + Math.random() + Math.random()) / 3 - 0.5;
+    const x = g * PILE_RADIUS * 1.8;
+    const z = g * PILE_RADIUS * 1.8;
+    const h = getPileHeight(x, z);
+    if (h < bestY) {
+      bestX = x; bestZ = z; bestY = h;
+    }
+  }
+  const idx = getPileIdx(bestX, bestZ);
+  if (idx >= 0) {
+    pileGrid[idx] += objHeight;
+    const xIdx = idx % PILE_GRID;
+    const zIdx = Math.floor(idx / PILE_GRID);
+    const spreadFactor = objHeight * 0.25;
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dz = -1; dz <= 1; dz++) {
+        if (dx === 0 && dz === 0) continue;
+        const ni = xIdx + dx;
+        const nj = zIdx + dz;
+        if (ni >= 0 && ni < PILE_GRID && nj >= 0 && nj < PILE_GRID) {
+          pileGrid[ni + nj * PILE_GRID] += spreadFactor;
+        }
+      }
+    }
+  }
+  return { x: bestX, z: bestZ, y: bestY + 0.1 };
+}
+
 const TRASH_COLORS = {
   '분노': 0xff1744,
   '짜증': 0xff6d00,
@@ -55,6 +108,7 @@ function initScene() {
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.5;
 
+  initPileGrid();
   setupLights();
   createGround();
   createBaseTrash();
@@ -133,26 +187,18 @@ function createGround() {
 }
 
 function createBaseTrash() {
-  const count = 30;
-  for (let i = 0; i < count; i++) {
-    const radius = 0.3 + Math.random() * 0.8;
-    const height = 0.3 + Math.random() * 0.6;
-    const geo = new THREE.DodecahedronGeometry(radius);
-    const color = [0x444444, 0x555555, 0x333333, 0x2a2a2a, 0x1a1a1a][Math.floor(Math.random() * 5)];
-    const mat = new THREE.MeshStandardMaterial({
-      color,
-      roughness: 0.8,
-      metalness: 0.2,
-    });
-    const mesh = new THREE.Mesh(geo, mat);
-    const angle = Math.random() * Math.PI * 2;
-    const dist = 0.5 + Math.random() * 4;
-    mesh.position.set(
-      Math.cos(angle) * dist,
-      height / 2 + Math.random() * 2.5,
-      Math.sin(angle) * dist
-    );
-    mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+  const categories = ['can', 'can', 'can', 'box', 'box', 'tv', 'tv', 'fridge', 'car'];
+  const colors = [0xff1744, 0xff6d00, 0xffee00, 0x00e676, 0x2979ff, 0xb388ff, 0xff88aa, 0x88ddff, 0xffaa44];
+  for (let i = 0; i < categories.length; i++) {
+    const cat = categories[i];
+    const fakeContentLen = cat === 'can' ? 30 : cat === 'box' ? 120 : cat === 'tv' ? 350 : cat === 'fridge' ? 600 : 1200;
+    const color = colors[i % colors.length];
+    const w = [20, 30, 15, 60, 80, 100, 150, 200, 300][i];
+    const objHeight = getObjHeight(cat);
+    const pilePos = placeOnPile(cat, objHeight);
+    const mesh = createTrashMesh(w, fakeContentLen, color, [], cat);
+    mesh.position.set(pilePos.x, pilePos.y + 0.1, pilePos.z);
+    mesh.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     scene.add(mesh);
@@ -731,12 +777,32 @@ function processDumpAnimation() {
   createTrashItem(data);
 }
 
+function getObjHeight(category) {
+  switch (category) {
+    case 'can': return 1.3;
+    case 'box': return 1.1;
+    case 'tv': return 1.0;
+    case 'fridge': return 2.8;
+    case 'car': return 2.2;
+    default: return 1.0;
+  }
+}
+
 function createTrashItem(data) {
   const color = getTagColor(data.tags || []);
   const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
 
   const contentLength = (data.content || '').length;
-  console.log('[DEBUG] createTrashItem:', { contentLength, content: data.content?.substring(0, 30), weight, tags: data.tags });
+  let category;
+  if (data.trashType && data.trashType !== 'auto') {
+    category = data.trashType;
+  } else if (contentLength <= 50) category = 'can';
+  else if (contentLength <= 200) category = 'box';
+  else if (contentLength <= 500) category = 'tv';
+  else if (contentLength <= 1000) category = 'fridge';
+  else category = 'car';
+
+  console.log('[DEBUG] createTrashItem:', { contentLength, content: data.content?.substring(0, 30), weight, category, tags: data.tags });
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);
 
   const angle = Math.random() * Math.PI * 2;
@@ -752,9 +818,9 @@ function createTrashItem(data) {
 
   scene.add(mesh);
 
-  const targetX = (Math.random() - 0.5) * 2.5;
-  const targetZ = (Math.random() - 0.5) * 2.5;
-  const targetY = 1.0 + Math.random() * 1.8;
+  const objHeight = getObjHeight(category);
+  const pilePos = placeOnPile(category, objHeight);
+
   const arcHeight = 5 + Math.random() * 3;
   const duration = 2500 + Math.random() * 1200;
   const startTime = Date.now();
@@ -766,9 +832,9 @@ function createTrashItem(data) {
     startX: mesh.position.x,
     startY,
     startZ: mesh.position.z,
-    targetX,
-    targetY,
-    targetZ,
+    targetX: pilePos.x,
+    targetY: pilePos.y,
+    targetZ: pilePos.z,
     arcHeight,
     startRot: { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z },
     startTime,
