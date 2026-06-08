@@ -750,7 +750,7 @@ let trailParticles = [];
 
 function createTrashItem(data) {
   const color = getTagColor(data.tags || []);
-  const weight = data.weightAfter !== undefined ? data.weightAfter : 50;
+  const weight = Math.max(20, data.weightAfter !== undefined ? data.weightAfter : 50);
 
   const contentLength = (data.content || '').length;
   const mesh = createTrashMesh(weight, contentLength, color, data.tags, data.trashType);

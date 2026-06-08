@@ -705,10 +705,23 @@ setInterval(() => {
   updateTicker();
 }, 10000);
 
+function normalizeWeight(item) {
+  const len = (item.content || '').length;
+  if (!item.weightBefore || item.weightBefore < 5) {
+    item.weightBefore = Math.min(200, 30 + Math.floor(len / 20));
+  }
+  if (!item.weightAfter || item.weightAfter < 1) {
+    item.weightAfter = Math.max(5, Math.floor((item.weightBefore || 30) * 0.4));
+  }
+  item.weightDiff = (item.weightBefore || 30) - (item.weightAfter || 5);
+  return item;
+}
+
 fbLoadPosts().then(firebasePosts => {
   if (firebasePosts.length > 0) {
     const existingIds = new Set(allTrash.map(t => t.id));
     firebasePosts.forEach(p => {
+      normalizeWeight(p);
       if (!existingIds.has(p.id)) {
         allTrash.push(p);
         existingIds.add(p.id);
@@ -746,6 +759,7 @@ fbLoadPosts().then(firebasePosts => {
     const existingIds = new Set(allTrash.map(t => t.id));
     let changed = false;
     firebasePosts.forEach(p => {
+      normalizeWeight(p);
       if (!existingIds.has(p.id)) {
         allTrash.push(p);
         existingIds.add(p.id);
