@@ -243,9 +243,9 @@ function renderTop10() {
       </div>
       <div class="top10-weight">-${item.weightDiff || 0}kg</div>
       <div class="top10-reactions">
-        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
-        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
-        <button class="feed-reaction" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
       </div>
     </div>
   `).join('');
@@ -288,11 +288,11 @@ function renderFeed() {
       ` : ''}
       <div class="feed-footer">
         <span class="feed-weight">${item.weightBefore}kg → ${item.weightAfter}kg</span>
-        <div class="feed-reactions">
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
-          <button class="feed-reaction" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
-        </div>
+          <div class="feed-reactions">
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+            <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+          </div>
       </div>
     </div>
   `).join('');
@@ -303,18 +303,31 @@ function reactToFeed(id, type) {
   if (!item) return;
   if (!item.reactions) item.reactions = {};
   const reactedKey = `feed_reacted_${id}_${type}`;
-  if (localStorage.getItem(reactedKey)) {
-    showToast('이미 공감하셨습니다 💛', 'info');
-    return;
+  const alreadyReacted = localStorage.getItem(reactedKey);
+
+  if (alreadyReacted) {
+    item.reactions[type] = Math.max(0, (item.reactions[type] || 1) - 1);
+    localStorage.removeItem(reactedKey);
+    if (typeof fbUpdateReactions === 'function') {
+      fbUpdateReactions(id, type, item.reactions[type]);
+    }
+  } else {
+    item.reactions[type] = (item.reactions[type] || 0) + 1;
+    localStorage.setItem(reactedKey, '1');
+    if (typeof fbUpdateReactions === 'function') {
+      fbUpdateReactions(id, type, item.reactions[type]);
+    }
   }
-  item.reactions[type] = (item.reactions[type] || 0) + 1;
-  localStorage.setItem(reactedKey, '1');
+
   localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
-  if (typeof fbUpdateReactions === 'function') {
-    fbUpdateReactions(id, type, item.reactions[type]);
-  }
-  renderFeed();
-  showToast(`${type} +1 💛`, 'success');
+
+  document.querySelectorAll(`[onclick*="reactToFeed(${id}, '${type}')"], [onclick*='reactToFeed(${id}, &quot;${type}&quot;)']`).forEach(btn => {
+    const countSpan = btn.querySelector('[data-count]');
+    if (countSpan) countSpan.textContent = item.reactions[type] || 0;
+    btn.classList.toggle('reacted', !alreadyReacted);
+  });
+
+  showToast(alreadyReacted ? `${type} 취소` : `${type} +1 💛`, 'success');
 }
 
 function renderMyTrash() {

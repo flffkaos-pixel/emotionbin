@@ -518,6 +518,12 @@ body {
   transform: scale(0.95);
 }
 
+.feed-reaction.reacted {
+  border-color: var(--neon-cyan);
+  background: rgba(57,255,20,0.12);
+  color: var(--neon-green);
+}
+
 .top10-rank {
   font-size: 1.5rem;
   font-weight: 900;
