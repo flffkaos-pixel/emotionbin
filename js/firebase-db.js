@@ -8,13 +8,22 @@ const FIREBASE_CONFIG = {
   measurementId: "G-R0PSCZ6RFT"
 };
 
-firebase.initializeApp(FIREBASE_CONFIG);
-const fbDb = firebase.firestore();
+let fbDb, fbConnected = false, fbUnsubscribe = null;
+
+try {
+  firebase.initializeApp(FIREBASE_CONFIG);
+  fbDb = firebase.firestore();
+  fbDb.settings({ merge: true });
+  fbConnected = true;
+  console.log('[FB] Firebase initialized');
+} catch (e) {
+  console.warn('[FB] init error:', e);
+}
+
 const POSTS_COLLECTION = 'publicPosts';
 
-let fbUnsubscribe = null;
-
 async function fbSavePost(data) {
+  if (!fbConnected) return null;
   try {
     const docRef = await fbDb.collection(POSTS_COLLECTION).add({
       ...data,
@@ -23,25 +32,28 @@ async function fbSavePost(data) {
     });
     return docRef.id;
   } catch (e) {
-    console.error('[FB] save error:', e);
+    console.warn('[FB] save error:', e);
     return null;
   }
 }
 
 async function fbLoadPosts() {
+  if (!fbConnected) return [];
   try {
     const snapshot = await fbDb.collection(POSTS_COLLECTION)
       .orderBy('timestamp', 'desc')
       .limit(500)
       .get();
+    console.log('[FB] loaded', snapshot.docs.length, 'posts');
     return snapshot.docs.map(doc => ({ ...doc.data(), _fbId: doc.id }));
   } catch (e) {
-    console.error('[FB] load error:', e);
+    console.warn('[FB] load error:', e);
     return [];
   }
 }
 
 function fbSubscribePosts(callback) {
+  if (!fbConnected) return;
   if (fbUnsubscribe) fbUnsubscribe();
   fbUnsubscribe = fbDb.collection(POSTS_COLLECTION)
     .orderBy('timestamp', 'desc')
@@ -50,11 +62,12 @@ function fbSubscribePosts(callback) {
       const posts = snapshot.docs.map(doc => ({ ...doc.data(), _fbId: doc.id }));
       callback(posts);
     }, error => {
-      console.error('[FB] subscribe error:', error);
+      console.warn('[FB] subscribe error:', error);
     });
 }
 
 async function fbUpdateReactions(postId, type, count) {
+  if (!fbConnected) return;
   try {
     const snapshot = await fbDb.collection(POSTS_COLLECTION)
       .where('id', '==', postId)
@@ -65,6 +78,6 @@ async function fbUpdateReactions(postId, type, count) {
       await ref.update({ [`reactions.${type}`]: count });
     }
   } catch (e) {
-    console.error('[FB] reaction update error:', e);
+    console.warn('[FB] reaction update error:', e);
   }
 }

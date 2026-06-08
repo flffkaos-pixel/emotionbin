@@ -24,8 +24,20 @@ const DEFAULT_COLOR = 0x888888;
 
 function initScene() {
   const container = document.getElementById('three-container');
-  const w = container.clientWidth;
-  const h = container.clientHeight;
+  if (!container) return;
+
+  let w = container.clientWidth;
+  let h = container.clientHeight;
+  if (w === 0 || h === 0) {
+    w = window.innerWidth;
+    h = window.innerHeight;
+  }
+  container.style.height = h + 'px';
+
+  if (!window.WebGLRenderingContext) {
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-family:sans-serif;text-align:center;padding:2rem"><div><div style="font-size:4rem;margin-bottom:1rem">🗑️</div><h2 style="color:#39ff14;margin-bottom:.5rem">WebGL을 지원하지 않는 브라우저입니다</h2><p style="color:#888">Chrome, Safari, Firefox 최신 버전으로 접속해주세요</p></div></div>';
+    return;
+  }
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
@@ -975,12 +987,21 @@ function updateLandingImpacts() {
 
 function onResize() {
   const container = document.getElementById('three-container');
-  const w = container.clientWidth;
-  const h = container.clientHeight;
+  if (!container || !camera || !renderer) return;
+  let w = container.clientWidth;
+  let h = container.clientHeight;
+  if (w === 0 || h === 0) {
+    w = window.innerWidth;
+    h = window.innerHeight;
+  }
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
 }
+
+window.addEventListener('orientationchange', () => {
+  setTimeout(onResize, 300);
+});
 
 function animate() {
   requestAnimationFrame(animate);

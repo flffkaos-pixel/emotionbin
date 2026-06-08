@@ -18,6 +18,7 @@
   --text-dim: #555555;
   --border-color: #2a2a2a;
   --border-neon: rgba(57, 255, 20, 0.3);
+  --vh: 1vh;
   --shadow-green: rgba(57, 255, 20, 0.2);
   --shadow-red: rgba(255, 23, 68, 0.2);
 }
@@ -181,13 +182,13 @@ body {
 }
 
 #section-mountain {
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   position: relative;
 }
 
 #three-container {
   width: 100%;
-  height: 100vh;
+  height: calc(var(--vh, 1vh) * 100);
   position: relative;
 }
 
