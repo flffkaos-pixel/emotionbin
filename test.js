@@ -104,7 +104,7 @@ cssChecks.forEach(check => {
 console.log('\n=== 5. Script Load Order ===');
 const scriptTags = [...html.matchAll(/<script\s+src="js\/([^"?]+)[^"]*"\s+defer><\/script>/g)];
 const order = scriptTags.map(m => m[1]);
-const expectedOrder = ['trash-mountain.js', 'ai.js', 'effects.js', 'drum-scene.js', 'app.js'];
+const expectedOrder = ['firebase-db.js', 'trash-mountain.js', 'ai.js', 'effects.js', 'drum-scene.js', 'app.js'];
 const orderOk = JSON.stringify(order) === JSON.stringify(expectedOrder);
 if (orderOk) {
   passes.push('SCRIPT ORDER: ' + order.join(' → '));

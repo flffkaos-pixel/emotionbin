@@ -166,6 +166,9 @@ async function dumpEmotion() {
     allTrash.unshift(data);
     if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
     localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    if (typeof fbSavePost === 'function') {
+      fbSavePost(data);
+    }
   }
 
   btn.classList.remove('loading');
@@ -321,6 +324,9 @@ function reactToFeed(id, type) {
   item.reactions[type] = (item.reactions[type] || 0) + 1;
   localStorage.setItem(reactedKey, '1');
   localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  if (typeof fbUpdateReactions === 'function') {
+    fbUpdateReactions(id, type, item.reactions[type]);
+  }
   renderFeed();
   showToast(`${type} +1 💛`, 'success');
 }
@@ -678,24 +684,61 @@ setInterval(() => {
   updateTicker();
 }, 10000);
 
-setTimeout(() => {
-  const sampleTrash = [
+fbLoadPosts().then(firebasePosts => {
+  if (firebasePosts.length > 0) {
+    const existingIds = new Set(allTrash.map(t => t.id));
+    firebasePosts.forEach(p => {
+      if (!existingIds.has(p.id)) {
+        allTrash.push(p);
+        existingIds.add(p.id);
+      }
+    });
+    allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    updateStats();
+    updateTicker();
+    allTrash.forEach(d => {
+      if (typeof scheduleTrashItem === 'function') scheduleTrashItem(d);
+    });
+  } else if (allTrash.length === 0) {
+    const sampleTrash = [
       { content: '오늘도 의미 없는 하루. 거울 속 내가 제일 싫다. 지친다.', tags: ['무기력', '지침'], weightBefore: 85, weightAfter: 40, timestamp: Date.now() - 300000, privacy: 'public', id: Date.now() - 1 },
-    { content: '왜 나만 이렇게 사는 거지? 모두가 나를 떠나갔다. 아무도 없어.', tags: ['외로움', '슬픔'], weightBefore: 70, weightAfter: 25, timestamp: Date.now() - 600000, privacy: 'public', id: Date.now() - 2 },
-    { content: '개같은 회사. 개같은 상사. 오늘도 참았다. 언젠간 터진다.', tags: ['분노', '짜증'], weightBefore: 120, weightAfter: 55, timestamp: Date.now() - 900000, privacy: 'public', id: Date.now() - 3 },
-    { content: '또 실수했다. 왜 나는 항상 이 모양일까. 다 내 탓이다. 아침에 눈을 뜨는 순간부터 하루 종일 후회뿐이다. 말하지 말았어야 할 말들, 하지 말았어야 할 선택들. 시간을 되돌릴 수만 있다면 모든 걸 처음부터 다시 하고 싶다. 근데 그게 안 되니까 더 좆같다. 아무리 생각해도 답은 없고, 그냥 이대로 살아야 하는 게 너무 무겁다. 언젠간 괜찮아질 거라는 말, 더 이상 믿지 않는다.', tags: ['후회', '실망'], weightBefore: 150, weightAfter: 80, timestamp: Date.now() - 1800000, privacy: 'public', id: Date.now() - 4 },
-    { content: '너만 행복하면 다야? 나는? 나는 버려도 돼?', tags: ['서운함', '상처'], weightBefore: 95, weightAfter: 45, timestamp: Date.now() - 3600000, privacy: 'public', id: Date.now() - 5 },
-    { content: '오늘 회사에서 또 당했다. 팀장은 내 아이디어를 자기가 낸 것처럼 발표했고, 옆자리 XX는 내 실수를 사무실 전체에 알렸다. 점심때는 혼자 먹었고, 핸드폰을 봐도 연락하는 사람은 아무도 없었다. 퇴근 길에 비까지 맞았다. 집에 와서도 할 일은 산더미다. 내일도 똑같은 하루가 반복될 생각을 하니 숨이 막힌다. 이 지긋지긋한 일상 언제까지 버텨야 할까. 나는 왜 이렇게 사는 걸까. 세상에 너무 많은 사람이 있는데 왜 나는 혼자인 기분일까. 다들 행복해 보이는데 나만 제자리다. 뭘 해도 재미없고, 뭘 먹어도 맛없고, 누굴 만나도 시시하다. 이게 우울증이라는 건 알지만, 극복할 의지조차 없다. 그냥 모든 게 귀찮다. 숨 쉬는 것조차 귀찮다. 아무것도 하기 싫다. 다 던져버리고 싶다. 모든 걸. 회사도, 인간관계도, 이 도시도, 나 자신도. 우주 어딘가에 아무도 없는 곳으로 떠나고 싶다.', tags: ['분노', '짜증', '스트레스', '외로움', '무기력'], weightBefore: 195, weightAfter: 75, timestamp: Date.now() - 7200000, privacy: 'public', id: Date.now() - 6 },
-  ];
-
-  sampleTrash.forEach(d => {
-    allTrash.push(d);
-    scheduleTrashItem(d);
-  });
-  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+      { content: '왜 나만 이렇게 사는 거지? 모두가 나를 떠나갔다. 아무도 없어.', tags: ['외로움', '슬픔'], weightBefore: 70, weightAfter: 25, timestamp: Date.now() - 600000, privacy: 'public', id: Date.now() - 2 },
+      { content: '개같은 회사. 개같은 상사. 오늘도 참았다. 언젠간 터진다.', tags: ['분노', '짜증'], weightBefore: 120, weightAfter: 55, timestamp: Date.now() - 900000, privacy: 'public', id: Date.now() - 3 },
+      { content: '또 실수했다. 왜 나는 항상 이 모양일까. 다 내 탓이다. 아침에 눈을 뜨는 순간부터 하루 종일 후회뿐이다. 말하지 말았어야 할 말들, 하지 말았어야 할 선택들. 시간을 되돌릴 수만 있다면 모든 걸 처음부터 다시 하고 싶다. 근데 그게 안 되니까 더 좆같다. 아무리 생각해도 답은 없고, 그냥 이대로 살아야 하는 게 너무 무겁다. 언젠간 괜찮아질 거라는 말, 더 이상 믿지 않는다.', tags: ['후회', '실망'], weightBefore: 150, weightAfter: 80, timestamp: Date.now() - 1800000, privacy: 'public', id: Date.now() - 4 },
+      { content: '너만 행복하면 다야? 나는? 나는 버려도 돼?', tags: ['서운함', '상처'], weightBefore: 95, weightAfter: 45, timestamp: Date.now() - 3600000, privacy: 'public', id: Date.now() - 5 },
+      { content: '오늘 회사에서 또 당했다. 팀장은 내 아이디어를 자기가 낸 것처럼 발표했고, 옆자리 XX는 내 실수를 사무실 전체에 알렸다. 점심때는 혼자 먹었고, 핸드폰을 봐도 연락하는 사람은 아무도 없었다. 퇴근 길에 비까지 맞았다. 집에 와서도 할 일은 산더미다. 내일도 똑같은 하루가 반복될 생각을 하니 숨이 막힌다. 이 지긋지긋한 일상 언제까지 버텨야 할까. 나는 왜 이렇게 사는 걸까. 세상에 너무 많은 사람이 있는데 왜 나는 혼자인 기분일까. 다들 행복해 보이는데 나만 제자리다. 뭘 해도 재미없고, 뭘 먹어도 맛없고, 누굴 만나도 시시하다. 이게 우울증이라는 건 알지만, 극복할 의지조차 없다. 그냥 모든 게 귀찮다. 숨 쉬는 것조차 귀찮다. 아무것도 하기 싫다. 다 던져버리고 싶다. 모든 걸. 회사도, 인간관계도, 이 도시도, 나 자신도. 우주 어딘가에 아무도 없는 곳으로 떠나고 싶다.', tags: ['분노', '짜증', '스트레스', '외로움', '무기력'], weightBefore: 195, weightAfter: 75, timestamp: Date.now() - 7200000, privacy: 'public', id: Date.now() - 6 },
+    ];
+    sampleTrash.forEach(d => {
+      allTrash.push(d);
+      scheduleTrashItem(d);
+    });
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  }
   updateStats();
   updateTicker();
-}, 1200);
+
+  fbSubscribePosts(firebasePosts => {
+    const existingIds = new Set(allTrash.map(t => t.id));
+    let changed = false;
+    firebasePosts.forEach(p => {
+      if (!existingIds.has(p.id)) {
+        allTrash.push(p);
+        existingIds.add(p.id);
+        changed = true;
+        if (typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
+      }
+    });
+    if (changed) {
+      allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+      updateStats();
+      updateTicker();
+    }
+  });
+});
 
 updateStats();
 updateLevel();
