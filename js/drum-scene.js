@@ -156,20 +156,32 @@ function createDrum() {
 }
 
 function createDrumBaseTrash() {
-  const count = 8;
+  const count = 12;
+  const trashTypes = [
+    () => new THREE.DodecahedronGeometry(0.06 + Math.random() * 0.05),
+    () => new THREE.BoxGeometry(0.04 + Math.random() * 0.04, 0.1 + Math.random() * 0.04, 0.04 + Math.random() * 0.04),
+    () => new THREE.CylinderGeometry(0.03 + Math.random() * 0.03, 0.04 + Math.random() * 0.03, 0.06 + Math.random() * 0.04, 6),
+    () => new THREE.TorusKnotGeometry(0.04 + Math.random() * 0.03, 0.015, 8, 4),
+    () => new THREE.IcosahedronGeometry(0.05 + Math.random() * 0.04),
+    () => new THREE.ConeGeometry(0.04 + Math.random() * 0.03, 0.07 + Math.random() * 0.04, 5),
+  ];
+
   for (let i = 0; i < count; i++) {
     const angle = Math.random() * Math.PI * 2;
-    const dist = Math.random() * (DRUM_RADIUS * 0.7);
-    const size = 0.06 + Math.random() * 0.1;
-    const geo = new THREE.DodecahedronGeometry(size);
+    const dist = Math.random() * (DRUM_RADIUS * 0.65);
+    const size = 0.06 + Math.random() * 0.08;
+    const geoFn = trashTypes[Math.floor(Math.random() * trashTypes.length)];
+    const geo = geoFn();
     const mat = new THREE.MeshStandardMaterial({
-      color: [0x3a2a1a, 0x4a3a2a, 0x2a2018][Math.floor(Math.random() * 3)],
-      roughness: 0.9,
+      color: [0x3a2a1a, 0x4a3a2a, 0x2a2018, 0x5a4a3a, 0x1a1a1a][Math.floor(Math.random() * 5)],
+      roughness: 0.7 + Math.random() * 0.3,
+      metalness: 0.1 + Math.random() * 0.2,
     });
     const m = new THREE.Mesh(geo, mat);
-    m.position.set(Math.cos(angle) * dist, 0.1 + size / 2, Math.sin(angle) * dist);
-    m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0);
+    m.position.set(Math.cos(angle) * dist, 0.06 + Math.random() * 0.15, Math.sin(angle) * dist);
+    m.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI * 0.5);
     m.castShadow = true;
+    m.receiveShadow = true;
     drumScene.add(m);
     drumBaseTrash.push(m);
   }

@@ -266,46 +266,61 @@ function createCanTexture(accentColor) {
 
   const grad = ctx.createLinearGradient(0, 0, 256, 0);
   grad.addColorStop(0, `rgb(${r>>1},${g>>1},${b>>1})`);
-  grad.addColorStop(0.15, `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+60)})`);
-  grad.addColorStop(0.3, '#ddd');
-  grad.addColorStop(0.5, `rgb(${r},${g},${b})`);
-  grad.addColorStop(0.7, '#bbb');
-  grad.addColorStop(0.85, `rgb(${Math.min(255,r+40)},${Math.min(255,g+40)},${Math.min(255,b+40)})`);
+  grad.addColorStop(0.08, `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`);
+  grad.addColorStop(0.2, '#eee');
+  grad.addColorStop(0.35, `rgb(${r},${g},${b})`);
+  grad.addColorStop(0.5, '#ddd');
+  grad.addColorStop(0.65, `rgb(${r},${g},${b})`);
+  grad.addColorStop(0.8, '#ccc');
+  grad.addColorStop(0.92, `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+60)})`);
   grad.addColorStop(1, `rgb(${r>>1},${g>>1},${b>>1})`);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 256);
 
-  ctx.shadowColor = 'rgba(0,0,0,0.3)';
-  ctx.shadowBlur = 4;
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillRect(30, 0, 4, 256);
+  ctx.fillRect(120, 0, 4, 256);
+  ctx.fillRect(180, 0, 4, 256);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, 256, 2);
+  ctx.fillRect(0, 254, 256, 2);
+
+  ctx.shadowColor = 'rgba(0,0,0,0.2)';
+  ctx.shadowBlur = 3;
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 36px sans-serif';
+  ctx.font = 'bold 32px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('🥫', 128, 80);
+  ctx.fillText('🥫', 128, 78);
 
   ctx.shadowBlur = 0;
-  ctx.fillStyle = `rgba(255,255,255,0.15)`;
-  ctx.fillRect(40, 100, 176, 2);
-  ctx.fillRect(40, 160, 176, 2);
+  ctx.fillStyle = `rgba(255,255,255,0.12)`;
+  ctx.fillRect(40, 100, 176, 1);
+  ctx.fillRect(40, 160, 176, 1);
 
   ctx.fillStyle = '#fff';
-  ctx.font = 'bold 18px sans-serif';
+  ctx.font = 'bold 16px sans-serif';
   ctx.fillText('EMOTION', 128, 135);
-  ctx.font = '12px sans-serif';
+  ctx.font = '11px sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.6)';
   ctx.fillText('ENERGY DRINK', 128, 155);
 
-  ctx.fillStyle = `rgba(255,255,255,0.08)`;
+  ctx.fillStyle = `rgba(255,255,255,0.06)`;
   ctx.fillRect(30, 175, 196, 40);
 
-  ctx.font = '10px sans-serif';
+  ctx.font = '9px sans-serif';
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.fillText('500ml   ·   감정쓰레기통', 128, 200);
-  ctx.fillText('★ ★ ★ ★ ★', 128, 220);
+  ctx.fillText('★ ★ ★ ★ ★', 128, 218);
 
-  ctx.shadowBlur = 8;
+  ctx.fillStyle = '#888';
+  ctx.font = '8px sans-serif';
+  ctx.fillText('www.emotionbin.com', 128, 238);
+
+  ctx.shadowBlur = 6;
   ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
   ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.font = 'bold 14px sans-serif';
+  ctx.font = 'bold 12px sans-serif';
   ctx.fillText('🍺', 128, 250);
   ctx.shadowBlur = 0;
 
@@ -320,14 +335,24 @@ function createBoxTexture(accentColor) {
 
   const grad = ctx.createLinearGradient(0, 0, 256, 256);
   grad.addColorStop(0, '#d4a86a');
-  grad.addColorStop(0.5, '#c4955a');
-  grad.addColorStop(1, '#a87d4a');
+  grad.addColorStop(0.5, '#c89b5e');
+  grad.addColorStop(1, '#b0884e');
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, 256, 256);
 
-  for (let i = 0; i < 50; i++) {
-    ctx.fillStyle = `rgba(0,0,0,${0.02 + Math.random() * 0.05})`;
-    ctx.fillRect(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 6, 1);
+  for (let i = 0; i < 80; i++) {
+    ctx.fillStyle = `rgba(0,0,0,${0.01 + Math.random() * 0.04})`;
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 4, 1);
+  }
+
+  for (let i = 0; i < 20; i++) {
+    ctx.strokeStyle = `rgba(0,0,0,${0.03 + Math.random() * 0.04})`;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    const y = Math.random() * 256;
+    ctx.moveTo(0, y);
+    ctx.lineTo(256, y + (Math.random() - 0.5) * 2);
+    ctx.stroke();
   }
 
   ctx.strokeStyle = `rgba(${r},${g},${b},0.5)`;
@@ -341,33 +366,40 @@ function createBoxTexture(accentColor) {
   ctx.fillStyle = `rgba(${r},${g},${b},0.15)`;
   ctx.fillRect(90, 70, 76, 120);
 
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
   ctx.fillRect(88, 68, 80, 4);
   ctx.fillRect(88, 188, 80, 4);
   ctx.fillRect(88, 68, 4, 124);
   ctx.fillRect(164, 68, 4, 124);
 
-  ctx.fillStyle = '#fff';
-  ctx.font = 'bold 28px sans-serif';
+  ctx.fillStyle = '#666';
+  ctx.font = 'bold 24px sans-serif';
   ctx.textAlign = 'center';
   ctx.shadowColor = 'rgba(0,0,0,0.3)';
   ctx.shadowBlur = 2;
-  ctx.fillText('📦', 128, 115);
+  ctx.fillText('📦', 128, 118);
   ctx.shadowBlur = 0;
 
-  ctx.fillStyle = '#222';
-  ctx.font = 'bold 22px sans-serif';
+  ctx.fillStyle = '#a33';
+  ctx.font = 'bold 18px sans-serif';
   ctx.fillText('FRAGILE', 128, 160);
 
-  ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.font = 'bold 14px sans-serif';
-  ctx.fillText('⚠', 128, 195);
+  ctx.fillStyle = '#333';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText('HANDLE WITH CARE', 128, 180);
 
-  ctx.fillStyle = 'rgba(0,0,0,0.2)';
-  ctx.fillRect(0, 0, 256, 4);
-  ctx.fillRect(0, 252, 256, 4);
-  ctx.fillRect(0, 0, 4, 256);
-  ctx.fillRect(252, 0, 4, 256);
+  ctx.fillStyle = `rgb(${r},${g},${b})`;
+  ctx.font = 'bold 16px sans-serif';
+  ctx.fillText('⚠', 128, 200);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.1)';
+  ctx.fillRect(0, 0, 256, 3);
+  ctx.fillRect(0, 253, 256, 3);
+  ctx.fillRect(0, 0, 3, 256);
+  ctx.fillRect(253, 0, 3, 256);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(60, 220, 136, 20);
 
   return new THREE.CanvasTexture(c);
 }
@@ -385,42 +417,66 @@ function createTVTexture(accentColor) {
   ctx.fillStyle = bezelGrad;
   ctx.fillRect(0, 0, 512, 256);
 
-  ctx.fillStyle = '#0a0a0a';
+  ctx.fillStyle = '#080808';
   ctx.shadowColor = 'rgba(0,0,0,0.5)';
   ctx.shadowBlur = 10;
-  ctx.fillRect(30, 15, 452, 210);
+  ctx.fillRect(25, 15, 462, 210);
   ctx.shadowBlur = 0;
 
   const screenGrad = ctx.createRadialGradient(256, 120, 10, 256, 120, 200);
-  screenGrad.addColorStop(0, `rgb(${Math.min(255,r+100)},${Math.min(255,g+100)},${Math.min(255,b+100)})`);
-  screenGrad.addColorStop(0.3, `rgb(${r},${g},${b})`);
-  screenGrad.addColorStop(0.7, `rgb(${r>>1},${g>>1},${b>>1})`);
-  screenGrad.addColorStop(1, '#111');
+  screenGrad.addColorStop(0, `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`);
+  screenGrad.addColorStop(0.2, `rgb(${r},${g},${b})`);
+  screenGrad.addColorStop(0.5, `rgb(${r>>1},${g>>1},${b>>1})`);
+  screenGrad.addColorStop(0.8, `rgb(${r>>2},${g>>2},${b>>2})`);
+  screenGrad.addColorStop(1, '#0a0a0a');
   ctx.fillStyle = screenGrad;
-  ctx.fillRect(35, 20, 442, 200);
+  ctx.fillRect(30, 20, 452, 200);
 
-  ctx.shadowColor = `rgba(${r},${g},${b},0.4)`;
-  ctx.shadowBlur = 30;
-  ctx.fillRect(35, 20, 442, 200);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fillRect(30, 20, 452, 200);
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.fillRect(30, 20, 452, 4);
+  ctx.fillRect(30, 216, 452, 4);
+
+  ctx.shadowColor = `rgba(${r},${g},${b},0.3)`;
+  ctx.shadowBlur = 25;
+  ctx.fillRect(30, 20, 452, 200);
   ctx.shadowBlur = 0;
 
-  ctx.fillStyle = '#333';
-  ctx.fillRect(200, 230, 112, 12);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.font = 'bold 16px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('감정쓰레기통', 256, 130);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('EMOTION BIN', 256, 155);
 
-  ctx.fillStyle = '#444';
+  ctx.fillStyle = '#333';
+  ctx.fillRect(200, 228, 112, 12);
+
+  ctx.fillStyle = '#666';
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('POWER', 256, 240);
+  ctx.fillText('POWER', 256, 238);
+
   ctx.fillStyle = `rgb(${r},${g},${b})`;
   ctx.shadowColor = `rgb(${r},${g},${b})`;
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 8;
   ctx.beginPath();
   ctx.arc(256, 248, 3, 0, Math.PI * 2);
   ctx.fill();
   ctx.shadowBlur = 0;
 
   ctx.fillStyle = '#222';
-  ctx.fillRect(470, 240, 30, 6);
+  ctx.fillRect(470, 238, 30, 6);
+  ctx.fillStyle = '#444';
+  ctx.fillRect(472, 240, 4, 2);
+  ctx.fillRect(480, 240, 4, 2);
+  ctx.fillRect(488, 240, 4, 2);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(25, 0, 462, 15);
+  ctx.fillRect(25, 241, 462, 15);
 
   return new THREE.CanvasTexture(c);
 }
@@ -432,55 +488,79 @@ function createFridgeTexture(accentColor) {
   const { r, g, b } = hexToRgb(accentColor);
 
   const metalGrad = ctx.createLinearGradient(0, 0, 128, 0);
-  metalGrad.addColorStop(0, '#888');
+  metalGrad.addColorStop(0, '#666');
+  metalGrad.addColorStop(0.08, '#c0c0c0');
   metalGrad.addColorStop(0.15, '#e8e8e8');
-  metalGrad.addColorStop(0.3, '#ddd');
-  metalGrad.addColorStop(0.5, '#f0f0f0');
-  metalGrad.addColorStop(0.7, '#ddd');
+  metalGrad.addColorStop(0.35, '#f5f5f5');
+  metalGrad.addColorStop(0.5, '#fafafa');
+  metalGrad.addColorStop(0.65, '#f5f5f5');
   metalGrad.addColorStop(0.85, '#e8e8e8');
-  metalGrad.addColorStop(1, '#888');
+  metalGrad.addColorStop(0.92, '#c0c0c0');
+  metalGrad.addColorStop(1, '#666');
   ctx.fillStyle = metalGrad;
   ctx.fillRect(0, 0, 128, 256);
 
-  ctx.strokeStyle = `rgba(${r},${g},${b},0.4)`;
-  ctx.lineWidth = 3;
-  ctx.strokeRect(4, 4, 120, 118);
-  ctx.strokeRect(4, 126, 120, 126);
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(0, 0, 128, 2);
+  ctx.fillRect(0, 254, 128, 2);
 
-  ctx.fillStyle = `rgba(${r},${g},${b},0.12)`;
-  ctx.fillRect(10, 10, 108, 106);
-  ctx.fillRect(10, 132, 108, 114);
+  ctx.strokeStyle = `rgba(${r},${g},${b},0.3)`;
+  ctx.lineWidth = 2;
+  ctx.strokeRect(6, 6, 116, 116);
+  ctx.strokeRect(6, 126, 116, 124);
 
-  ctx.fillStyle = '#666';
-  ctx.fillRect(60, 48, 8, 20);
-  ctx.fillRect(60, 170, 8, 20);
-
-  ctx.strokeStyle = '#999';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(4, 126);
-  ctx.lineTo(124, 126);
-  ctx.stroke();
-
-  ctx.fillStyle = `rgba(${r},${g},${b},0.06)`;
-  ctx.fillRect(14, 14, 100, 98);
-  ctx.fillRect(14, 136, 100, 106);
-
-  ctx.fillStyle = 'rgba(0,0,0,0.05)';
-  ctx.fillRect(10, 40, 108, 2);
-  ctx.fillRect(10, 80, 108, 2);
-  ctx.fillRect(10, 150, 108, 2);
-  ctx.fillRect(10, 190, 108, 2);
+  ctx.fillStyle = `rgba(${r},${g},${b},0.1)`;
+  ctx.fillRect(10, 10, 108, 108);
+  ctx.fillRect(10, 130, 108, 116);
 
   ctx.fillStyle = '#555';
-  ctx.font = '8px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('❄ FREEZER', 64, 110);
-  ctx.fillText('❄ FRIDGE', 64, 240);
+  ctx.fillRect(58, 48, 12, 24);
+  ctx.fillRect(58, 172, 12, 24);
 
-  ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.font = 'bold 10px sans-serif';
-  ctx.fillText('감정쓰레기통', 64, 132);
+  ctx.strokeStyle = '#bbb';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(6, 126);
+  ctx.lineTo(122, 126);
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(12, 12, 104, 104);
+  ctx.fillRect(12, 132, 104, 112);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.04)';
+  ctx.fillRect(12, 38, 104, 2);
+  ctx.fillRect(12, 78, 104, 2);
+  ctx.fillRect(12, 150, 104, 2);
+  ctx.fillRect(12, 190, 104, 2);
+
+  ctx.fillStyle = '#888';
+  ctx.font = 'bold 9px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('FREEZER', 64, 112);
+  ctx.fillText('FRIDGE', 64, 244);
+
+  ctx.fillStyle = '#666';
+  ctx.font = '7px sans-serif';
+  ctx.fillText('-18°C', 64, 105);
+  ctx.fillText('4°C', 64, 237);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.fillRect(10, 128, 108, 1);
+
+  ctx.fillStyle = `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+60)})`;
+  ctx.font = 'bold 8px sans-serif';
+  ctx.fillText('EMOTION', 64, 36);
+  ctx.fillText('EMOTION', 64, 160);
+
+  ctx.fillStyle = '#444';
+  ctx.font = '6px sans-serif';
+  ctx.fillText('감정쓰레기통', 64, 124);
+  ctx.fillText('감정쓰레기통', 64, 248);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.05)';
+  ctx.fillRect(0, 0, 4, 256);
+  ctx.fillRect(124, 0, 4, 256);
 
   return new THREE.CanvasTexture(c);
 }
@@ -491,36 +571,62 @@ function createCarTexture(accentColor) {
   const ctx = c.getContext('2d');
   const { r, g, b } = hexToRgb(accentColor);
 
-  ctx.fillStyle = '#222';
+  ctx.fillStyle = '#1a1a1a';
   ctx.fillRect(0, 65, 256, 63);
 
   const bodyGrad = ctx.createLinearGradient(0, 0, 0, 64);
-  bodyGrad.addColorStop(0, `rgb(${Math.min(255,r+60)},${Math.min(255,g+60)},${Math.min(255,b+60)})`);
-  bodyGrad.addColorStop(0.5, `rgb(${r},${g},${b})`);
-  bodyGrad.addColorStop(1, `rgb(${r>>1},${g>>1},${b>>1})`);
+  bodyGrad.addColorStop(0, `rgb(${Math.min(255,r+80)},${Math.min(255,g+80)},${Math.min(255,b+80)})`);
+  bodyGrad.addColorStop(0.3, `rgb(${Math.min(255,r+30)},${Math.min(255,g+30)},${Math.min(255,b+30)})`);
+  bodyGrad.addColorStop(0.6, `rgb(${r>>1},${g>>1},${b>>1})`);
+  bodyGrad.addColorStop(1, `rgb(${r>>2},${g>>2},${b>>2})`);
   ctx.fillStyle = bodyGrad;
 
   ctx.beginPath();
   ctx.moveTo(20, 60);
-  ctx.lineTo(40, 15);
-  ctx.lineTo(130, 15);
+  ctx.lineTo(40, 14);
+  ctx.lineTo(130, 14);
   ctx.lineTo(165, 60);
   ctx.lineTo(236, 60);
-  ctx.lineTo(236, 80);
-  ctx.lineTo(20, 80);
+  ctx.lineTo(236, 84);
+  ctx.lineTo(20, 84);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.beginPath();
+  ctx.moveTo(25, 56);
+  ctx.lineTo(42, 18);
+  ctx.lineTo(128, 18);
+  ctx.lineTo(160, 56);
+  ctx.closePath();
+  ctx.fill();
+
+  const glossGrad = ctx.createLinearGradient(0, 0, 0, 60);
+  glossGrad.addColorStop(0, 'rgba(255,255,255,0.15)');
+  glossGrad.addColorStop(0.5, 'rgba(255,255,255,0)');
+  glossGrad.addColorStop(1, 'rgba(0,0,0,0.2)');
+  ctx.fillStyle = glossGrad;
   ctx.beginPath();
   ctx.moveTo(20, 60);
-  ctx.lineTo(40, 15);
-  ctx.lineTo(130, 15);
+  ctx.lineTo(40, 14);
+  ctx.lineTo(130, 14);
+  ctx.lineTo(165, 60);
+  ctx.lineTo(236, 60);
+  ctx.lineTo(236, 50);
+  ctx.lineTo(20, 50);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.beginPath();
+  ctx.moveTo(20, 60);
+  ctx.lineTo(40, 14);
+  ctx.lineTo(130, 14);
   ctx.lineTo(165, 60);
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = '#446688';
+  ctx.fillStyle = '#335577';
   ctx.beginPath();
   ctx.moveTo(55, 18);
   ctx.lineTo(120, 18);
@@ -529,7 +635,7 @@ function createCarTexture(accentColor) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.fillStyle = 'rgba(150,200,255,0.3)';
+  ctx.fillStyle = 'rgba(160,210,255,0.25)';
   ctx.beginPath();
   ctx.moveTo(58, 20);
   ctx.lineTo(117, 20);
@@ -538,27 +644,72 @@ function createCarTexture(accentColor) {
   ctx.closePath();
   ctx.fill();
 
-  ctx.strokeStyle = '#333';
+  ctx.fillStyle = '#335577';
+  ctx.beginPath();
+  ctx.moveTo(145, 24);
+  ctx.lineTo(162, 24);
+  ctx.lineTo(170, 55);
+  ctx.lineTo(142, 55);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(160,210,255,0.2)';
+  ctx.beginPath();
+  ctx.moveTo(147, 26);
+  ctx.lineTo(159, 26);
+  ctx.lineTo(166, 53);
+  ctx.lineTo(144, 53);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = '#222';
   ctx.lineWidth = 1;
   ctx.beginPath();
   ctx.moveTo(85, 18);
   ctx.lineTo(85, 55);
   ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(110, 18);
+  ctx.lineTo(110, 55);
+  ctx.stroke();
+
+  ctx.fillStyle = '#888';
+  ctx.fillRect(30, 57, 20, 5);
+  ctx.fillRect(180, 57, 40, 5);
 
   ctx.fillStyle = '#ffeb3b';
   ctx.shadowColor = '#ffeb3b';
   ctx.shadowBlur = 8;
-  ctx.fillRect(28, 65, 20, 12);
-  ctx.fillRect(195, 65, 20, 12);
+  ctx.beginPath();
+  ctx.arc(228, 70, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = '#fffbe6';
+  ctx.beginPath();
+  ctx.arc(228, 70, 3, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ff2222';
+  ctx.shadowColor = '#ff2222';
+  ctx.shadowBlur = 4;
+  ctx.beginPath();
+  ctx.arc(28, 70, 4, 0, Math.PI * 2);
+  ctx.fill();
   ctx.shadowBlur = 0;
 
-  ctx.fillStyle = '#ff4444';
-  ctx.fillRect(10, 68, 8, 8);
-  ctx.fillRect(230, 68, 10, 8);
-
   ctx.fillStyle = `rgb(${r},${g},${b})`;
-  ctx.font = 'bold 10px sans-serif';
-  ctx.fillText('EMOTION', 128, 95);
+  ctx.font = 'bold 8px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('EMOTION', 210, 42);
+
+  ctx.fillStyle = '#555';
+  ctx.font = '6px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('감정쓰레기통', 130, 76);
+
+  ctx.fillStyle = '#333';
+  ctx.fillRect(215, 55, 8, 4);
+  ctx.fillRect(225, 55, 8, 4);
 
   return new THREE.CanvasTexture(c);
 }
@@ -580,35 +731,40 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
   else if (contentLength <= 1000) category = 'fridge';
   else category = 'car';
 
-  const baseMat = (texture) => new THREE.MeshStandardMaterial({
-    map: texture,
-    roughness: 0.4 + Math.random() * 0.3,
-    metalness: 0.2 + Math.random() * 0.3,
-    emissive: accentColor,
-    emissiveIntensity: 0.15,
-  });
-
   const group = new THREE.Group();
 
   if (category === 'can') {
     const tex = createCanTexture(accentColor);
     const h = (1.0 + w * 1.2) * lenFactor;
     const r = (0.4 + w * 0.5) * lenFactor;
-    const geo = new THREE.CylinderGeometry(r * 0.85, r * 1.05, h, 16);
-    const mesh = new THREE.Mesh(geo, baseMat(tex));
+
+    const canMat = new THREE.MeshStandardMaterial({
+      map: tex, roughness: 0.2, metalness: 0.7,
+      emissive: accentColor, emissiveIntensity: 0.1,
+    });
+    const geo = new THREE.CylinderGeometry(r * 0.9, r * 1.02, h, 14);
+    const mesh = new THREE.Mesh(geo, canMat);
     mesh.castShadow = true; mesh.receiveShadow = true;
+    mesh.position.x = (Math.random() - 0.5) * 0.08;
+    mesh.rotation.z = (Math.random() - 0.5) * 0.06;
     group.add(mesh);
 
-    const tabMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.6, roughness: 0.3 });
-    const tab = new THREE.Mesh(new THREE.TorusGeometry(r * 0.28, 0.08, 8, 10), tabMat);
-    tab.position.y = h / 2 + 0.06;
+    const topMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.2 });
+    const top = new THREE.Mesh(new THREE.CircleGeometry(r * 0.88, 14), topMat);
+    top.position.y = h * 0.5 + 0.01;
+    top.rotation.x = -Math.PI / 2;
+    group.add(top);
+
+    const tabMat = new THREE.MeshStandardMaterial({ color: 0xbbbbbb, metalness: 0.6, roughness: 0.3 });
+    const tab = new THREE.Mesh(new THREE.TorusGeometry(r * 0.26, 0.06, 6, 8), tabMat);
+    tab.position.y = h * 0.5 + 0.04;
     tab.rotation.x = Math.PI / 2;
     tab.castShadow = true;
     group.add(tab);
 
-    const rimMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.5, roughness: 0.4 });
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(r, 0.08, 8, 16), rimMat);
-    rim.position.y = h / 2;
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.5, roughness: 0.3 });
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(r * 0.92, 0.06, 6, 14), rimMat);
+    rim.position.y = h * 0.5;
     rim.rotation.x = Math.PI / 2;
     group.add(rim);
   }
@@ -618,29 +774,44 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
     const sx = (1.2 + w * 1.0) * lenFactor;
     const sy = (0.9 + w * 0.7) * lenFactor;
     const sz = (1.2 + w * 1.0) * lenFactor;
-    const geo = new THREE.BoxGeometry(sx, sy, sz);
-    const box = new THREE.Mesh(geo, baseMat(tex));
+
+    const bodyBMat = new THREE.MeshStandardMaterial({
+      map: tex, roughness: 0.85, metalness: 0,
+    });
+    const box = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), bodyBMat);
     box.castShadow = true; box.receiveShadow = true;
     group.add(box);
 
-    const tapeMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.8 });
+    const tapeMat = new THREE.MeshStandardMaterial({ color: 0x8B7355, roughness: 0.7, metalness: 0 });
     [-1, 1].forEach(side => {
-      const t = new THREE.Mesh(new THREE.BoxGeometry(0.06, sy * 0.9, 0.12), tapeMat);
-      t.position.x = side * sx * 0.45;
-      t.castShadow = true;
-      group.add(t);
-      const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.12, sy * 0.9, 0.06), tapeMat);
+      const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, sy * 0.85, 0.1), tapeMat);
+      t1.position.x = side * sx * 0.45;
+      t1.castShadow = true;
+      group.add(t1);
+      const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.1, sy * 0.85, 0.05), tapeMat);
       t2.position.z = side * sz * 0.45;
       t2.castShadow = true;
       group.add(t2);
     });
 
+    const topTape = new THREE.Mesh(new THREE.BoxGeometry(sx * 0.3, 0.02, sz * 0.3), tapeMat);
+    topTape.position.y = sy * 0.49;
+    group.add(topTape);
+
     const cornerMat = new THREE.MeshStandardMaterial({ color: 0x9a8060, roughness: 0.9 });
     [-1, 1].forEach(sx2 => [-1, 1].forEach(sz2 => {
-      const c = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), cornerMat);
+      const c = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), cornerMat);
       c.position.set(sx2 * sx * 0.48, sy * 0.48, sz2 * sz * 0.48);
       group.add(c);
     }));
+
+    const foldMat = new THREE.MeshStandardMaterial({ color: 0x7a6a50, roughness: 0.9 });
+    const fold = new THREE.Mesh(new THREE.BoxGeometry(sx * 0.48, 0.02, 0.08), foldMat);
+    fold.position.set(0, sy * 0.49, sz * 0.35);
+    group.add(fold);
+    const fold2 = new THREE.Mesh(new THREE.BoxGeometry(sx * 0.48, 0.02, 0.08), foldMat);
+    fold2.position.set(0, sy * 0.49, -sz * 0.35);
+    group.add(fold2);
   }
 
   else if (category === 'tv') {
@@ -648,24 +819,41 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
     const sx = (2.5 + w * 1.2) * lenFactor;
     const sy = (0.9 + w * 0.5) * lenFactor;
     const sz = (0.25 + w * 0.18) * lenFactor;
-    const geo = new THREE.BoxGeometry(sx, sy, sz);
-    const screen = new THREE.Mesh(geo, baseMat(tex));
-    screen.castShadow = true; screen.receiveShadow = true;
+
+    const bezelMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4, metalness: 0.05 });
+    const bOuter = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.1, sy + 0.1, sz * 0.6), bezelMat);
+    bOuter.castShadow = true; bOuter.receiveShadow = true;
+    group.add(bOuter);
+
+    const screenMat = new THREE.MeshStandardMaterial({
+      map: tex, emissive: new THREE.Color(0x4488ff), emissiveIntensity: 0.15,
+      roughness: 0.1, metalness: 0.05,
+    });
+    const screen = new THREE.Mesh(new THREE.BoxGeometry(sx - 0.12, sy - 0.12, sz * 0.45), screenMat);
+    screen.position.z = sz * 0.07;
+    screen.castShadow = true;
     group.add(screen);
 
-    const bezelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.3, metalness: 0.1 });
-    const bezel = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.12, sy + 0.12, sz * 0.5), bezelMat);
-    bezel.position.z = -sz * 0.25;
-    bezel.castShadow = true;
-    group.add(bezel);
+    const glowMat = new THREE.MeshStandardMaterial({
+      color: 0x4488ff, emissive: 0x4488ff, emissiveIntensity: 0.3,
+      transparent: true, opacity: 0.08,
+    });
+    const glow = new THREE.Mesh(new THREE.BoxGeometry(sx - 0.06, sy - 0.06, sz * 0.2), glowMat);
+    glow.position.z = sz * 0.15;
+    group.add(glow);
 
-    const standMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.5 });
-    const stand = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.24, 0.18), standMat);
-    stand.position.y = -(sy * 0.5 + 0.12);
+    const ledMat = new THREE.MeshStandardMaterial({ color: 0x00ff44, emissive: 0x00ff44, emissiveIntensity: 0.6 });
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.02, 6, 6), ledMat);
+    led.position.set(sx * 0.4, -sy * 0.42, sz * 0.32);
+    group.add(led);
+
+    const standMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.6, metalness: 0.2 });
+    const stand = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, sy * 0.2, 6), standMat);
+    stand.position.y = -(sy * 0.5 + sy * 0.1);
     stand.castShadow = true;
     group.add(stand);
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.12, 0.3), standMat);
-    base.position.y = -(sy * 0.5 + 0.24);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(sx * 0.4, 0.08, sz * 0.8), standMat);
+    base.position.y = -(sy * 0.5 + sy * 0.2);
     base.castShadow = true;
     group.add(base);
   }
@@ -675,106 +863,182 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
     const sx = (1.5 + w * 1.0) * lenFactor;
     const sy = (2.5 + w * 1.5) * lenFactor;
     const sz = (1.0 + w * 0.7) * lenFactor;
-    const geo = new THREE.BoxGeometry(sx, sy, sz);
-    const fridge = new THREE.Mesh(geo, baseMat(tex));
-    fridge.castShadow = true; fridge.receiveShadow = true;
-    group.add(fridge);
 
-    const handleMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.2 });
+    const bodyFMat = new THREE.MeshStandardMaterial({
+      map: tex, roughness: 0.15, metalness: 0.85,
+    });
+    const bodyF = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), bodyFMat);
+    bodyF.castShadow = true; bodyF.receiveShadow = true;
+    group.add(bodyF);
+
+    const rubberMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 });
+    const seal = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.02, 0.03, sz + 0.04), rubberMat);
+    seal.position.y = sy * 0.02;
+    seal.position.z = sz * 0.51;
+    group.add(seal);
+
+    const handleMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, metalness: 0.8, roughness: 0.15 });
+    const handleShape = new THREE.Shape();
+    handleShape.moveTo(-0.02, 0);
+    handleShape.lineTo(-0.02, 0.15);
+    handleShape.quadraticCurveTo(0, 0.18, 0.02, 0.15);
+    handleShape.lineTo(0.02, 0);
+    handleShape.lineTo(-0.02, 0);
+    const hExtrude = { steps: 1, depth: 0.06, bevelEnabled: false };
     [-1, 1].forEach(side => {
-      const h = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.1), handleMat);
-      h.position.set(side * 0.66, 0.75, sz * 0.52);
-      group.add(h);
-      const h2 = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.18, 0.1), handleMat);
-      h2.position.set(side * 0.66, -0.75, sz * 0.52);
-      group.add(h2);
+      ['top', 'bot'].forEach((part, i) => {
+        const hGeo = new THREE.ExtrudeGeometry(handleShape, hExtrude);
+        hGeo.translate(0, 0, -0.03);
+        const h = new THREE.Mesh(hGeo, handleMat);
+        const yOff = i === 0 ? sy * 0.22 : -sy * 0.22;
+        h.position.set(side * sx * 0.44, yOff, sz * 0.52);
+        h.rotation.y = side > 0 ? Math.PI : 0;
+        h.castShadow = true;
+        group.add(h);
+      });
     });
 
-    const divMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.3 });
-    const div = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.06, 0.06, sz + 0.06), divMat);
+    const divMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.4, roughness: 0.3 });
+    const div = new THREE.Mesh(new THREE.BoxGeometry(sx + 0.04, 0.04, sz + 0.04), divMat);
     div.position.y = 0.06;
     group.add(div);
 
+    const ventMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+    const vent = new THREE.Mesh(new THREE.BoxGeometry(sx * 0.5, 0.04, sz * 0.1), ventMat);
+    vent.position.set(0, -sy * 0.46, sz * 0.52);
+    group.add(vent);
+
     const lightMat = new THREE.MeshStandardMaterial({
-      color: 0x88ccff, emissive: 0x88ccff, emissiveIntensity: 0.1, transparent: true, opacity: 0.3
+      color: 0x88ccff, emissive: 0x88ccff, emissiveIntensity: 0.12,
+      transparent: true, opacity: 0.25,
     });
-    const light = new THREE.Mesh(new THREE.SphereGeometry(0.09, 6, 6), lightMat);
-    light.position.set(0, sy * 0.4, sz * 0.52);
+    const light = new THREE.Mesh(new THREE.SphereGeometry(0.08, 8, 8), lightMat);
+    light.position.set(0, sy * 0.38, sz * 0.52);
     group.add(light);
+
+    const labelMat = new THREE.MeshStandardMaterial({ color: 0x4488ff, emissive: 0x4488ff, emissiveIntensity: 0.05 });
+    const label = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.04, 0.01), labelMat);
+    label.position.set(0, sy * 0.12, sz * 0.52);
+    group.add(label);
   }
 
   else if (category === 'car') {
     const tex = createCarTexture(accentColor);
-    const scale = (1.8 + w * 1.2) * lenFactor;
+    const s = (1.8 + w * 1.2) * lenFactor;
 
     const bodyMat = new THREE.MeshStandardMaterial({
-      map: tex,
-      roughness: 0.3,
-      metalness: 0.6,
-      emissive: accentColor,
-      emissiveIntensity: 0.03,
+      map: tex, roughness: 0.25, metalness: 0.7,
+      emissive: accentColor, emissiveIntensity: 0.03,
     });
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1.8 * scale, 0.35 * scale, 0.8 * scale), bodyMat);
-    body.position.y = 0.2 * scale;
+
+    const bodyShape = new THREE.Shape();
+    bodyShape.moveTo(-0.9 * s, -0.3 * s);
+    bodyShape.quadraticCurveTo(-0.5 * s, -0.1 * s, 0.1 * s, -0.35 * s);
+    bodyShape.quadraticCurveTo(0.5 * s, -0.35 * s, 0.9 * s, -0.25 * s);
+    bodyShape.quadraticCurveTo(0.95 * s, 0.1 * s, 0.85 * s, 0.25 * s);
+    bodyShape.quadraticCurveTo(0.6 * s, 0.32 * s, 0.1 * s, 0.32 * s);
+    bodyShape.quadraticCurveTo(-0.3 * s, 0.32 * s, -0.7 * s, 0.2 * s);
+    bodyShape.quadraticCurveTo(-0.95 * s, 0.05 * s, -0.9 * s, -0.3 * s);
+
+    const extrudeSettings = { steps: 1, depth: 0.7 * s, bevelEnabled: true, bevelThickness: 0.03 * s, bevelSize: 0.02 * s, bevelSegments: 3 };
+    const bodyGeo = new THREE.ExtrudeGeometry(bodyShape, extrudeSettings);
+    bodyGeo.translate(0, 0, -0.35 * s);
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.25 * s;
     body.castShadow = true; body.receiveShadow = true;
     group.add(body);
+
+    const bumperMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 });
+    const frontBumper = new THREE.Mesh(new THREE.BoxGeometry(0.08 * s, 0.12 * s, 0.6 * s), bumperMat);
+    frontBumper.position.set(0.85 * s, 0.08 * s, 0);
+    group.add(frontBumper);
+    const rearBumper = new THREE.Mesh(new THREE.BoxGeometry(0.08 * s, 0.12 * s, 0.6 * s), bumperMat);
+    rearBumper.position.set(-0.85 * s, 0.08 * s, 0);
+    group.add(rearBumper);
 
     const cabinMat = new THREE.MeshStandardMaterial({
       color: 0x88bbdd, metalness: 0.1, roughness: 0.1,
       transparent: true, opacity: 0.35,
     });
-    const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.8 * scale, 0.22 * scale, 0.7 * scale), cabinMat);
-    cabin.position.set(-0.15 * scale, 0.4 * scale, 0);
+    const cabinShape = new THREE.Shape();
+    cabinShape.moveTo(-0.55 * s, 0);
+    cabinShape.quadraticCurveTo(-0.35 * s, 0.35 * s, 0.1 * s, 0.38 * s);
+    cabinShape.quadraticCurveTo(0.4 * s, 0.38 * s, 0.65 * s, 0);
+    cabinShape.lineTo(-0.55 * s, 0);
+
+    const cabinExtrude = { steps: 1, depth: 0.6 * s, bevelEnabled: true, bevelThickness: 0.02 * s, bevelSize: 0.01 * s, bevelSegments: 2 };
+    const cabinGeo = new THREE.ExtrudeGeometry(cabinShape, cabinExtrude);
+    cabinGeo.translate(0, 0, -0.3 * s);
+    const cabin = new THREE.Mesh(cabinGeo, cabinMat);
+    cabin.position.y = 0.3 * s;
     cabin.castShadow = true;
     group.add(cabin);
 
     const windowMat = new THREE.MeshStandardMaterial({
       color: 0x88ccff, metalness: 0.3, roughness: 0.1,
-      transparent: true, opacity: 0.25,
+      transparent: true, opacity: 0.2,
     });
-    const fWindow = new THREE.Mesh(new THREE.BoxGeometry(0.3 * scale, 0.15 * scale, 0.65 * scale), windowMat);
-    fWindow.position.set(-0.5 * scale, 0.38 * scale, 0);
-    group.add(fWindow);
+    const wShape = new THREE.Shape();
+    wShape.moveTo(-0.4 * s, 0.02 * s);
+    wShape.quadraticCurveTo(-0.2 * s, 0.28 * s, 0.1 * s, 0.3 * s);
+    wShape.quadraticCurveTo(0.35 * s, 0.3 * s, 0.5 * s, 0.02 * s);
+    wShape.lineTo(-0.4 * s, 0.02 * s);
+    const wExtrude = { steps: 1, depth: 0.55 * s, bevelEnabled: false };
+    const wGeo = new THREE.ExtrudeGeometry(wShape, wExtrude);
+    wGeo.translate(0, 0, -0.275 * s);
+    const windows = new THREE.Mesh(wGeo, windowMat);
+    windows.position.y = 0.32 * s;
+    group.add(windows);
 
-    const headlightMat = new THREE.MeshStandardMaterial({ color: 0xffffaa, emissive: 0xffffaa, emissiveIntensity: 0.2 });
-    [-1, 1].forEach(side => {
-      const hl = new THREE.Mesh(new THREE.SphereGeometry(0.05 * scale, 6, 6), headlightMat);
-      hl.position.set(0.9 * scale, 0.18 * scale, side * 0.25 * scale);
+    const headlightMat = new THREE.MeshStandardMaterial({ color: 0xffffcc, emissive: 0xffffaa, emissiveIntensity: 0.4 });
+    [-1, 1].forEach(z => {
+      const hl = new THREE.Mesh(new THREE.SphereGeometry(0.04 * s, 8, 8), headlightMat);
+      hl.position.set(0.92 * s, 0.22 * s, z * 0.22 * s);
       group.add(hl);
+      const hl2 = new THREE.Mesh(new THREE.CylinderGeometry(0.03 * s, 0.05 * s, 0.06 * s, 8), headlightMat);
+      hl2.rotation.z = Math.PI / 2;
+      hl2.position.set(0.95 * s, 0.22 * s, z * 0.22 * s);
+      group.add(hl2);
     });
 
-    const tailMat = new THREE.MeshStandardMaterial({ color: 0xff2222, emissive: 0xff2222, emissiveIntensity: 0.1 });
-    [-1, 1].forEach(side => {
-      const tl = new THREE.Mesh(new THREE.SphereGeometry(0.04 * scale, 6, 6), tailMat);
-      tl.position.set(-0.9 * scale, 0.18 * scale, side * 0.25 * scale);
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xff2222, emissive: 0xff2222, emissiveIntensity: 0.15 });
+    [-1, 1].forEach(z => {
+      const tl = new THREE.Mesh(new THREE.BoxGeometry(0.04 * s, 0.06 * s, 0.08 * s), tailMat);
+      tl.position.set(-0.92 * s, 0.2 * s, z * 0.2 * s);
       group.add(tl);
     });
 
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.95 });
+    const rimMat2 = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7, roughness: 0.2 });
     const wheelPos = [
-      [-0.5 * scale, -0.06 * scale, 0.4 * scale],
-      [0.5 * scale, -0.06 * scale, 0.4 * scale],
-      [-0.5 * scale, -0.06 * scale, -0.4 * scale],
-      [0.5 * scale, -0.06 * scale, -0.4 * scale],
+      [-0.5 * s, -0.05 * s, 0.36 * s], [0.5 * s, -0.05 * s, 0.36 * s],
+      [-0.5 * s, -0.05 * s, -0.36 * s], [0.5 * s, -0.05 * s, -0.36 * s],
     ];
     wheelPos.forEach(pos => {
-      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.1 * scale, 0.1 * scale, 0.05 * scale, 12), wheelMat);
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.1 * s, 0.11 * s, 0.04 * s, 12), wheelMat);
       wheel.rotation.x = Math.PI / 2;
       wheel.position.set(pos[0], pos[1], pos[2]);
       wheel.castShadow = true;
       group.add(wheel);
-
-      const rimMat2 = new THREE.MeshStandardMaterial({ color: 0x666666, metalness: 0.6 });
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * scale, 0.05 * scale, 0.051 * scale, 8), rimMat2);
+      const rim = new THREE.Mesh(new THREE.TorusGeometry(0.06 * s, 0.015 * s, 6, 8), rimMat2);
       rim.rotation.x = Math.PI / 2;
       rim.position.set(pos[0], pos[1], pos[2]);
       group.add(rim);
+      const hub = new THREE.Mesh(new THREE.SphereGeometry(0.025 * s, 6, 6), rimMat2);
+      hub.position.set(pos[0], pos[1], pos[2]);
+      group.add(hub);
     });
 
-    const spoilerMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-    const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.4 * scale, 0.06 * scale, 0.02 * scale), spoilerMat);
-    spoiler.position.set(-0.7 * scale, 0.4 * scale, 0);
+    const spoilerMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8 });
+    const spoiler = new THREE.Mesh(new THREE.BoxGeometry(0.5 * s, 0.05 * s, 0.15 * s), spoilerMat);
+    spoiler.position.set(-0.75 * s, 0.42 * s, 0);
     group.add(spoiler);
+    const spoilerLegMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+    [-1, 1].forEach(z => {
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.02 * s, 0.1 * s, 0.02 * s), spoilerLegMat);
+      leg.position.set(-0.75 * s, 0.34 * s, z * 0.06 * s);
+      group.add(leg);
+    });
   }
 
   return group;
