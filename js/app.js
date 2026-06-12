@@ -239,7 +239,6 @@ function updateStats() {
     ? `${(totalWeight / 1000).toFixed(1)}t`
     : `${totalWeight}kg`;
 }
-}
 
 function renderTop10() {
   const container = document.getElementById('top10-list');
