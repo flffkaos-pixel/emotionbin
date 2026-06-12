@@ -238,13 +238,7 @@ function updateStats() {
   document.getElementById('total-weight').textContent = totalWeight >= 1000
     ? `${(totalWeight / 1000).toFixed(1)}t`
     : `${totalWeight}kg`;
-  const todayWeight = source.filter(t => t.timestamp >= todayStart.getTime()).reduce((sum, t) => sum + (t.weightBefore || 0), 0);
-  const twEl = document.getElementById('today-weight');
-  if (twEl) {
-    twEl.textContent = todayWeight >= 1000
-      ? `오늘 ${(todayWeight / 1000).toFixed(1)}t`
-      : `오늘 ${todayWeight}kg`;
-  }
+}
 }
 
 function renderTop10() {
