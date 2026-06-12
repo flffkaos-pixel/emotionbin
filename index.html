@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
   <title>감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화</title>
-  <meta name="description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 감정쓰레기통에서 당신의 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간으로 시각화하며 배출하세요. 계정 없이 무료로 사용 가능.">
+  <meta name="description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 게정쓰레기통에서 당신의 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간으로 시각화하며 배출하세요. 계정 없이 무료.">
   <meta name="abstract" content="익명 감정 배출 및 3D 시각화 웹앱 - 감정쓰레기통">
   <meta name="keywords" content="감정쓰레기통,감정배출,익명감정,스트레스해소,분노해소,감정시각화,멘탈헬스,감정정리,카타르시스,3D시각화,감정일기,감정쓰레기,무료웹앱">
   <meta name="author" content="감정쓰레기통">
@@ -94,7 +94,7 @@
     "name": "감정쓰레기통",
     "alternateName": "Emotional Trash Can",
     "url": "https://emotional-trash-can.app",
-    "description": "익명으로 부정적 감정을 배출하고 실시간 3D 쓰레기산으로 시각화하는 웹 애플리케이션. 계정 없이 무료로 사용 가능하며, AI 반응 모드와 감정 통계를 제공합니다.",
+    "description": "익명으로 부정적 감정을 배출하고 실시간 3D 쓰레기산으로 시각화하는 웹 애플리케이션. 계정 없이 무료로 사용 가능하며, 감정 통계와 공감 시스템을 제공합니다.",
     "applicationCategory": "LifestyleApplication",
     "applicationSubCategory": "Mental Health Application",
     "operatingSystem": "All",
@@ -109,13 +109,13 @@
     },
     "featureList": [
       "익명 감정 쓰기 (계정 불필요)",
-      "실시간 3D 쓰레기산 시각화",
+      "실시간 3D 쓰레기산 시각화 (Three.js)",
       "감정 태그 12종",
-      "감정 무게 측정",
-      "AI 반응 모드 (더 세게 토해내 / 냉정한 분석)",
+      "Firebase 실시간 동기화",
       "감정 통계 및 차트",
       "오늘의 최악의 쓰레기 TOP 10",
-      "내 쓰레기통 (로컬 저장)",
+      "공감, 위로, 응원 반응",
+      "내 쓰레기통 (3D 드럼)",
       "감정 소각 기능",
       "레벨 시스템"
     ],
@@ -313,10 +313,10 @@
           <li>🗑️ <strong>감정 쓰기</strong>: 계정 없이 5000자까지 자유롭게 감정 표현 (욕설, 자학, 분노 모두 허용)</li>
           <li>🏔️ <strong>실시간 3D 쓰레기산 시각화</strong>: 버려진 감정들이 Three.js 기반 3D 쓰레기산에 쌓입니다</li>
           <li>🏷️ <strong>감정 태그 12종</strong>: 분노, 짜증, 후회, 실망, 서운함, 상처, 슬픔, 불안, 스트레스, 외로움, 무기력, 지침</li>
-          <li>⚖️ <strong>감정 무게 측정</strong>: 버리기 전/후 감정의 무게를 슬라이더로 측정</li>
-          <li>🤖 <strong>AI 반응 모드</strong>: '더 세게 토해내' / '냉정한 분석' 두 가지 모드 제공 (무료, API 키 불필요)</li>
-          <li>📊 <strong>감정 통계</strong>: 태그별 비율, 감정 무게 추이 차트</li>
+          <li>⚖️ <strong>감정 무게 자동 측정</strong>: 글자 수에 따라 감정 무게가 자동으로 계산됩니다</li>
+          <li>📊 <strong>글로벌 감정 통계</strong>: 실시간 Firebase 기반 전 세계 감정 통계</li>
           <li>🔥 <strong>오늘의 최악의 쓰레기 TOP 10</strong>: 가장 무거운 감정 랭킹</li>
+          <li>💬 <strong>공감 반응</strong>: 다른 사람의 감정에 공감, 위로, 응원을 전달</li>
           <li>🔥 <strong>감정 소각</strong>: 내 쓰레기통의 감정을 불태우는 추가 카타르시스</li>
           <li>🎮 <strong>레벨 시스템</strong>: LV.1 일반 쓰레기 → LV.10 감정 쓰레기 신</li>
           <li>👻 <strong>실시간 감정 티커</strong>: 전 세계 사람들이 버린 감정이 흘러갑니다</li>
@@ -334,9 +334,8 @@
         <ol style="line-height:2;">
           <li>우측 상단의 <strong>'버리기' 버튼</strong>을 클릭합니다</li>
           <li>5000자 이내로 감정을 자유롭게 작성합니다</li>
-          <li>감정에 맞는 태그를 선택합니다</li>
-          <li>버리기 전/후 감정 무게를 슬라이더로 설정합니다</li>
-          <li>AI 반응 모드를 선택합니다 (선택사항)</li>
+          <li>감정에 맞는 태그를 선택합니다 (최대 5개)</li>
+          <li>공개/비공개 설정을 선택합니다</li>
           <li><strong>'쓰레기통에 버리기'</strong> 버튼을 누르면 감정이 3D 쓰레기산에 떨어집니다</li>
         </ol>
 
@@ -568,7 +567,9 @@
         <span class="footer-sep">·</span>
         <a href="#" onclick="showSection('stats')">통계</a>
         <span class="footer-sep">·</span>
-        <a href="#" onclick="openDumpModal()">감정 버리기</a>
+        <a href="privacy.html">개인정보 처리방침</a>
+        <span class="footer-sep">·</span>
+        <a href="terms.html">이용약관</a>
       </div>
       <div class="footer-copy">
         모든 데이터는 브라우저에 로컬 저장됩니다 · 익명성 보장

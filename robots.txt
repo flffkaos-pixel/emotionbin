@@ -14,11 +14,14 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-# AI 크롤러 (GEO)
+# AI 크롤러 (GEO 인용 허용)
 User-agent: GPTBot
 Allow: /
 
 User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: Claude-Web
@@ -39,6 +42,9 @@ Allow: /
 User-agent: Google-Extended
 Allow: /
 
+User-agent: CCBot
+Allow: /
+
 # 악성 봇 차단
 User-agent: AhrefsBot
 Disallow: /
@@ -50,4 +56,3 @@ User-agent: DotBot
 Disallow: /
 
 Sitemap: https://emotional-trash-can.app/sitemap.xml
-Sitemap: https://emotional-trash-can.app/rss.xml
