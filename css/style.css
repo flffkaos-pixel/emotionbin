@@ -337,6 +337,11 @@ body {
   box-shadow: 0 0 10px var(--shadow-red);
 }
 
+.mytrash-footer {
+  text-align: center;
+  padding: 1rem;
+}
+
 .drum-container {
   position: relative;
   width: 100%;
@@ -441,10 +446,11 @@ body {
 
 .feed-text {
   color: var(--text-primary);
-  line-height: 1.5;
+  line-height: 1.7;
   margin-bottom: 0.8rem;
   white-space: pre-wrap;
-  word-break: break-word;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .feed-tags {

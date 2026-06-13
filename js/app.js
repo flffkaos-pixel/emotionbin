@@ -243,7 +243,11 @@ function updateStats() {
 function renderTop10() {
   const container = document.getElementById('top10-list');
   const publicTrash = allTrash.filter(t => t.privacy === 'public');
-  const sorted = [...publicTrash].sort((a, b) => (b.weightDiff || 0) - (a.weightDiff || 0));
+  const getReactions = (item) => {
+    if (!item.reactions) return 0;
+    return (item.reactions['공감'] || 0) + (item.reactions['위로'] || 0) + (item.reactions['응원'] || 0);
+  };
+  const sorted = [...publicTrash].sort((a, b) => getReactions(b) - getReactions(a) || (b.weightDiff || 0) - (a.weightDiff || 0));
   const top10 = sorted.slice(0, 10);
 
   if (top10.length === 0) {
@@ -278,7 +282,7 @@ function renderTop10() {
         </div>
       ` : ''}
       <div class="feed-footer">
-        <span class="feed-weight top10-weight-label">-${item.weightDiff || 0}kg</span>
+        <span class="feed-weight top10-weight-label">🤗 ${getReactions(item)}</span>
         <div class="feed-reactions">
           <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
           <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
