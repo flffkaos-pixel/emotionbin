@@ -1,5 +1,6 @@
 let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
+let firebasePosts = [];
 
 function normalizeWeight(item) {
   const len = (item.content || '').length;
@@ -178,6 +179,9 @@ async function dumpEmotion() {
     allTrash.unshift(data);
     if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
     localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    if (firebasePosts.length > 0) {
+      firebasePosts.unshift(data);
+    }
     if (typeof fbSavePost === 'function') {
       fbSavePost(data);
     }
@@ -223,12 +227,14 @@ function showToast(message, type) {
 }
 
 function updateStats() {
-  document.getElementById('total-trash-count').textContent = allTrash.length;
+  const fb = firebasePosts.length > 0;
+  const source = fb ? firebasePosts : allTrash;
+  document.getElementById('total-trash-count').textContent = source.length;
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
-  const todayCount = allTrash.filter(t => t.timestamp >= todayStart.getTime()).length;
+  const todayCount = source.filter(t => t.timestamp >= todayStart.getTime()).length;
   document.getElementById('today-trash-count').textContent = todayCount;
-  const totalWeight = allTrash.reduce((sum, t) => sum + (t.weightBefore || 0), 0);
+  const totalWeight = source.reduce((sum, t) => sum + (t.weightBefore || 0), 0);
   document.getElementById('total-weight').textContent = totalWeight >= 1000
     ? `${(totalWeight / 1000).toFixed(1)}t`
     : `${totalWeight}kg`;
@@ -458,6 +464,7 @@ function resetAllData() {
   localStorage.removeItem('all_emotional_trash');
   myTrash = [];
   allTrash = [];
+  firebasePosts = [];
   if (typeof clearDrumTrash === 'function') clearDrumTrash();
   if (typeof fbDeleteAllPosts === 'function') fbDeleteAllPosts();
   renderMyTrash();
@@ -737,19 +744,24 @@ setInterval(() => {
   updateTicker();
 }, 10000);
 
-fbLoadPosts().then(firebasePosts => {
-  if (firebasePosts.length > 0) {
+fbLoadPosts().then(list => {
+  if (list.length > 0) {
+    firebasePosts = list.map(p => normalizeWeight(p));
+    firebasePosts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const existingIds = new Set(allTrash.map(t => t.id));
+    let added = 0;
     firebasePosts.forEach(p => {
-      normalizeWeight(p);
       if (!existingIds.has(p.id)) {
         allTrash.push(p);
         existingIds.add(p.id);
+        added++;
       }
     });
-    allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
-    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    if (added > 0) {
+      allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    }
     updateStats();
     updateTicker();
     allTrash.forEach(d => {
@@ -774,12 +786,13 @@ fbLoadPosts().then(firebasePosts => {
   updateTicker();
   refreshActiveSection();
 
-  fbSubscribePosts(firebasePosts => {
-    if (!firebasePosts || firebasePosts.length === 0) return;
+  fbSubscribePosts(list => {
+    if (!list || list.length === 0) return;
+    firebasePosts = list.map(p => normalizeWeight(p));
+    firebasePosts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
     const existingIds = new Set(allTrash.map(t => t.id));
     let changed = false;
     firebasePosts.forEach(p => {
-      normalizeWeight(p);
       if (!existingIds.has(p.id)) {
         allTrash.push(p);
         existingIds.add(p.id);
@@ -791,10 +804,10 @@ fbLoadPosts().then(firebasePosts => {
       allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
       if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
       localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
-      updateStats();
-      updateTicker();
-      refreshActiveSection();
     }
+    updateStats();
+    updateTicker();
+    refreshActiveSection();
   });
 });
 
