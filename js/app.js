@@ -250,23 +250,34 @@ function renderTop10() {
     return;
   }
 
+  const tagColors = {
+    '분노': '#ff1744', '짜증': '#ff6d00', '후회': '#9c27b0', '실망': '#4a148c',
+    '서운함': '#5c6bc0', '상처': '#7b1fa2', '슬픔': '#1565c0', '불안': '#827717',
+    '스트레스': '#e65100', '외로움': '#37474f', '무기력': '#616161', '지침': '#78909c',
+  };
+
   container.innerHTML = top10.map((item, i) => `
-    <div class="top10-item" style="animation-delay: ${i * 0.08}s" data-id="${item.id}">
-      <div class="top10-rank">#${i + 1}</div>
-      <div class="top10-content">
-        <div class="top10-text">${escapeHtml(item.content)}</div>
-        ${item.tags && item.tags.length ? `
-          <div class="top10-tags">
-            ${item.tags.map(t => `<span class="top10-tag">#${t}</span>`).join('')}
-          </div>
-        ` : ''}
-        <div class="top10-meta">${formatTime(item.timestamp)}</div>
+    <div class="feed-item top10-item" style="animation-delay: ${i * 0.08}s" data-id="${item.id}">
+      <div class="feed-header">
+        <span>
+          <span class="top10-rank-badge">#${i + 1}</span>
+          <span class="feed-anon">익명</span>
+        </span>
+        <span class="feed-time">${formatTime(item.timestamp)}</span>
       </div>
-      <div class="top10-weight">-${item.weightDiff || 0}kg</div>
-      <div class="top10-reactions">
-        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
-        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
-        <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+      <div class="feed-text">${escapeHtml(item.content)}</div>
+      ${item.tags && item.tags.length ? `
+        <div class="feed-tags">
+          ${item.tags.map(t => `<span class="feed-tag" style="border-color:${tagColors[t] || '#666'};color:${tagColors[t] || '#aaa'}">#${t}</span>`).join('')}
+        </div>
+      ` : ''}
+      <div class="feed-footer">
+        <span class="feed-weight top10-weight-label">-${item.weightDiff || 0}kg</span>
+        <div class="feed-reactions">
+          <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
+          <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
+          <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
+        </div>
       </div>
     </div>
   `).join('');

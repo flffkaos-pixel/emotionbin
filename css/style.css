@@ -392,27 +392,14 @@ body {
   padding: 0 1rem;
 }
 
-.top10-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding: 1.2rem;
-  margin-bottom: 0.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  animation: slideUp 0.5s ease both;
-}
-
 @keyframes slideUp {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .top10-item:hover {
-  border-color: var(--neon-red);
-  box-shadow: 0 0 20px var(--shadow-red);
+  border-color: var(--neon-red) !important;
+  box-shadow: 0 0 12px var(--shadow-red);
 }
 
 .feed-container {
@@ -524,66 +511,25 @@ body {
   color: var(--neon-green);
 }
 
-.top10-rank {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--neon-red);
-  min-width: 2rem;
-  text-align: center;
-  text-shadow: 0 0 10px var(--shadow-red);
-}
-
-.top10-content {
-  flex: 1;
-}
-
-.top10-text {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: var(--text-primary);
-  word-break: break-word;
-}
-
-.top10-tags {
-  display: flex;
-  gap: 0.3rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.top10-tag {
-  font-size: 0.7rem;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  background: rgba(255,23,68,0.1);
-  border: 1px solid rgba(255,23,68,0.3);
-  color: var(--neon-red);
-}
-
-.top10-meta {
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  margin-top: 0.3rem;
-}
-
-.top10-weight {
-  font-size: 0.8rem;
-  color: var(--neon-orange);
-  font-weight: 700;
-  white-space: nowrap;
-  display: none;
-}
-
-.top10-reactions {
-  display: flex;
-  gap: 0.3rem;
-  margin-top: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.top10-reactions .feed-reaction {
-  padding: 0.25rem 0.6rem;
+.top10-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
   font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--neon-red);
+  box-shadow: 0 0 8px var(--shadow-red);
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.top10-weight-label {
+  color: var(--neon-orange) !important;
+  font-weight: 700 !important;
 }
 
 .mytrash-container {
