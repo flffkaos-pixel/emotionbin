@@ -608,6 +608,22 @@ body {
   border-color: var(--neon-green);
 }
 
+.top10-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--neon-red);
+  box-shadow: 0 0 8px var(--shadow-red);
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
 .top10-rank {
   font-size: 1.5rem;
   font-weight: 900;
