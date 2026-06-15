@@ -289,6 +289,7 @@ function renderTop10() {
           <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
         </div>
       </div>
+      ${renderComments(item)}
     </div>
   `).join('');
 }
@@ -316,7 +317,7 @@ function renderFeed() {
     '스트레스': '#e65100', '외로움': '#37474f', '무기력': '#616161', '지침': '#78909c',
   };
 
-  container.innerHTML = recent.map((item, i) => `
+container.innerHTML = recent.map((item, i) => `
     <div class="feed-item" style="animation-delay: ${i * 0.03}s" data-id="${item.id}">
       <div class="feed-header">
         <span class="feed-anon">익명</span>
@@ -336,6 +337,7 @@ function renderFeed() {
             <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_응원') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '응원')" data-type="응원">✨ <span data-count="응원">${(item.reactions && item.reactions['응원']) || 0}</span></button>
           </div>
       </div>
+      ${renderComments(item)}
     </div>
   `).join('');
 }
@@ -370,6 +372,48 @@ function reactToFeed(id, type) {
   });
 
   showToast(alreadyReacted ? `${type} 취소` : `${type} +1 💛`, 'success');
+}
+
+function renderComments(item) {
+  const comments = item.comments || [];
+  let html = '<div class=\"comments-section\">';
+  if (comments.length > 0) {
+    html += comments.map(c => `
+      <div class=\"comment-item\">
+        <span class=\"comment-anon\">익명</span>
+        <span class=\"comment-text\">${escapeHtml(c.text)}</span>
+        <span class=\"comment-time\">${formatTime(c.timestamp)}</span>
+      </div>
+    `).join('');
+  }
+  html += `<div class=\"comment-form\">
+    <input class=\"comment-input\" type=\"text\" placeholder=\"익명 댓글...\" maxlength=\"300\" onkeydown=\"if(event.key==='Enter')submitComment(${item.id}, this)\">
+    <button class=\"comment-submit\" onclick=\"submitComment(${item.id}, this.previousElementSibling)\">전송</button>
+  </div></div>`;
+  return html;
+}
+
+function submitComment(id, inputEl) {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  const item = allTrash.find(t => t.id === id);
+  if (!item) return;
+  if (!item.comments) item.comments = [];
+  const comment = { text: text.substring(0, 300), timestamp: Date.now() };
+  item.comments.push(comment);
+  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+  const fbItem = firebasePosts.find(t => t.id === id);
+  if (fbItem) {
+    if (!fbItem.comments) fbItem.comments = [];
+    fbItem.comments.push(comment);
+  }
+  if (typeof fbAddComment === 'function') {
+    fbAddComment(id, text);
+  }
+  inputEl.value = '';
+  showToast('💬 댓글 작성 완료', 'success');
+  renderFeed();
+  renderTop10();
 }
 
 function renderMyTrash() {
@@ -412,15 +456,27 @@ function burnMyTrash(id) {
   const item = myTrash.find(t => t.id === id);
   if (!item) return;
 
+  function cleanupData() {
+    myTrash = myTrash.filter(t => t.id !== id);
+    localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+    const wasPublic = item.privacy === 'public';
+    if (wasPublic) {
+      allTrash = allTrash.filter(t => t.id !== id);
+      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+      firebasePosts = firebasePosts.filter(t => t.id !== id);
+      if (typeof fbDeletePost === 'function') fbDeletePost(id);
+    }
+    renderMyTrash();
+    rebuildDrumFromStorage();
+    updateStats();
+    renderTop10();
+    renderFeed();
+    updateLevel();
+    showToast('🔥 감정이 불태워졌습니다', 'success');
+  }
+
   if (typeof burnInDrum === 'function' && typeof drumTrashObjects !== 'undefined' && drumTrashObjects.length > 0) {
-    burnInDrum(item, () => {
-      myTrash = myTrash.filter(t => t.id !== id);
-      localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
-      renderMyTrash();
-      rebuildDrumFromStorage();
-      updateLevel();
-      showToast('🔥 감정이 불태워졌습니다', 'success');
-    });
+    burnInDrum(item, cleanupData);
     return;
   }
 
@@ -438,27 +494,27 @@ function burnMyTrash(id) {
     createBurnEffect({
       left: rect.left + rect.width / 2,
       top: rect.top + rect.height / 2,
-    }, () => {
-      myTrash = myTrash.filter(t => t.id !== id);
-      localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
-      renderMyTrash();
-      updateLevel();
-      showToast('🔥 감정이 불태워졌습니다', 'success');
-    });
+    }, cleanupData);
   } else {
-    myTrash = myTrash.filter(t => t.id !== id);
-    localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
-    renderMyTrash();
-    updateLevel();
-    showToast('🔥 감정이 불태워졌습니다', 'success');
+    cleanupData();
   }
 }
 
 function deleteMyTrash(id) {
   if (!confirm('이 감정을 완전히 삭제하시겠습니까?')) return;
+  const item = myTrash.find(t => t.id === id);
   myTrash = myTrash.filter(t => t.id !== id);
   localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+  if (item && item.privacy === 'public') {
+    allTrash = allTrash.filter(t => t.id !== id);
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    firebasePosts = firebasePosts.filter(t => t.id !== id);
+    if (typeof fbDeletePost === 'function') fbDeletePost(id);
+  }
   renderMyTrash();
+  renderTop10();
+  renderFeed();
+  updateStats();
   showToast('삭제되었습니다', 'success');
 }
 

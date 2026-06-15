@@ -82,6 +82,42 @@ async function fbUpdateReactions(postId, type, count) {
   }
 }
 
+async function fbDeletePost(postId) {
+  if (!fbConnected) return;
+  try {
+    const snapshot = await fbDb.collection(POSTS_COLLECTION)
+      .where('id', '==', postId)
+      .limit(1)
+      .get();
+    if (!snapshot.empty) {
+      await snapshot.docs[0].ref.delete();
+      console.log('[FB] deleted post:', postId);
+    }
+  } catch (e) {
+    console.warn('[FB] delete post error:', e);
+  }
+}
+
+async function fbAddComment(postId, text) {
+  if (!fbConnected) return null;
+  try {
+    const snapshot = await fbDb.collection(POSTS_COLLECTION)
+      .where('id', '==', postId)
+      .limit(1)
+      .get();
+    if (!snapshot.empty) {
+      const ref = snapshot.docs[0].ref;
+      const comment = { text: text.substring(0, 300), timestamp: Date.now() };
+      const existing = snapshot.docs[0].data().comments || [];
+      await ref.update({ comments: [...existing, comment] });
+      return comment;
+    }
+  } catch (e) {
+    console.warn('[FB] comment error:', e);
+  }
+  return null;
+}
+
 async function fbDeleteAllPosts() {
   if (!fbConnected) return;
   try {
