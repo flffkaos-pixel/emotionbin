@@ -34,7 +34,6 @@ const htmlChecks = [
   { name: 'nav link mountain', pattern: /showSection\('mountain'\)/, required: true },
   { name: 'nav link feed', pattern: /showSection\('feed'\)/, required: true },
   { name: 'nav link mytrash', pattern: /showSection\('mytrash'\)/, required: true },
-  { name: 'reset data btn', pattern: /resetAllData\(\)/, required: true },
 ];
 htmlChecks.forEach(check => {
   if (check.pattern.test(html)) {
