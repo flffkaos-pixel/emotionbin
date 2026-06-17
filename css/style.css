@@ -403,6 +403,11 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+.top10-item:hover {
+  border-color: var(--neon-red) !important;
+  box-shadow: 0 0 12px var(--shadow-red);
+}
+
 .feed-item {
   background: var(--bg-card);
   border: 1px solid var(--border-color);

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a0a"/>
+      <stop offset="50%" stop-color="#1a0a1a"/>
+      <stop offset="100%" stop-color="#0a0a1a"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#39ff14"/>
+      <stop offset="100%" stop-color="#00cc66"/>
+    </linearGradient>
+    <filter id="neonGlow">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Grid pattern -->
+  <g opacity="0.05">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="200" y1="0" x2="200" y2="630" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="400" y1="0" x2="400" y2="630" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="800" y1="0" x2="800" y2="630" stroke="#39ff14" stroke-width="0.5"/>
+    <line x1="1000" y1="0" x2="1000" y2="630" stroke="#39ff14" stroke-width="0.5"/>
+  </g>
+  <!-- Trash mountain - 3D-like shapes -->
+  <g opacity="0.15">
+    <polygon points="200,500 500,180 800,500" fill="#39ff14"/>
+    <polygon points="350,500 700,120 1050,500" fill="#00cc66"/>
+    <polygon points="150,500 600,200 1000,500" fill="#1aff1a"/>
+  </g>
+  <!-- Emoji -->
+  <text x="100" y="200" font-size="120" font-family="Apple Color Emoji, Segoe UI Emoji, Noto Color Emoji, sans-serif">🗑️</text>
+  <!-- Title -->
+  <text x="270" y="200" font-size="72" font-weight="900" fill="#39ff14" filter="url(#neonGlow)" font-family="'Noto Sans KR', NanumGothic, sans-serif">감정쓰레기통</text>
+  <!-- Description -->
+  <text x="100" y="300" font-size="28" fill="#cccccc" font-family="'Noto Sans KR', NanumGothic, sans-serif">익명으로 부정적 감정을 마음껏 배출하는 공간</text>
+  <!-- Features -->
+  <text x="100" y="370" font-size="22" fill="#999999" font-family="'Noto Sans KR', NanumGothic, sans-serif">🏔️ 3D 쓰레기산 실시간 시각화</text>
+  <text x="100" y="410" font-size="22" fill="#999999" font-family="'Noto Sans KR', NanumGothic, sans-serif">🔥 감정 소각 &amp; 공감 반응</text>
+  <text x="100" y="450" font-size="22" fill="#999999" font-family="'Noto Sans KR', NanumGothic, sans-serif">📊 실시간 글로벌 감정 통계</text>
+  <!-- CTA -->
+  <rect x="100" y="500" width="360" height="56" rx="28" fill="none" stroke="#39ff14" stroke-width="2"/>
+  <text x="100" y="536" width="360" text-anchor="middle" font-size="22" font-weight="700" fill="#39ff14" font-family="'Noto Sans KR', NanumGothic, sans-serif">계정 없이 지금 바로 버리기</text>
+  <!-- URL -->
+  <text x="1000" y="570" text-anchor="end" font-size="18" fill="#39ff14" opacity="0.6" font-family="'Noto Sans KR', NanumGothic, sans-serif">emotionbin.app</text>
+  <!-- Decorative dots -->
+  <circle cx="1100" cy="100" r="4" fill="#39ff14" opacity="0.3"/>
+  <circle cx="1050" cy="140" r="2" fill="#39ff14" opacity="0.2"/>
+  <circle cx="1150" cy="130" r="3" fill="#00cc66" opacity="0.25"/>
+</svg>
