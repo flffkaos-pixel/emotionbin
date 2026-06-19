@@ -2,19 +2,15 @@ User-agent: *
 Allow: /
 Disallow: /dump-modal
 
-# 네이버 검색로봇
 User-agent: Naverbot
 Allow: /
 
-# 구글 검색로봇
 User-agent: Googlebot
 Allow: /
 
-# 빙 검색로봇
 User-agent: Bingbot
 Allow: /
 
-# AI 크롤러 (GEO 인용 허용)
 User-agent: GPTBot
 Allow: /
 
@@ -45,7 +41,6 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-# 악성 봇 차단
 User-agent: AhrefsBot
 Disallow: /
 
@@ -55,4 +50,4 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-Sitemap: https://emotional-trash-can.app/sitemap.xml
+Sitemap: https://emotionbin.pages.dev/sitemap.xml
