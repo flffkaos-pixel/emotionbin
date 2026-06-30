@@ -2,6 +2,28 @@ let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
 let firebasePosts = [];
 
+function syncFromFirebase(fbList) {
+  const fbIds = new Set(fbList.map(p => p.id));
+  allTrash = allTrash.filter(t => t.privacy !== 'public' || fbIds.has(t.id));
+  const localIds = new Set(allTrash.map(t => t.id));
+  fbList.forEach(p => {
+    if (localIds.has(p.id)) {
+      const idx = allTrash.findIndex(t => t.id === p.id);
+      if (idx >= 0) {
+        allTrash[idx].comments = p.comments || [];
+        allTrash[idx].reactions = p.reactions || {};
+      }
+    } else {
+      allTrash.push(p);
+      localIds.add(p.id);
+      if (typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
+    }
+  });
+  allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
+  localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+}
+
 function normalizeWeight(item) {
   const len = (item.content || '').length;
   if (!item.weightBefore || item.weightBefore < 5) {
@@ -807,26 +829,7 @@ setInterval(() => {
 fbLoadPosts().then(list => {
   if (list.length > 0) {
     firebasePosts = list.map(p => normalizeWeight(p));
-    firebasePosts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    const existingIds = new Set(allTrash.map(t => t.id));
-    let added = 0;
-    firebasePosts.forEach(p => {
-      if (!existingIds.has(p.id)) {
-        allTrash.push(p);
-        existingIds.add(p.id);
-        added++;
-      }
-    });
-    if (added > 0) {
-      allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
-      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
-    }
-    updateStats();
-    updateTicker();
-    allTrash.forEach(d => {
-      if (typeof scheduleTrashItem === 'function') scheduleTrashItem(d);
-    });
+    syncFromFirebase(firebasePosts);
   } else if (allTrash.length === 0) {
     const sampleTrash = [
       { content: '오늘도 의미 없는 하루. 거울 속 내가 제일 싫다. 지친다.', tags: ['무기력', '지침'], weightBefore: 85, weightAfter: 40, timestamp: Date.now() - 300000, privacy: 'public', id: Date.now() - 1 },
@@ -850,21 +853,7 @@ fbLoadPosts().then(list => {
     if (!list || list.length === 0) return;
     firebasePosts = list.map(p => normalizeWeight(p));
     firebasePosts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    const existingIds = new Set(allTrash.map(t => t.id));
-    let changed = false;
-    firebasePosts.forEach(p => {
-      if (!existingIds.has(p.id)) {
-        allTrash.push(p);
-        existingIds.add(p.id);
-        changed = true;
-        if (typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
-      }
-    });
-    if (changed) {
-      allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-      if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
-      localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
-    }
+    syncFromFirebase(firebasePosts);
     updateStats();
     updateTicker();
     refreshActiveSection();
