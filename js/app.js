@@ -352,7 +352,7 @@ container.innerHTML = recent.map((item, i) => `
         </div>
       ` : ''}
       <div class="feed-footer">
-        <span class="feed-weight">${getTrashTypeByLength(item.content.length).icon}</span>
+        <span class="feed-weight">${item.content.length}kg</span>
           <div class="feed-reactions">
             <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_공감') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '공감')" data-type="공감">🤗 <span data-count="공감">${(item.reactions && item.reactions['공감']) || 0}</span></button>
             <button class="feed-reaction${localStorage.getItem('feed_reacted_' + item.id + '_위로') ? ' reacted' : ''}" onclick="reactToFeed(${item.id}, '위로')" data-type="위로">💪 <span data-count="위로">${(item.reactions && item.reactions['위로']) || 0}</span></button>
