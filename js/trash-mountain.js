@@ -43,7 +43,7 @@ function placeOnPile(category, objHeight) {
     pileGrid[idx] += objHeight;
     const xIdx = idx % PILE_GRID;
     const zIdx = Math.floor(idx / PILE_GRID);
-    const spreadFactor = objHeight * 0.25;
+    const spreadFactor = objHeight * 0.5;
     for (let dx = -1; dx <= 1; dx++) {
       for (let dz = -1; dz <= 1; dz++) {
         if (dx === 0 && dz === 0) continue;
@@ -55,7 +55,8 @@ function placeOnPile(category, objHeight) {
       }
     }
   }
-  return { x: bestX, z: bestZ, y: bestY + 0.1 };
+  const jitter = 0.2;
+  return { x: bestX + (Math.random() - 0.5) * jitter, z: bestZ + (Math.random() - 0.5) * jitter, y: bestY + 0.1 };
 }
 
 const TRASH_COLORS = {
@@ -1105,6 +1106,8 @@ function createTrashItem(data) {
   const arcHeight = 5 + Math.random() * 3;
   const duration = 2500 + Math.random() * 1200;
   const startTime = Date.now();
+  const wobbleX = (Math.random() - 0.5) * 1.2;
+  const wobbleZ = (Math.random() - 0.5) * 1.2;
 
   mesh.scale.set(0.3, 0.3, 0.3);
 
@@ -1118,6 +1121,7 @@ function createTrashItem(data) {
     targetZ: pilePos.z,
     arcHeight,
     startRot: { x: mesh.rotation.x, y: mesh.rotation.y, z: mesh.rotation.z },
+    wobbleX, wobbleZ,
     startTime,
     duration,
     trailColor: color,
@@ -1180,9 +1184,9 @@ function updateDumpAnimations() {
     const arcY = Math.sin(Math.PI * t) * (anim.arcHeight || 0);
     anim.mesh.position.y = baseY + arcY;
 
-    anim.mesh.rotation.x = anim.startRot.x + (Math.random() - 0.5) * 3 * ease;
+    anim.mesh.rotation.x = anim.startRot.x + anim.wobbleX * ease;
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 6;
-    anim.mesh.rotation.z = anim.startRot.z + (Math.random() - 0.5) * 3 * ease;
+    anim.mesh.rotation.z = anim.startRot.z + anim.wobbleZ * ease;
 
     const scale = 0.5 + 0.7 * t;
     anim.mesh.scale.set(scale, scale, scale);
