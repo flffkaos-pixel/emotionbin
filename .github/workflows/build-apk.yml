@@ -1,0 +1,177 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create android project
+        run: |
+          mkdir -p android/app/src/main/java/com/emotionbin/app
+          mkdir -p android/app/src/main/res/values
+          
+          # AndroidManifest
+          cat > android/app/src/main/AndroidManifest.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.emotionbin.app"
+    android:versionCode="1"
+    android:versionName="1.0.0">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="감정쓰레기통"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>
+EOF
+
+          # MainActivity
+          cat > android/app/src/main/java/com/emotionbin/app/MainActivity.java << 'JAVA'
+package com.emotionbin.app;
+import android.os.Bundle;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
+import android.webkit.WebSettings;
+import androidx.appcompat.app.AppCompatActivity;
+public class MainActivity extends AppCompatActivity {
+    private WebView webView;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        webView = new WebView(this);
+        setContentView(webView);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setUseWideViewPort(true);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, String url) {
+                v.loadUrl(url);
+                return true;
+            }
+        });
+        webView.loadUrl("https://emotionbin.pages.dev");
+    }
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) webView.goBack();
+        else super.onBackPressed();
+    }
+}
+JAVA
+
+          # strings.xml
+          cat > android/app/src/main/res/values/strings.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">감정쓰레기통</string>
+</resources>
+EOF
+
+          # themes.xml
+          cat > android/app/src/main/res/values/themes.xml << 'EOF'
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">#0a0a0a</item>
+    </style>
+</resources>
+EOF
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Generate launcher icons
+        run: |
+          mkdir -p android/app/src/main/res
+          for size in mdpi hdpi xhdpi xxhdpi xxxhdpi; do
+            mkdir -p "android/app/src/main/res/mipmap-${size}"
+          done
+          # Copy icon as launcher icon for all densities
+          cp icon-192.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp icon-192.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp icon-512.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp icon-512.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp icon-512.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+      - name: Create Gradle project files
+        run: |
+          cat > android/settings.gradle << 'EOF'
+include ':app'
+rootProject.name = 'emotionbin'
+EOF
+
+          cat > android/build.gradle << 'EOF'
+buildscript {
+    repositories { google(); mavenCentral() }
+    dependencies { classpath 'com.android.tools.build:gradle:8.7.0' }
+}
+allprojects {
+    repositories { google(); mavenCentral() }
+}
+EOF
+
+          cat > android/gradle.properties << 'EOF'
+android.useAndroidX=true
+org.gradle.jvmargs=-Xmx2g
+EOF
+
+          cat > android/app/build.gradle << 'EOF'
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.emotionbin.app'
+    compileSdk 34
+    defaultConfig {
+        applicationId 'com.emotionbin.app'
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName '1.0.0'
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+}
+EOF
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+
+      - name: Build APK
+        run: |
+          cd android
+          gradle wrapper --gradle-version=8.7
+          ./gradlew assembleRelease --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: emotionbin-app
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: error

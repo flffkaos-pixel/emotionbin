@@ -1,0 +1,587 @@
+﻿<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화</title>
+  <meta name="description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 게정쓰레기통에서 당신의 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간으로 시각화하며 배출하세요. 계정 없이 무료.">
+  <meta name="abstract" content="익명 감정 배출 및 3D 시각화 웹앱 - 감정쓰레기통">
+  <meta name="keywords" content="감정쓰레기통,감정배출,익명감정,스트레스해소,분노해소,감정시각화,멘탈헬스,감정정리,카타르시스,3D시각화,감정일기,감정쓰레기,무료웹앱">
+  <meta name="author" content="감정쓰레기통">
+  <meta name="copyright" content="© 2026 감정쓰레기통">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="googlebot" content="index, follow">
+  <meta name="Yeti" content="index, follow">
+  <meta name="Naverbot" content="index, follow">
+  <meta name="language" content="ko">
+  <meta name="distribution" content="global">
+  <meta name="rating" content="general">
+  <meta name="revisit-after" content="1 day">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="msapplication-TileColor" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
+  <link rel="apple-touch-icon" href="/icon-192.png">
+
+  <script>function setVh(){document.documentElement.style.setProperty('--vh',window.innerHeight*.01+'px')}window.addEventListener('resize',setVh),window.addEventListener('orientationchange',function(){setTimeout(setVh,100)}),setVh()</script>
+
+  <link rel="canonical" href="https://emotional-trash-can.app">
+  <link rel="alternate" hreflang="ko" href="https://emotional-trash-can.app">
+  <link rel="alternate" hreflang="x-default" href="https://emotional-trash-can.app">
+  <link rel="alternate" type="application/rss+xml" title="감정쓰레기통 - 최신 감정 쓰레기" href="https://emotional-trash-can.app/rss.xml">
+  <link rel="sitemap" type="application/xml" href="https://emotional-trash-can.app/sitemap.xml">
+
+  <meta name="naver-site-verification" content="56a1f9b4d2dd4664aaa14c6574c633744465c88f">
+  <meta name="google-site-verification" content="90ObN9YY1jH6ZHRfL3tGx5HvKoHC8boT6jdFhbSe80s">
+  <meta name="google-adsense-account" content="ca-pub-1955893232253258">
+  <meta name="msvalidate.01" content="빙_웹마스터_인증코드_여기에_입력">
+  <meta name="facebook-domain-verification" content="페이스북_도메인_인증코드_여기에_입력">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://emotional-trash-can.app">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta property="og:site_name" content="감정쓰레기통">
+  <meta property="og:title" content="감정쓰레기통 | 익명 감정 배출 &amp; 3D 시각화">
+  <meta property="og:description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간 시각화하며 배출하세요. 계정 없이 무료.">
+  <meta property="og:image" content="https://flffkaos-pixel.github.io/emotionbin/og-image.png">
+  <meta property="og:image:secure_url" content="https://flffkaos-pixel.github.io/emotionbin/og-image.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="감정쓰레기통 - 익명 감정 배출 3D 시각화 서비스">
+  <meta property="og:updated_time" content="2026-06-17T00:00:00+09:00">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="감정쓰레기통 | 익명 감정 배출 &amp; 3D 시각화">
+  <meta name="twitter:description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 3D 쓰레기산에 실시간으로 쌓입니다.">
+  <meta name="twitter:image" content="https://flffkaos-pixel.github.io/emotionbin/og-image.png">
+  <meta name="twitter:image:alt" content="감정쓰레기통 - 익명 감정 배출 3D 시각화 서비스">
+  <meta name="twitter:site" content="@emotional_trash">
+  <meta name="twitter:creator" content="@emotional_trash">
+
+  <meta property="article:author" content="감정쓰레기통">
+  <meta property="article:publisher" content="https://emotional-trash-can.app">
+  <meta property="article:modified_time" content="2026-05-31T00:00:00+09:00">
+  <meta property="article:section" content="Mental Health">
+  <meta property="article:tag" content="감정배출">
+  <meta property="article:tag" content="익명">
+  <meta property="article:tag" content="멘탈헬스">
+
+  <meta name="application-name" content="감정쓰레기통">
+  <meta name="subject" content="익명 감정 배출 및 3D 시각화">
+  <meta name="category" content="Lifestyle, Mental Health, Web Application">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗑️</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🗑️</text></svg>">
+
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+  <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+
+  <link rel="stylesheet" href="css/style.css?v=15">
+  <link rel="preload" as="style" href="css/style.css?v=15">
+  <link rel="preload" as="script" href="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&family=Nanum+Gothic+Coding&display=swap" rel="stylesheet">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "감정쓰레기통",
+    "speakable": {
+      "@type": "SpeakableSpecification",
+      "cssSelector": [".hero-title", ".section-header h2", ".section-header p"]
+    },
+    "alternateName": "Emotional Trash Can",
+    "url": "https://emotional-trash-can.app",
+    "description": "익명으로 부정적 감정을 배출하고 실시간 3D 쓰레기산으로 시각화하는 웹 애플리케이션. 계정 없이 무료로 사용 가능하며, 감정 통계와 공감 시스템을 제공합니다.",
+    "applicationCategory": "LifestyleApplication",
+    "applicationSubCategory": "Mental Health Application",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires JavaScript and WebGL",
+    "inLanguage": "ko-KR",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "KRW",
+      "availability": "https://schema.org/InStock"
+    },
+    "featureList": [
+      "익명 감정 쓰기 (계정 불필요)",
+      "실시간 3D 쓰레기산 시각화 (Three.js)",
+      "감정 태그 12종",
+      "Firebase 실시간 동기화",
+      "감정 통계 및 차트",
+      "오늘의 최악의 쓰레기 TOP 10",
+      "공감, 위로, 응원 반응",
+      "내 쓰레기통 (3D 드럼)",
+      "감정 소각 기능",
+      "레벨 시스템"
+    ],
+    "screenshot": "https://emotional-trash-can.app/og-image.png",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "1247",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "감정쓰레기통",
+      "url": "https://emotional-trash-can.app"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "감정쓰레기통",
+      "url": "https://emotional-trash-can.app"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "감정쓰레기통",
+    "url": "https://emotional-trash-can.app",
+    "logo": "https://emotional-trash-can.app/logo.png",
+    "description": "익명 감정 배출 및 3D 시각화 서비스",
+    "sameAs": [
+      "https://twitter.com/emotional_trash"
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "감정쓰레기통",
+    "url": "https://emotional-trash-can.app",
+    "inLanguage": "ko-KR",
+    "publisher": {
+      "@type": "Organization",
+      "name": "감정쓰레기통"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "홈",
+        "item": "https://emotional-trash-can.app"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "쓰레기산",
+        "item": "https://emotional-trash-can.app#section-mountain"
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "감정쓰레기통 사용 방법",
+    "description": "감정쓰레기통에서 감정을 버리는 4단계 가이드",
+    "totalTime": "PT1M",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "버리기 버튼 클릭",
+        "text": "우측 상단의 '버리기' 버튼을 클릭하여 감정 쓰기 모달을 엽니다."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "감정 작성",
+        "text": "더럽고 추악한 감정을 5000자 이내로 자유롭게 작성합니다. 욕설, 자학, 분노 표현도 모두 허용됩니다."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "태그 및 무게 선택",
+        "text": "감정에 맞는 태그(분노, 슬픔, 스트레스 등 12종)를 선택하고, 버리기 전/후 감정 무게를 슬라이더로 설정합니다."
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "쓰레기통에 버리기",
+        "text": "'쓰레기통에 버리기' 버튼을 누르면 감정이 실시간 3D 쓰레기산에 떨어지며 시각화됩니다."
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "감정쓰레기통이 무엇인가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "감정쓰레기통은 부정적인 감정을 익명으로 배출하고 실시간 3D 쓰레기산으로 시각화하는 웹 서비스입니다. 계정이나 회원가입 없이 누구나 무료로 사용할 수 있습니다. 분노, 슬픔, 스트레스, 후회, 상처, 외로움, 무기력, 지침 등 모든 감정을 안전하게 표현할 수 있는 카타르시스(감정 배출) 공간을 제공합니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "회원가입이 필요한가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "아니요, 감정쓰레기통은 회원가입이나 계정 없이 바로 사용할 수 있습니다. 모든 데이터는 사용자의 브라우저 로컬 스토리지에 저장되므로 별도의 가입 절차가 필요 없습니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "내 감정은 안전하게 보호되나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "감정 데이터는 사용자의 브라우저에 로컬로 저장됩니다. 공개 설정을 선택한 경우에만 익명으로 쓰레기산에 표시되며, 비공개로 설정하면 오직 본인만 볼 수 있습니다. 어떤 서버에도 개인의 식별 정보가 전송되지 않습니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "AI 반응 모드는 어떻게 작동하나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "AI 반응 모드는 '더 세게 토해내'와 '냉정한 분석' 두 가지가 있습니다. '더 세게 토해내' 모드는 사용자의 감정에 공감하며 함께 분노해주고, '냉정한 분석' 모드는 감정을 객관적이고 건조한 어조로 분석해줍니다. 두 모드 모두 무료이며 API 키가 필요하지 않습니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "쓰레기산 3D 시각화는 어떻게 작동하나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Three.js 기반의 3D 쓰레기산은 사용자가 버린 감정 데이터를 실시간으로 시각화합니다. 각 감정은 태그에 따라 다른 색상의 쓰레기 조각으로 표현되며, 무게에 따라 크기가 달라집니다. 마우스로 드래그하여 회전하고 확대할 수 있습니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "감정 소각 기능은 무엇인가요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "감정 소각 기능은 내 쓰레기통에서 '태우기' 버튼을 클릭하여 버린 감정을 불태우는 추가 카타르시스 기능입니다. 불꽃 애니메이션과 함께 감정이 완전히 소멸되며, 한 번 더 감정을 배출하는 효과를 줍니다."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "레벨 시스템은 어떻게 작동하나요?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "레벨 시스템은 사용자가 감정을 많이 버릴수록 등급이 올라가는 게임 요소입니다. 일반 쓰레기(LV.1)에서 시작하여 재활용 불가, 음식물 쓰레기, 매립지, 소각장, 산업 폐기물, 플라스틱 섬을 거쳐 최고 등급인 '감정 쓰레기 신'(LV.10)에 도달할 수 있습니다."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1955893232253258" crossorigin="anonymous"></script>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">본문으로 바로가기</a>
+
+  <noscript>
+    <div style="background:#0a0a0a;color:#e0e0e0;padding:3rem 2rem;min-height:100vh;font-family:'Noto Sans KR',sans-serif;">
+      <article style="max-width:800px;margin:0 auto;">
+        <h1 style="color:#39ff14;font-size:2.5rem;margin-bottom:1rem;">🗑️ 감정쓰레기통</h1>
+        <p style="font-size:1.1rem;line-height:1.8;margin-bottom:1.5rem;">
+          <strong>감정쓰레기통</strong>은 누구에게도 말할 수 없는 <strong>부정적 감정</strong>을 <strong>익명</strong>으로 마음껏 버리는 카타르시스(감정 배출) 웹 서비스입니다.
+          분노, 슬픔, 스트레스, 후회, 상처, 외로움, 무기력 등 모든 감정을 안전하게 표현하고 즉시 해소할 수 있습니다.
+        </p>
+
+        <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">주요 기능</h2>
+        <ul style="line-height:2;font-size:1rem;">
+          <li>🗑️ <strong>감정 쓰기</strong>: 계정 없이 5000자까지 자유롭게 감정 표현 (욕설, 자학, 분노 모두 허용)</li>
+          <li>🏔️ <strong>실시간 3D 쓰레기산 시각화</strong>: 버려진 감정들이 Three.js 기반 3D 쓰레기산에 쌓입니다</li>
+          <li>🏷️ <strong>감정 태그 12종</strong>: 분노, 짜증, 후회, 실망, 서운함, 상처, 슬픔, 불안, 스트레스, 외로움, 무기력, 지침</li>
+          <li>⚖️ <strong>감정 무게 자동 측정</strong>: 글자 수에 따라 감정 무게가 자동으로 계산됩니다</li>
+          <li>📊 <strong>글로벌 감정 통계</strong>: 실시간 Firebase 기반 전 세계 감정 통계</li>
+          <li>🔥 <strong>오늘의 최악의 쓰레기 TOP 10</strong>: 가장 무거운 감정 랭킹</li>
+          <li>💬 <strong>공감 반응</strong>: 다른 사람의 감정에 공감, 위로, 응원을 전달</li>
+          <li>🔥 <strong>감정 소각</strong>: 내 쓰레기통의 감정을 불태우는 추가 카타르시스</li>
+          <li>🎮 <strong>레벨 시스템</strong>: LV.1 일반 쓰레기 → LV.10 감정 쓰레기 신</li>
+          <li>👻 <strong>실시간 감정 티커</strong>: 전 세계 사람들이 버린 감정이 흘러갑니다</li>
+        </ul>
+
+        <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">왜 감정쓰레기통인가요?</h2>
+        <p style="line-height:1.8;margin-bottom:1rem;">
+          현대인들은 일상에서 느끼는 분노, 슬픔, 스트레스를 표현할 곳이 부족합니다.
+          SNS는 부끄럽고, 가족이나 친구에게 말하기엔 민망하고, 상담받기엔 부담스럽습니다.
+          감정쓰레기통은 그런 사람들을 위한 <strong>100% 익명 감정 배출 공간</strong>입니다.
+          부드러운 위로 대신 <strong>강렬한 카타르시스</strong>를 추구합니다.
+        </p>
+
+        <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">사용 방법</h2>
+        <ol style="line-height:2;">
+          <li>우측 상단의 <strong>'버리기' 버튼</strong>을 클릭합니다</li>
+          <li>5000자 이내로 감정을 자유롭게 작성합니다</li>
+          <li>감정에 맞는 태그를 선택합니다 (최대 5개)</li>
+          <li>공개/비공개 설정을 선택합니다</li>
+          <li><strong>'쓰레기통에 버리기'</strong> 버튼을 누르면 감정이 3D 쓰레기산에 떨어집니다</li>
+        </ol>
+
+        <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">자주 묻는 질문 (FAQ)</h2>
+        <dl>
+          <dt style="color:#ff1744;font-weight:700;margin-top:1rem;">Q. 회원가입이 필요한가요?</dt>
+          <dd style="margin-left:1rem;line-height:1.6;">A. 아니요, 회원가입 없이 바로 사용 가능합니다. 모든 데이터는 브라우저에 로컬 저장됩니다.</dd>
+
+          <dt style="color:#ff1744;font-weight:700;margin-top:1rem;">Q. 내 감정은 안전한가요?</dt>
+          <dd style="margin-left:1rem;line-height:1.6;">A. 공개 설정을 비공개로 선택하면 오직 본인만 볼 수 있습니다. 어떤 서버에도 개인 정보가 전송되지 않습니다.</dd>
+
+          <dt style="color:#ff1744;font-weight:700;margin-top:1rem;">Q. AI 반응은 유료인가요?</dt>
+          <dd style="margin-left:1rem;line-height:1.6;">A. 아니요, 완전 무료입니다. '더 세게 토해내'와 '냉정한 분석' 두 모드 모두 API 키 없이 사용 가능합니다.</dd>
+        </dl>
+
+        <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">카테고리</h2>
+        <p>멘탈헬스, 감정관리, 스트레스해소, 카타르시스, 익명일기, 감정시각화, 3D 웹앱, 무료웹앱, 정서지원, 심리 케어</p>
+
+        <p style="margin-top:3rem;color:#888;font-size:0.9rem;">
+          이 페이지는 JavaScript와 WebGL이 필요합니다. JavaScript를 활성화한 후 다시 방문해주세요.
+          또는 최신 Chrome, Edge, Safari, Firefox 브라우저를 사용해주세요.
+        </p>
+      </article>
+    </div>
+  </noscript>
+
+  <div id="loader" role="status" aria-label="로딩 중">
+    <div class="loader-content">
+      <div class="loader-icon" aria-hidden="true">🗑️</div>
+      <div class="loader-text">감정쓰레기통<br><span>당신의 모든 감정을 여기에 버리세요</span></div>
+      <div class="loader-bar" aria-hidden="true"><div></div></div>
+    </div>
+  </div>
+
+  <header role="banner">
+    <nav id="navbar" role="navigation" aria-label="메인 내비게이션">
+      <div class="nav-logo" onclick="scrollToTop()" role="button" tabindex="0" aria-label="홈으로 이동">
+        <span class="logo-icon" aria-hidden="true">🗑️</span>
+        <span class="logo-text">감정<span class="neon">쓰레기통</span></span>
+      </div>
+      <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="메뉴 열기">☰</button>
+      <div class="nav-links" id="nav-links" role="tablist">
+        <a href="#section-mountain" onclick="showSection('mountain');closeMobileNav()" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
+        <a href="#section-feed" onclick="showSection('feed');closeMobileNav()" class="nav-link" role="tab">공개 피드</a>
+        <a href="#section-top10" onclick="showSection('top10');closeMobileNav()" class="nav-link" role="tab">최악의 TOP 10</a>
+        <a href="#section-mytrash" onclick="showSection('mytrash');closeMobileNav()" class="nav-link" role="tab">내 쓰레기통</a>
+      </div>
+    </nav>
+  </header>
+
+  <aside id="ticker" aria-label="실시간 감정 쓰레기 소식" role="marquee">
+    <div class="ticker-track" id="ticker-track"></div>
+  </aside>
+
+  <main id="main-content">
+    <section id="section-mountain" class="section active" aria-label="3D 쓰레기산 메인 화면">
+      <div id="three-container">
+        <div id="canvas-overlay">
+          <div class="overlay-stats" aria-label="전체 통계">
+            <div class="stat-item">
+              <span class="stat-number" id="total-trash-count" aria-live="polite">0</span>
+              <span class="stat-label">버려진 감정</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="today-trash-count" aria-live="polite">0</span>
+              <span class="stat-label">오늘 버려진</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number" id="total-weight" aria-live="polite">0kg</span>
+              <span class="stat-label">전체 무게</span>
+            </div>
+          </div>
+          <div class="overlay-bottom">
+            <div class="overlay-title">
+              <h1>세상의 모든 <span class="neon">감정 쓰레기</span>가 모이는 곳</h1>
+              <p>당신의 모든 감정을 여기에 버리세요. 영원히 사라집니다.</p>
+            </div>
+            <div class="overlay-cta">
+              <button class="cta-btn" onclick="openDumpModal()" aria-label="지금 감정 쓰레기 버리기">
+                <span class="btn-icon" aria-hidden="true">🗑️</span>
+                지금 감정 버리기
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-feed" class="section" aria-label="다른 사람의 감정 피드">
+      <div class="section-header">
+        <h2>다른 사람의 감정</h2>
+        <p>익명으로 남긴 다른 사람들의 감정. 응원 한마디가 큰 위로가 됩니다.</p>
+      </div>
+      <div class="feed-container" id="feed-list" role="list"></div>
+    </section>
+
+    <section id="section-top10" class="section" aria-label="오늘의 최악의 쓰레기 TOP 10">
+      <div class="section-header">
+        <h2>오늘의 최악의 쓰레기 TOP 10</h2>
+        <p>오늘 가장 무거운 감정을 버린 익명의 쓰레기들</p>
+      </div>
+      <div class="top10-container" id="top10-list" role="list"></div>
+    </section>
+
+    <section id="section-mytrash" class="section" aria-label="내 쓰레기통">
+      <div class="section-header">
+        <h2>내 쓰레기통</h2>
+        <p>당신이 버린 모든 감정들. 당신만 볼 수 있습니다.</p>
+      </div>
+      <div class="drum-container" id="drum-container">
+        <div class="drum-hint">🖱️ 드래그로 회전 · 휠로 줌</div>
+        <div id="drum-canvas-wrap"></div>
+      </div>
+      <div class="mytrash-container" id="mytrash-list" role="list">
+        <div class="empty-trash">
+          <span class="empty-icon" aria-hidden="true">🗑️</span>
+          <p>아직 버린 감정이 없습니다</p>
+          <button class="cta-btn" onclick="openDumpModal()">첫 감정 버리기</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="dump-modal" class="modal" role="dialog" aria-modal="true" aria-label="감정 쓰레기 버리기">
+    <div class="modal-backdrop" onclick="closeDumpModal()" tabindex="-1"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>감정 버리기</h2>
+        <p>당신의 감정을 모두 쏟아내세요. 아무도 당신을 알지 못합니다.</p>
+        <button class="modal-close" onclick="closeDumpModal()" aria-label="닫기">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="dump-form" onsubmit="event.preventDefault();dumpEmotion()">
+          <div class="form-group">
+            <label for="emotion-text" class="form-label">당신의 감정을 마음껏 쏟아내세요</label>
+            <textarea id="emotion-text" placeholder="글자가 길수록 더 크고 무거운 쓰레기가 됩니다. 냉장고, TV, 자동차도 될 수 있어요." maxlength="5000" required></textarea>
+            <div class="char-count">
+            <span id="char-count" aria-live="polite">0</span> / 5000
+            <span class="trash-preview" id="trash-preview">🧃 캔</span>
+          </div>
+          </div>
+
+          <fieldset class="form-group">
+            <legend class="form-label">감정 태그 (중복 선택 가능)</legend>
+            <div class="tag-container" id="tag-container" role="group">
+              <span class="tag" data-tag="분노" role="checkbox" aria-checked="false" tabindex="0">#분노</span>
+              <span class="tag" data-tag="짜증" role="checkbox" aria-checked="false" tabindex="0">#짜증</span>
+              <span class="tag" data-tag="후회" role="checkbox" aria-checked="false" tabindex="0">#후회</span>
+              <span class="tag" data-tag="실망" role="checkbox" aria-checked="false" tabindex="0">#실망</span>
+              <span class="tag" data-tag="서운함" role="checkbox" aria-checked="false" tabindex="0">#서운함</span>
+              <span class="tag" data-tag="상처" role="checkbox" aria-checked="false" tabindex="0">#상처</span>
+              <span class="tag" data-tag="슬픔" role="checkbox" aria-checked="false" tabindex="0">#슬픔</span>
+              <span class="tag" data-tag="불안" role="checkbox" aria-checked="false" tabindex="0">#불안</span>
+              <span class="tag" data-tag="스트레스" role="checkbox" aria-checked="false" tabindex="0">#스트레스</span>
+              <span class="tag" data-tag="외로움" role="checkbox" aria-checked="false" tabindex="0">#외로움</span>
+              <span class="tag" data-tag="무기력" role="checkbox" aria-checked="false" tabindex="0">#무기력</span>
+              <span class="tag" data-tag="지침" role="checkbox" aria-checked="false" tabindex="0">#지침</span>
+            </div>
+          </fieldset>
+
+          <div class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</div>
+
+          <fieldset class="form-group">
+            <legend class="form-label">공개 설정</legend>
+            <div class="privacy-container">
+              <label class="privacy-option">
+                <input type="radio" name="privacy" value="public" checked>
+                <span class="privacy-check" aria-hidden="true"></span>
+                <span class="privacy-text">익명으로 공개 (쓰레기산에 표시됨)</span>
+              </label>
+              <label class="privacy-option">
+                <input type="radio" name="privacy" value="private">
+                <span class="privacy-check" aria-hidden="true"></span>
+                <span class="privacy-text">비공개 (나만 보기)</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="dump-btn" id="dump-btn">
+            <span class="dump-btn-icon" aria-hidden="true">🗑️</span>
+            <span>쓰레기통에 버리기</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <footer role="contentinfo" class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-sections">
+        <div class="footer-section">
+          <h4 class="footer-heading">🗑️ 감정쓰레기통</h4>
+          <p class="footer-desc">익명으로 감정을 배출하고 3D 쓰레기산으로 시각화하는 서비스. 계정 없이 무료.</p>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-heading">바로가기</h4>
+          <div class="footer-links">
+            <a href="#" onclick="showSection('mountain')">쓰레기산</a>
+            <a href="#" onclick="showSection('top10')">TOP 10</a>
+            <a href="#" onclick="showSection('feed')">공개 피드</a>
+            <a href="#" onclick="showSection('mytrash')">내 쓰레기통</a>
+          </div>
+        </div>
+        <div class="footer-section">
+          <h4 class="footer-heading">정보</h4>
+          <div class="footer-links">
+            <a href="about.html">소개</a>
+            <a href="faq.html">FAQ</a>
+            <a href="contact.html">문의하기</a>
+            <a href="privacy.html">개인정보 처리방침</a>
+            <a href="terms.html">이용약관</a>
+            <a href="disclaimer.html">면책조항</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-copy">
+        © 2026 감정쓰레기통. 모든 데이터는 브라우저에 로컬 저장됩니다 · 익명성 보장
+      </div>
+    </div>
+  </footer>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm"
+    }
+  }
+  </script>
+  <script type="module" src="js/supabase-db.js?v=1"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
+  <script src="js/trash-mountain.js?v=15" defer></script>
+  <script src="js/ai.js?v=15" defer></script>
+  <script src="js/effects.js?v=15" defer></script>
+  <script src="js/drum-scene.js?v=15" defer></script>
+  <script src="js/app.js?v=15" defer></script>
+</body>
+</html>
