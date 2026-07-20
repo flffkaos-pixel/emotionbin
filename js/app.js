@@ -130,8 +130,10 @@ function updateTrashPreview(len) {
   const el = document.getElementById('trash-preview');
   const hintEl = document.getElementById('trash-type-hint-value');
   const t = getTrashTypeByLength(len);
-  el.textContent = `${t.icon} ${t.label}`;
-  if (hintEl) hintEl.textContent = `${t.icon} ${t.label}`;
+  const label = (typeof trashTypeI18n !== 'undefined' && trashTypeI18n[t.label]) ? trashTypeI18n[t.label][LANG] : t.label;
+  const text = `${t.icon} ${label}`;
+  el.textContent = text;
+  if (hintEl) hintEl.innerHTML = `${t.icon} <span data-i18n-trash="${t.label}">${label}</span>`;
 }
 
 document.querySelectorAll('.tag').forEach(el => {
@@ -655,6 +657,7 @@ sbLoadPosts().then(list => {
   });
 });
 
+applyLanguage();
 updateTicker();
 updateTrashPreview(0);
 

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-  <title>감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화</title>
+  <title data-i18n="page-title">감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화</title>
   <meta name="description" content="세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 게정쓰레기통에서 당신의 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간으로 시각화하며 배출하세요. 계정 없이 무료.">
   <meta name="abstract" content="익명 감정 배출 및 3D 시각화 웹앱 - 감정쓰레기통">
   <meta name="keywords" content="감정쓰레기통,감정배출,익명감정,스트레스해소,분노해소,감정시각화,멘탈헬스,감정정리,카타르시스,3D시각화,감정일기,감정쓰레기,무료웹앱">
@@ -387,10 +387,10 @@
       </div>
       <button class="nav-hamburger" onclick="toggleMobileNav()" aria-label="메뉴 열기">☰</button>
       <div class="nav-links" id="nav-links" role="tablist">
-        <a href="#section-mountain" onclick="showSection('mountain');closeMobileNav()" class="nav-link active" role="tab" aria-selected="true">쓰레기산</a>
-        <a href="#section-feed" onclick="showSection('feed');closeMobileNav()" class="nav-link" role="tab">공개 피드</a>
-        <a href="#section-top10" onclick="showSection('top10');closeMobileNav()" class="nav-link" role="tab">최악의 TOP 10</a>
-        <a href="#section-mytrash" onclick="showSection('mytrash');closeMobileNav()" class="nav-link" role="tab">내 쓰레기통</a>
+        <a href="#section-mountain" onclick="showSection('mountain');closeMobileNav()" class="nav-link active" role="tab" aria-selected="true" data-i18n="nav-trash-mountain">쓰레기산</a>
+        <a href="#section-feed" onclick="showSection('feed');closeMobileNav()" class="nav-link" role="tab" data-i18n="nav-public-feed">공개 피드</a>
+        <a href="#section-top10" onclick="showSection('top10');closeMobileNav()" class="nav-link" role="tab" data-i18n="nav-top10">최악의 TOP 10</a>
+        <a href="#section-mytrash" onclick="showSection('mytrash');closeMobileNav()" class="nav-link" role="tab" data-i18n="nav-my-trash">내 쓰레기통</a>
       </div>
     </nav>
   </header>
@@ -406,26 +406,26 @@
           <div class="overlay-stats" aria-label="전체 통계">
             <div class="stat-item">
               <span class="stat-number" id="total-trash-count" aria-live="polite">0</span>
-              <span class="stat-label">버려진 감정</span>
+              <span class="stat-label" data-i18n="stat-dumped">버려진 감정</span>
             </div>
             <div class="stat-item">
               <span class="stat-number" id="today-trash-count" aria-live="polite">0</span>
-              <span class="stat-label">오늘 버려진</span>
+              <span class="stat-label" data-i18n="stat-today">오늘 버려진</span>
             </div>
             <div class="stat-item">
               <span class="stat-number" id="total-weight" aria-live="polite">0kg</span>
-              <span class="stat-label">전체 무게</span>
+              <span class="stat-label" data-i18n="stat-total-weight">전체 무게</span>
             </div>
           </div>
           <div class="overlay-bottom">
             <div class="overlay-title">
-              <h1>세상의 모든 <span class="neon">감정 쓰레기</span>가 모이는 곳</h1>
-              <p>당신의 모든 감정을 여기에 버리세요. 영원히 사라집니다.</p>
+              <h1 data-i18n="hero-title">세상의 모든 <span class="neon">감정 쓰레기</span>가 모이는 곳</h1>
+              <p data-i18n="hero-subtitle">당신의 모든 감정을 여기에 버리세요. 영원히 사라집니다.</p>
             </div>
             <div class="overlay-cta">
               <button class="cta-btn" onclick="openDumpModal()" aria-label="지금 감정 쓰레기 버리기">
                 <span class="btn-icon" aria-hidden="true">🗑️</span>
-                지금 감정 버리기
+                <span data-i18n="hero-cta">지금 감정 버리기</span>
               </button>
             </div>
           </div>
@@ -435,34 +435,34 @@
 
     <section id="section-feed" class="section" aria-label="다른 사람의 감정 피드">
       <div class="section-header">
-        <h2>다른 사람의 감정</h2>
-        <p>익명으로 남긴 다른 사람들의 감정. 응원 한마디가 큰 위로가 됩니다.</p>
+        <h2 data-i18n="feed-title">다른 사람의 감정</h2>
+        <p data-i18n="feed-desc">익명으로 남긴 다른 사람들의 감정. 응원 한마디가 큰 위로가 됩니다.</p>
       </div>
       <div class="feed-container" id="feed-list" role="list"></div>
     </section>
 
     <section id="section-top10" class="section" aria-label="오늘의 최악의 쓰레기 TOP 10">
       <div class="section-header">
-        <h2>오늘의 최악의 쓰레기 TOP 10</h2>
-        <p>오늘 가장 무거운 감정을 버린 익명의 쓰레기들</p>
+        <h2 data-i18n="top10-title">오늘의 최악의 쓰레기 TOP 10</h2>
+        <p data-i18n="top10-desc">오늘 가장 무거운 감정을 버린 익명의 쓰레기들</p>
       </div>
       <div class="top10-container" id="top10-list" role="list"></div>
     </section>
 
     <section id="section-mytrash" class="section" aria-label="내 쓰레기통">
       <div class="section-header">
-        <h2>내 쓰레기통</h2>
-        <p>당신이 버린 모든 감정들. 당신만 볼 수 있습니다.</p>
+        <h2 data-i18n="mytrash-title">내 쓰레기통</h2>
+        <p data-i18n="mytrash-desc">당신이 버린 모든 감정들. 당신만 볼 수 있습니다.</p>
       </div>
       <div class="drum-container" id="drum-container">
-        <div class="drum-hint">🖱️ 드래그로 회전 · 휠로 줌</div>
+        <div class="drum-hint" data-i18n="mytrash-hint">🖱️ 드래그로 회전 · 휠로 줌</div>
         <div id="drum-canvas-wrap"></div>
       </div>
       <div class="mytrash-container" id="mytrash-list" role="list">
         <div class="empty-trash">
           <span class="empty-icon" aria-hidden="true">🗑️</span>
-          <p>아직 버린 감정이 없습니다</p>
-          <button class="cta-btn" onclick="openDumpModal()">첫 감정 버리기</button>
+          <p data-i18n="mytrash-empty">아직 버린 감정이 없습니다</p>
+          <button class="cta-btn" onclick="openDumpModal()" data-i18n="mytrash-first">첫 감정 버리기</button>
         </div>
       </div>
     </section>
@@ -472,15 +472,15 @@
     <div class="modal-backdrop" onclick="closeDumpModal()" tabindex="-1"></div>
     <div class="modal-content">
       <div class="modal-header">
-        <h2>감정 버리기</h2>
-        <p>당신의 감정을 모두 쏟아내세요. 아무도 당신을 알지 못합니다.</p>
+        <h2 data-i18n="modal-title">감정 버리기</h2>
+        <p data-i18n="modal-desc">당신의 감정을 모두 쏟아내세요. 아무도 당신을 알지 못합니다.</p>
         <button class="modal-close" onclick="closeDumpModal()" aria-label="닫기">✕</button>
       </div>
       <div class="modal-body">
         <form id="dump-form" onsubmit="event.preventDefault();dumpEmotion()">
           <div class="form-group">
-            <label for="emotion-text" class="form-label">당신의 감정을 마음껏 쏟아내세요</label>
-            <textarea id="emotion-text" placeholder="글자가 길수록 더 크고 무거운 쓰레기가 됩니다. 냉장고, TV, 자동차도 될 수 있어요." maxlength="5000" required></textarea>
+            <label for="emotion-text" class="form-label" data-i18n="modal-label">당신의 감정을 마음껏 쏟아내세요</label>
+            <textarea id="emotion-text" data-i18n-placeholder="modal-placeholder" placeholder="글자가 길수록 더 크고 무거운 쓰레기가 됩니다. 냉장고, TV, 자동차도 될 수 있어요." maxlength="5000" required></textarea>
             <div class="char-count">
             <span id="char-count" aria-live="polite">0</span> / 5000
             <span class="trash-preview" id="trash-preview">🧃 캔</span>
@@ -488,7 +488,7 @@
           </div>
 
           <fieldset class="form-group">
-            <legend class="form-label">감정 태그 (중복 선택 가능)</legend>
+            <legend class="form-label" data-i18n="modal-tags-legend">감정 태그 (중복 선택 가능)</legend>
             <div class="tag-container" id="tag-container" role="group">
               <span class="tag" data-tag="분노" role="checkbox" aria-checked="false" tabindex="0">#분노</span>
               <span class="tag" data-tag="짜증" role="checkbox" aria-checked="false" tabindex="0">#짜증</span>
@@ -505,27 +505,27 @@
             </div>
           </fieldset>
 
-          <div class="trash-type-hint" id="trash-type-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다 (현재: <span id="trash-type-hint-value">🥫 캔</span>)</div>
+          <div class="trash-type-hint" id="trash-type-hint"><span data-i18n="modal-trash-hint">글자수에 따라 자동으로 쓰레기 종류가 결정됩니다</span> (현재: <span id="trash-type-hint-value">🥫 <span data-i18n-trash="캔">캔</span></span>)</div>
 
           <fieldset class="form-group">
-            <legend class="form-label">공개 설정</legend>
+            <legend class="form-label" data-i18n="modal-privacy-legend">공개 설정</legend>
             <div class="privacy-container">
               <label class="privacy-option">
                 <input type="radio" name="privacy" value="public" checked>
                 <span class="privacy-check" aria-hidden="true"></span>
-                <span class="privacy-text">익명으로 공개 (쓰레기산에 표시됨)</span>
+                <span class="privacy-text" data-i18n="modal-public">익명으로 공개 (쓰레기산에 표시됨)</span>
               </label>
               <label class="privacy-option">
                 <input type="radio" name="privacy" value="private">
                 <span class="privacy-check" aria-hidden="true"></span>
-                <span class="privacy-text">비공개 (나만 보기)</span>
+                <span class="privacy-text" data-i18n="modal-private">비공개 (나만 보기)</span>
               </label>
             </div>
           </fieldset>
 
           <button type="submit" class="dump-btn" id="dump-btn">
             <span class="dump-btn-icon" aria-hidden="true">🗑️</span>
-            <span>쓰레기통에 버리기</span>
+            <span data-i18n="modal-submit">쓰레기통에 버리기</span>
           </button>
         </form>
       </div>
@@ -538,32 +538,32 @@
     <div class="footer-inner">
       <div class="footer-sections">
         <div class="footer-section">
-          <h4 class="footer-heading">🗑️ 감정쓰레기통</h4>
-          <p class="footer-desc">익명으로 감정을 배출하고 3D 쓰레기산으로 시각화하는 서비스. 계정 없이 무료.</p>
+          <h4 class="footer-heading" data-i18n="footer-brand">🗑️ 감정쓰레기통</h4>
+          <p class="footer-desc" data-i18n="footer-desc">익명으로 감정을 배출하고 3D 쓰레기산으로 시각화하는 서비스. 계정 없이 무료.</p>
         </div>
         <div class="footer-section">
-          <h4 class="footer-heading">바로가기</h4>
+          <h4 class="footer-heading" data-i18n="footer-quick">바로가기</h4>
           <div class="footer-links">
-            <a href="#" onclick="showSection('mountain')">쓰레기산</a>
-            <a href="#" onclick="showSection('top10')">TOP 10</a>
-            <a href="#" onclick="showSection('feed')">공개 피드</a>
-            <a href="#" onclick="showSection('mytrash')">내 쓰레기통</a>
+            <a href="#" onclick="showSection('mountain')" data-i18n="nav-trash-mountain">쓰레기산</a>
+            <a href="#" onclick="showSection('top10')" data-i18n="nav-top10">TOP 10</a>
+            <a href="#" onclick="showSection('feed')" data-i18n="nav-public-feed">공개 피드</a>
+            <a href="#" onclick="showSection('mytrash')" data-i18n="nav-my-trash">내 쓰레기통</a>
           </div>
         </div>
         <div class="footer-section">
-          <h4 class="footer-heading">정보</h4>
+          <h4 class="footer-heading" data-i18n="footer-info">정보</h4>
           <div class="footer-links">
-            <a href="about.html">소개</a>
+            <a href="about.html" data-i18n="footer-about">소개</a>
             <a href="faq.html">FAQ</a>
-            <a href="contact.html">문의하기</a>
-            <a href="privacy.html">개인정보 처리방침</a>
-            <a href="terms.html">이용약관</a>
-            <a href="disclaimer.html">면책조항</a>
+            <a href="contact.html" data-i18n="footer-contact">문의하기</a>
+            <a href="privacy.html" data-i18n="footer-privacy">개인정보 처리방침</a>
+            <a href="terms.html" data-i18n="footer-terms">이용약관</a>
+            <a href="disclaimer.html" data-i18n="footer-disclaimer">면책조항</a>
           </div>
         </div>
       </div>
       <div class="footer-copy">
-        © 2026 감정쓰레기통. 모든 데이터는 브라우저에 로컬 저장됩니다 · 익명성 보장
+        <span data-i18n="footer-copy">© 2026 감정쓰레기통. 모든 데이터는 브라우저에 로컬 저장됩니다 · 익명성 보장</span>
       </div>
     </div>
   </footer>
@@ -575,6 +575,7 @@
     }
   }
   </script>
+  <script src="js/lang.js?v=1"></script>
   <script type="module" src="js/supabase-db.js?v=1"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
