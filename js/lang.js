@@ -61,13 +61,11 @@ const tagI18n = {
 
 // trash type names for preview
 const trashTypeI18n = {
-  '캔': { en: 'Can' },
-  '페트병': { en: 'PET Bottle' },
-  '종이상자': { en: 'Cardboard Box' },
-  '나무': { en: 'Wood Log' },
-  '냉장고': { en: 'Fridge' },
-  'TV': { en: 'TV' },
-  '자동차': { en: 'Car' },
+  '캔': { en: 'Can', ko: '깡통' },
+  '박스': { en: 'Box', ko: '박스' },
+  'TV': { en: 'TV', ko: 'TV' },
+  '냉장고': { en: 'Fridge', ko: '냉장고' },
+  '자동차': { en: 'Car', ko: '자동차' },
 };
 
 function applyLanguage() {

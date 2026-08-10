@@ -31,15 +31,15 @@ function getPileHeight(x, z) {
 
 function placeOnPile(category, objHeight) {
   const minDist = { can: 0.8, box: 1.0, tv: 1.2, fridge: 1.8, car: 2.2 }[category] || 1.0;
-  for (let attempt = 0; attempt < 80; attempt++) {
+  for (let attempt = 0; attempt < 120; attempt++) {
     const angle = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.random()) * PILE_RADIUS * 1.8;
+    const r = Math.sqrt(Math.random()) * PILE_RADIUS * 1.6;
     const x = Math.cos(angle) * r;
     const z = Math.sin(angle) * r;
     let tooClose = false;
     for (const p of placedPositions) {
       const dx = x - p.x, dz = z - p.z;
-      const sep = (minDist + p.minDist) * 0.6;
+      const sep = (minDist + p.minDist) * 0.85;
       if (dx * dx + dz * dz < sep * sep) { tooClose = true; break; }
     }
     if (tooClose) continue;
@@ -64,11 +64,11 @@ function placeOnPile(category, objHeight) {
       }
     }
     placedPositions.push({ x, z, minDist });
-    const jitter = 0.15;
+    const jitter = 0.08;
     return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: h + 0.1 };
   }
   const fallbackAngle = Math.random() * Math.PI * 2;
-  const fallbackR = Math.random() * PILE_RADIUS;
+  const fallbackR = Math.random() * PILE_RADIUS * 0.8;
   const fx = Math.cos(fallbackAngle) * fallbackR;
   const fz = Math.sin(fallbackAngle) * fallbackR;
   placedPositions.push({ x: fx, z: fz, minDist: 0.5 });
@@ -102,10 +102,11 @@ function initScene() {
     w = window.innerWidth;
     h = window.innerHeight;
   }
-  container.style.height = h + 'px';
+  container.style.width = '100%';
+  container.style.height = '100vh';
 
   if (!window.WebGLRenderingContext) {
-    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#888;font-family:sans-serif;text-align:center;padding:2rem"><div><div style="font-size:4rem;margin-bottom:1rem">🗑️</div><h2 style="color:#39ff14;margin-bottom:.5rem">WebGL을 지원하지 않는 브라우저입니다</h2><p style="color:#888">Chrome, Safari, Firefox 최신 버전으로 접속해주세요</p></div></div>';
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#888;font-family:sans-serif;text-align:center;padding:2rem"><div><div style="font-size:4rem;margin-bottom:1rem">🗑️</div><h2 style="color:#39ff14;margin-bottom:.5rem">WebGL을 지원하지 않는 브라우저입니다</h2><p style="color:#888">Chrome, Safari, Firefox 최신 버전으로 접속해주세요</p></div></div>';
     return;
   }
 
@@ -1345,6 +1346,8 @@ function onResize() {
     w = window.innerWidth;
     h = window.innerHeight;
   }
+  container.style.width = '100%';
+  container.style.height = '100vh';
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
@@ -1353,6 +1356,8 @@ function onResize() {
 window.addEventListener('orientationchange', () => {
   setTimeout(onResize, 300);
 });
+
+window.addEventListener('resize', onResize);
 
 function animate() {
   requestAnimationFrame(animate);
