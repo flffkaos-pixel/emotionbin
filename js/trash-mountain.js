@@ -30,20 +30,28 @@ function getPileHeight(x, z) {
 }
 
 function placeOnPile(category, objHeight) {
-  const minDist = { can: 0.8, box: 1.0, tv: 1.2, fridge: 1.8, car: 2.2 }[category] || 1.0;
-  for (let attempt = 0; attempt < 120; attempt++) {
+  const baseMinDist = { can: 0.9, box: 1.1, tv: 1.4, fridge: 2.4, car: 3.0 };
+  const minDist = baseMinDist[category] || 1.0;
+  const isLarge = category === 'fridge' || category === 'car';
+  
+  for (let attempt = 0; attempt < 200; attempt++) {
     const angle = Math.random() * Math.PI * 2;
-    const r = Math.sqrt(Math.random()) * PILE_RADIUS * 1.6;
+    const maxR = isLarge ? PILE_RADIUS * 1.2 : PILE_RADIUS * 1.4;
+    const r = Math.sqrt(Math.random()) * maxR;
     const x = Math.cos(angle) * r;
     const z = Math.sin(angle) * r;
+    
     let tooClose = false;
     for (const p of placedPositions) {
       const dx = x - p.x, dz = z - p.z;
-      const sep = (minDist + p.minDist) * 0.85;
+      const sep = (minDist + p.minDist) * 1.1;
       if (dx * dx + dz * dz < sep * sep) { tooClose = true; break; }
     }
     if (tooClose) continue;
+    
     const h = getPileHeight(x, z);
+    if (h < 0) continue; // 지면 아래면 제외
+    
     const idx = getPileIdx(x, z);
     if (idx >= 0) {
       pileGrid[idx] += objHeight * 2;
@@ -57,22 +65,25 @@ function placeOnPile(category, objHeight) {
           const nj = zIdx + dz;
           if (ni >= 0 && ni < PILE_GRID && nj >= 0 && nj < PILE_GRID) {
             const dist = Math.sqrt(dx * dx + dz * dz);
-            const falloff = Math.max(0, 1 - dist / (minDist * 2));
-            pileGrid[ni + nj * PILE_GRID] += objHeight * 0.3 * falloff;
+            const falloff = Math.max(0, 1 - dist / (minDist * 2.5));
+            pileGrid[ni + nj * PILE_GRID] += objHeight * 0.25 * falloff;
           }
         }
       }
     }
     placedPositions.push({ x, z, minDist });
-    const jitter = 0.08;
-    return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: h + 0.1 };
+    const jitter = isLarge ? 0.03 : 0.05;
+    return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: Math.max(h + 0.15, objHeight * 0.5) };
   }
+  
+  // 폴백: 외곽에 배치
   const fallbackAngle = Math.random() * Math.PI * 2;
-  const fallbackR = Math.random() * PILE_RADIUS * 0.8;
+  const fallbackR = isLarge ? PILE_RADIUS * 1.0 : PILE_RADIUS * 0.7;
   const fx = Math.cos(fallbackAngle) * fallbackR;
   const fz = Math.sin(fallbackAngle) * fallbackR;
+  const fh = Math.max(getPileHeight(fx, fz), 0);
   placedPositions.push({ x: fx, z: fz, minDist: 0.5 });
-  return { x: fx, z: fz, y: getPileHeight(fx, fz) + 0.1 };
+  return { x: fx, z: fz, y: Math.max(fh + 0.2, objHeight * 0.5) };
 }
 
 const TRASH_COLORS = {
