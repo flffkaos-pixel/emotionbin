@@ -1,10 +1,11 @@
-User-agent: *
+﻿User-agent: *
 Allow: /
 Disallow: /dump-modal
 
 User-agent: Naverbot
 Allow: /
 
+Allow: /research/
 User-agent: Googlebot
 Allow: /
 
@@ -51,3 +52,4 @@ User-agent: DotBot
 Disallow: /
 
 Sitemap: https://emotionbin.pages.dev/sitemap.xml
+
