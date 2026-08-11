@@ -1,4 +1,0 @@
-#Mon Aug 10 13:13:29 KST 2026
-base.0=C\:\\Users\\중진공14\\Documents\\Default Project\\emotionbin\\android\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
-path.0=classes.dex
-renamed.0=classes.dex
