@@ -1,0 +1,5 @@
+﻿#!/bin/bash
+DIRNAME=\
+APP_HOME=\
+CLASSPATH=\/gradle/wrapper/gradle-wrapper.jar
+exec "\/bin/java" -classpath "\" org.gradle.wrapper.GradleWrapperMain "\$@"
