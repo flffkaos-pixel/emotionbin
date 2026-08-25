@@ -1,14 +1,1 @@
-﻿[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "web",
-    "site": "https://emotionbin.pages.dev"
-  }
-}, {
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.emotionbin.app",
-    "sha256_cert_fingerprints": ["25:68:D1:DC:79:E3:B8:4D:1D:67:1A:85:DC:83:0F:C3:17:4F:D6:81:56:0A:FF:3C:3E:9C:54:7E:4F:95:A6:E3"]
-  }
-}]
+[{"relation":["delegate_permission/common.handle_all_urls"],"target":{"namespace":"android_app","package_name":"com.emotionbin.app","sha256_cert_fingerprints":["58:40:23:34:2C:86:9F:44:82:C1:D5:30:6B:13:65:72:6F:7B:C4:D5:2D:A9:42:3E:BE:7A:71:98:CE:D6:F5:C0","25:68:D1:DC:79:E3:B8:4D:1D:67:1A:85:DC:83:0F:C3:17:4F:D6:81:56:0A:FF:3C:3E:9C:54:7E:4F:95:A6:E3"]}}]
