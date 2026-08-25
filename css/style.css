@@ -156,12 +156,13 @@ body {
 
 .nav-hamburger {
   display: none;
-  background: none;
-  border: none;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
   color: var(--text-primary);
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  padding: 0.3rem;
+  padding: 0.45rem 0.65rem;
   font-family: inherit;
   line-height: 1;
 }
