@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private AdView adView;
     private InterstitialAd interstitialAd;
+    private boolean interstitialShownThisSession = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +60,10 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void showInterstitial() {
             runOnUiThread(() -> {
+                // ponytail: 세션당 1회 제한 — 삭제/태우기 때마다 광고면 피로도·리뷰 지름
+                if (interstitialShownThisSession) return;
                 if (interstitialAd != null) {
+                    interstitialShownThisSession = true;
                     interstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
                         @Override
                         public void onAdDismissedFullScreenContent() {
@@ -77,6 +81,16 @@ public class MainActivity extends AppCompatActivity {
                     loadInterstitial();
                 }
             });
+        }
+
+        @JavascriptInterface
+        public void hideBanner() {
+            runOnUiThread(() -> adView.setVisibility(android.view.View.GONE));
+        }
+
+        @JavascriptInterface
+        public void showBanner() {
+            runOnUiThread(() -> adView.setVisibility(android.view.View.VISIBLE));
         }
     }
 

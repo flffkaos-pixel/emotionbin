@@ -77,11 +77,13 @@ function openDumpModal() {
   document.getElementById('dump-btn').classList.remove('loading');
   document.getElementById('ai-response').style.display = 'none';
   document.body.style.overflow = 'hidden';
+  try { if (window.AndroidBridge && AndroidBridge.hideBanner) AndroidBridge.hideBanner(); } catch (e) {}
 }
 
 function closeDumpModal() {
   document.getElementById('dump-modal').classList.remove('active');
   document.body.style.overflow = '';
+  try { if (window.AndroidBridge && AndroidBridge.showBanner) AndroidBridge.showBanner(); } catch (e) {}
   resetForm();
 
   if (pendingDumpData) {
@@ -217,7 +219,7 @@ async function dumpEmotion() {
     }
   }, 3000);
 
-  if (typeof getAIResponse === 'function') getAIResponse(text);
+  if (typeof getAIResponse === 'function') getAIResponse(text, privacy === 'public' ? data.id : null);
   closeDumpModal();
 }
 
@@ -390,7 +392,7 @@ function renderComments(item) {
   if (comments.length > 0) {
     html += comments.map(c => `
       <div class=\"comment-item\">
-        <span class=\"comment-anon\">익명</span>
+        <span class=\"comment-anon\">${c.author ? escapeHtml(c.author) : '익명'}</span>
         <span class=\"comment-text\">${escapeHtml(c.text)}</span>
         <span class=\"comment-time\">${formatTime(c.timestamp)}</span>
       </div>
@@ -482,6 +484,7 @@ function burnMyTrash(id) {
     renderTop10();
     renderFeed();
     showToast('🔥 감정이 불태워졌습니다', 'success');
+    try { if (window.AndroidBridge && AndroidBridge.showInterstitial) AndroidBridge.showInterstitial(); } catch (e) {}
   }
 
   if (typeof burnInDrum === 'function' && typeof drumTrashObjects !== 'undefined' && drumTrashObjects.length > 0) {

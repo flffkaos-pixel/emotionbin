@@ -44,7 +44,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           cd android
-          gradle wrapper --gradle-version=8.7
+          gradle wrapper --gradle-version=8.9
           ./gradlew assembleRelease bundleRelease --no-daemon
 
       - name: Upload artifacts

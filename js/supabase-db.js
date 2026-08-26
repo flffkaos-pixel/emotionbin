@@ -96,7 +96,7 @@ async function sbDeletePost(postId) {
   }
 }
 
-async function sbAddComment(postId, text) {
+async function sbAddComment(postId, text, author) {
   if (!sbConnected) return null;
   try {
     const { data, error } = await sbClient
@@ -105,7 +105,7 @@ async function sbAddComment(postId, text) {
       .eq('id', postId)
       .single();
     if (error) throw error;
-    const comment = { text: text.substring(0, 300), timestamp: Date.now() };
+    const comment = { text: text.substring(0, 300), timestamp: Date.now(), author: author || null };
     const comments = [...(data?.comments || []), comment];
     const { error: updateError } = await sbClient
       .from(TABLE_NAME)
