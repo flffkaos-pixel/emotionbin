@@ -217,6 +217,7 @@ async function dumpEmotion() {
     }
   }, 3000);
 
+  if (typeof getAIResponse === 'function') getAIResponse(text);
   closeDumpModal();
 }
 
@@ -524,6 +525,7 @@ function deleteMyTrash(id) {
   renderFeed();
   updateStats();
   showToast('삭제되었습니다', 'success');
+  try { if (window.AndroidBridge && AndroidBridge.showInterstitial) AndroidBridge.showInterstitial(); } catch (e) {}
 }
 
 function resetAllData() {

@@ -1,10 +1,11 @@
+// AI 반응 (브라우저 내 Gemma/WebLLM) — 감정을 자동 판단해 위로하거나 같이 화내줌
+// ponytail: WebGPU 미지원·실패 시 정해둔 답변으로 폴백
 const AI_MODES = {
-  none: { label: 'AI 반응 안함', icon: '🚫' },
-  rage: { label: '🔥 더 세게 토해내', icon: '🔥' },
-  cold: { label: '🧊 냉정한 분석', icon: '🧊' },
+  auto: { label: '🤖 AI 반응' },
+  none: { label: 'AI 끄기' },
 };
 
-let selectedAIMode = 'none';
+let selectedAIMode = 'auto';
 
 function selectAIMode(mode) {
   selectedAIMode = mode;
@@ -13,49 +14,75 @@ function selectAIMode(mode) {
   });
 }
 
-const RAGE_RESPONSES = [
-  '맞아, 그 감정 전부 맞아. 더 화내. 더 욕해. 세상이 좆같은 건 사실이니까.',
-  '좋아, 다 토해내. 참지 마. 너가 느끼는 그 모든 감정은 다 정당해.',
-  '그래, 인생이 좆같지. 근데 그게 끝은 아니야. 더 쎄게 욕하고 더 쎄게 분노해.',
-  '오늘 하루도 참느라 고생했어. 이제 여기서 다 쏟아버려. 아무도 너를 판단하지 않아.',
-  '좋아. 더 해. 너의 그 분노, 그 아픔, 전부 여기 쏟아부어. 쓰레기통이 다 받아줄게.',
-  '세상이 널 이렇게 만들었어. 그 모든 좆같은 일들, 여기에 다 던져버려.',
-  '더 해. 니 속에 있는 그 모든 검은 감정들을 꺼내. 여기선 안전해.',
-  '좆같은 놈들, 좆같은 상황, 좆같은 기분. 다 들어줄게. 계속해.',
-  '참지마. 터져. 니 감정은 소중하니까. 여기서는 자유롭게 썩어도 돼.',
-  '그래, 그렇게 분노하는 너도 괜찮아. 약한 척 하지마. 있는 그대로 내뱉어.',
-];
+const MODEL_ID = 'gemma-2-2b-it-q4f16_1-MLC';
+const SYSTEM_PROMPT_AUTO = "너는 '감정쓰레기통' 앱의 AI 친구다. 사용자가 버린 감정 글을 읽고 상태를 먼저 판단한다. 분노·짜증·억울함이 티가 나면 사용자 편에서 함께 강하게 화내주고, 슬픔·외로움·불안·지침이면 따뜻하게 위로한다. 2~3문장, 한국어 반말. 판단 과정은 설명하지 말고 바로 반응만 말한다. 폭력 조장이나 특정인 비난은 하지 않는다.";
 
-const COLD_RESPONSES = [
-  '당신의 감정은 현재 상황에 대한 자연스러운 반응입니다. 하지만 감정이 행동을 지배하게 두지 마세요. 이 감정이 말하려는 본질적인 메시지가 무엇인지 생각해보세요.',
-  '분노는 보통 기대와 현실의 괴리에서 발생합니다. 당신이 기대한 것은 무엇이고, 현실은 어땠나요? 그 차이를 좁힐 수 있는 방법을 고민해보는 건 어떨까요.',
-  '슬픔은 상실에 대한 반응입니다. 당신이 무엇을 잃었다고 느끼는지 객관적으로 파악해보세요. 그것이 되찾을 수 있는 것인지, 받아들여야 하는 것인지 판단하는 것이 중요합니다.',
-  '불안은 미래에 대한 통제 불능에서 옵니다. 지금 당장 통제할 수 있는 것이 무엇인지 나열해보고, 거기서부터 시작하세요.',
-  '당신의 감정은 유효합니다. 하지만 감정은 사실이 아니라 사실에 대한 해석입니다. 같은 상황을 다른 시각에서 바라보면 다른 감정이 올 수도 있습니다.',
-  '무기력함은 종종 너무 많은 선택지나 너무 큰 목표에서 비롯됩니다. 가장 작은 것부터 시작하세요. 움직임이 동기를 만듭니다.',
-  '후회는 과거에 대한 집착입니다. 후회의 에너지를 미래를 위한 교훈으로 전환할 수 있다면, 그것은 더 이상 후회가 아니라 경험입니다.',
-  '당신이 느끼는 외로움은 연결의 부재가 아니라, 진정한 연결에 대한 갈망입니다. 양보다 질입니다. 당신을 진정으로 이해하는 사람은 소수여도 충분합니다.',
-  '스트레스는 능력과 요구 사이의 불균형에서 옵니다. 요구를 낮추거나 능력을 키우거나. 당신이 선택할 수 있습니다.',
-  '지금 당신의 감정을 인식하고 표현한 것 자체가 중요한 첫걸음입니다. 감정을 직시하는 용기를 가졌다는 사실을 기억하세요.',
-];
+// WebGPU 미지원·로딩 실패 시 폴백 답변
+const FALLBACK_RESPONSES = {
+  warm: [
+    '여기까지 버리러 와줘서 고마워. 그 감정, 충분히 무거웠을 것 같아.',
+    '참아온 시간들도 다 의미 있었어. 오늘은 여기 두고 가볍게 가자.',
+    '그렇게 느끼는 게 당연해. 너무 나 자신을 몰아붙이지 말자.',
+    '오늘 하루도 정말 고생했어. 이 감정은 여기서 안전하게 쉬게 해줄게.',
+    '버렸으니까 됐어. 남은 하루는 조금만 더 너를 돌보자.',
+  ],
+  rage: [
+    '맞아, 그 감정 전부 맞아. 더 화내. 더 욕해. 세상이 좆같은 건 사실이니까.',
+    '좋아, 다 토해내. 참지 마. 너가 느끼는 그 모든 감정은 다 정당해.',
+    '그래, 인생이 좆같지. 근데 그게 끝은 아니야. 더 쎄게 욕하고 더 쎄게 분노해.',
+    '오늘 하루도 참느라 고생했어. 이제 여기서 다 쏟아버려. 아무도 너를 판단하지 않아.',
+    '참지마. 터져. 니 감정은 소중하니까. 여기서는 자유롭게 썩어도 돼.',
+  ],
+};
 
-function getAIResponse(text, tags) {
-  if (selectedAIMode === 'none') return null;
+let enginePromise = null;
 
-  const responseDiv = document.getElementById('ai-response');
+function loadEngine(onProgress) {
+  if (!('gpu' in navigator)) return Promise.reject(new Error('NO_WEBGPU'));
+  if (!enginePromise) {
+    enginePromise = import('https://esm.run/@mlc-ai/web-llm')
+      .then(webllm => webllm.CreateMLCEngine(MODEL_ID, {
+        initProgressCallback: p => { if (onProgress) onProgress(p); },
+      }));
+  }
+  return enginePromise;
+}
+
+function closeAIResponse() {
+  document.getElementById('ai-response').style.display = 'none';
+}
+
+function getAIResponse(text) {
+  if (selectedAIMode === 'none') return;
+  const box = document.getElementById('ai-response');
   const responseText = document.getElementById('ai-response-text');
   const labelSpan = document.getElementById('ai-mode-label');
+  box.style.display = 'block';
+  labelSpan.textContent = AI_MODES[selectedAIMode].label;
+  responseText.textContent = '감정 읽는 중...';
 
-  const mode = AI_MODES[selectedAIMode];
-  responseDiv.style.display = 'block';
-  labelSpan.textContent = mode.label;
+  const useFallback = () => {
+    const pool = Math.random() < 0.5 ? FALLBACK_RESPONSES.warm : FALLBACK_RESPONSES.rage;
+    responseText.textContent = pool[Math.floor(Math.random() * pool.length)];
+  };
 
-  const pool = selectedAIMode === 'rage' ? RAGE_RESPONSES : COLD_RESPONSES;
-  const response = pool[Math.floor(Math.random() * pool.length)];
-
-  setTimeout(() => {
-    responseText.textContent = response;
-  }, 300 + Math.random() * 500);
-
-  return response;
+  loadEngine(p => {
+    if (p.progress < 1) {
+      responseText.textContent = `AI 불러오는 중... ${Math.round(p.progress * 100)}% (첫 1회만 다운로드, 와이파이 권장)`;
+    }
+  })
+    .then(engine => engine.chat.completions.create({
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT_AUTO },
+        { role: 'user', content: (text || '').slice(0, 1000) },
+      ],
+      max_tokens: 150,
+      temperature: 0.9,
+    }))
+    .then(r => {
+      const out = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
+      if (out) responseText.textContent = out;
+      else useFallback();
+    })
+    .catch(() => useFallback());
 }

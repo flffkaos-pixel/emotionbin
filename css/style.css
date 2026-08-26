@@ -1556,3 +1556,13 @@ body {
 }
 
 
+
+/* AI 반응 */
+.ai-mode-container { display: flex; flex-wrap: wrap; gap: 8px; }
+.ai-mode-btn { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: .85rem; cursor: pointer; font-family: inherit; transition: .15s; }
+.ai-mode-btn:hover { border-color: var(--neon-green); }
+.ai-mode-btn.active { background: rgba(57,255,20,.12); border-color: var(--neon-green); color: var(--neon-green); font-weight: 600; }
+.ai-response-box { position: fixed; left: 50%; transform: translateX(-50%); bottom: 90px; z-index: 1200; width: min(92vw, 420px); background: #141414; border: 1px solid rgba(57,255,20,.4); border-radius: 14px; padding: 14px 16px; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.ai-response-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: .8rem; color: var(--neon-green); font-weight: 700; }
+.ai-response-close { background: none; border: none; color: #888; cursor: pointer; font-size: 1rem; }
+#ai-response-text { margin: 0; font-size: .92rem; line-height: 1.6; color: #e0e0e0; white-space: pre-wrap; word-break: keep-all; }

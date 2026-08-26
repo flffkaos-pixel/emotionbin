@@ -523,6 +523,14 @@
             </div>
           </fieldset>
 
+          <fieldset class="form-group">
+            <legend class="form-label">AI 반응</legend>
+            <div class="ai-mode-container" id="ai-mode-container" role="group">
+              <button type="button" class="ai-mode-btn active" data-mode="auto" onclick="selectAIMode('auto')">🤖 AI가 자동으로 반응</button>
+              <button type="button" class="ai-mode-btn" data-mode="none" onclick="selectAIMode('none')">🚫 끄기</button>
+            </div>
+          </fieldset>
+
           <button type="submit" class="dump-btn" id="dump-btn">
             <span class="dump-btn-icon" aria-hidden="true">🗑️</span>
             <span data-i18n="modal-submit">쓰레기통에 버리기</span>
@@ -533,6 +541,11 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="ai-response" class="ai-response-box" style="display:none" role="status">
+    <div class="ai-response-header"><span id="ai-mode-label"></span><button class="ai-response-close" onclick="closeAIResponse()" aria-label="닫기">✕</button></div>
+    <p id="ai-response-text"></p>
+  </div>
 
   <footer role="contentinfo" class="site-footer">
     <div class="footer-inner">
@@ -586,7 +599,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
   <script src="js/trash-mountain.js?v=15" defer></script>
-  <script src="js/ai.js?v=15" defer></script>
+      <script src="js/ai.js?v=16" defer></script>
   <script src="js/effects.js?v=15" defer></script>
   <script src="js/drum-scene.js?v=15" defer></script>
   <script src="js/app.js?v=15" defer></script>
