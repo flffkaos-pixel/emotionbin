@@ -83,9 +83,9 @@ function getAIResponse(text, postId) {
       const out = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
       if (out) {
         responseText.textContent = out;
-        // 공개 글이면 같은 문장을 피드 댓글로도 저장 → 다른 사람들이 보고 재방문 (익명으로 표시)
+        // 공개 글이면 같은 문장을 피드 댓글로도 저장 → 다른 사람들이 보고 재방문 (AI 표시: 정책 안전)
         if (postId && typeof window.sbAddComment === 'function') {
-          window.sbAddComment(postId, out);
+          window.sbAddComment(postId, out, '🤖 AI');
         }
       }
       else useFallback();
