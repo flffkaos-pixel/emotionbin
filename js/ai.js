@@ -1,5 +1,5 @@
-// AI 반응 (브라우저 내 Gemma/WebLLM) — 감정을 자동 판단해 위로하거나 같이 화내줌
-// ponytail: WebGPU 미지원·실패 시 정해둔 답변으로 폴백
+// AI 반응 — 서버(Supabase Edge Function + Gemini)로 생성. WebGPU 불필요, 어디서든 동작.
+// ponytail: 서버 호출 실패 시 정해둔 답변으로 폴백
 const AI_MODES = {
   auto: { label: '🤖 AI 반응' },
   none: { label: 'AI 끄기' },
@@ -14,10 +14,12 @@ function selectAIMode(mode) {
   });
 }
 
-const MODEL_ID = 'gemma-2-2b-it-q4f16_1-MLC';
-const SYSTEM_PROMPT_AUTO = "너는 '감정쓰레기통' 앱의 AI 친구다. 사용자가 버린 감정 글을 읽고 상태를 먼저 판단한다. 분노·짜증·억울함이 티가 나면 사용자 편에서 함께 강하게 화내주고, 슬픔·외로움·불안·지침이면 따뜻하게 위로한다. 2~3문장, 한국어 반말. 판단 과정은 설명하지 말고 바로 반응만 말한다. 폭력 조장이나 특정인 비난은 하지 않는다.";
+// Supabase 프로젝트 ref (supabase-db.js와 동일)
+const SB_REF = 'ufvqbjduffflcijtrkkn';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdnFiamR1ZmZmbGNpanRya2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjM5NDcsImV4cCI6MjA5ODczOTk0N30.Yp2R_4HWxZiDcyHD91Bd03kf6S92qhLkwnw-B6FzkNc';
+const AI_FN_URL = `https://${SB_REF}.supabase.co/functions/v1/ai-reply`;
 
-// WebGPU 미지원·로딩 실패 시 폴백 답변
+// 서버 실패 시 폴백 답변
 const FALLBACK_RESPONSES = {
   warm: [
     '여기까지 버리러 와줘서 고마워. 그 감정, 충분히 무거웠을 것 같아.',
@@ -34,19 +36,6 @@ const FALLBACK_RESPONSES = {
     '참지마. 터져. 니 감정은 소중하니까. 여기서는 자유롭게 썩어도 돼.',
   ],
 };
-
-let enginePromise = null;
-
-function loadEngine(onProgress) {
-  if (!('gpu' in navigator)) return Promise.reject(new Error('NO_WEBGPU'));
-  if (!enginePromise) {
-    enginePromise = import('https://esm.run/@mlc-ai/web-llm')
-      .then(webllm => webllm.CreateMLCEngine(MODEL_ID, {
-        initProgressCallback: p => { if (onProgress) onProgress(p); },
-      }));
-  }
-  return enginePromise;
-}
 
 function closeAIResponse() {
   document.getElementById('ai-response').style.display = 'none';
@@ -66,28 +55,18 @@ function getAIResponse(text, postId) {
     responseText.textContent = pool[Math.floor(Math.random() * pool.length)];
   };
 
-  loadEngine(p => {
-    if (p.progress < 1) {
-      responseText.textContent = `AI 불러오는 중... ${Math.round(p.progress * 100)}% (첫 1회만 다운로드, 와이파이 권장)`;
-    }
+  fetch(AI_FN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SB_ANON_KEY,
+      'Authorization': 'Bearer ' + SB_ANON_KEY,
+    },
+    body: JSON.stringify({ content: (text || '').slice(0, 1000), postId: postId || null }),
   })
-    .then(engine => engine.chat.completions.create({
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT_AUTO },
-        { role: 'user', content: (text || '').slice(0, 1000) },
-      ],
-      max_tokens: 150,
-      temperature: 0.9,
-    }))
-    .then(r => {
-      const out = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
-      if (out) {
-        responseText.textContent = out;
-        // 공개 글이면 같은 문장을 피드 댓글로도 저장 → 다른 사람들이 보고 재방문 (AI 표시: 정책 안전)
-        if (postId && typeof window.sbAddComment === 'function') {
-          window.sbAddComment(postId, out, '🤖 AI');
-        }
-      }
+    .then(r => r.json())
+    .then(d => {
+      if (d && d.reply) responseText.textContent = d.reply;
       else useFallback();
     })
     .catch(() => useFallback());
