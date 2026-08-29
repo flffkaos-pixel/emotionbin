@@ -1,0 +1,32 @@
+name: Marketing Content
+
+on:
+  schedule:
+    # 매일 오전 9시 (KST = UTC 00:00)
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate today's marketing content
+        run: node tools/marketing/generate-posts.mjs
+
+      - name: Commit generated content
+        run: |
+          git config user.name "marketing-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if [ -n "$(git status --porcelain marketing/)" ]; then
+            git add marketing/
+            git commit -m "marketing: generate content $(date +%F)"
+            git push
+          else
+            echo "No new content (already generated today)"
+          fi
