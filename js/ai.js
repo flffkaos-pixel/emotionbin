@@ -53,6 +53,18 @@ function closeAIResponse() {
   document.getElementById('ai-response').style.display = 'none';
 }
 
+// 페이지 진입 시 백그라운드 프리로드 — 글 쓰기 전에 미리 받아두기
+if ('gpu' in navigator) {
+  const preloadAI = () => {
+    if (selectedAIMode === 'none') return;
+    loadEngine(p => {
+      if (p.progress < 1) console.log(`AI preload ${Math.round(p.progress * 100)}%`);
+    }).catch(() => {});
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(preloadAI, { timeout: 3000 });
+  else setTimeout(preloadAI, 1500);
+}
+
 function getAIResponse(text, postId) {
   if (selectedAIMode === 'none') return;
   const box = document.getElementById('ai-response');
