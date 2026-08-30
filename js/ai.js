@@ -14,9 +14,9 @@ function selectAIMode(mode) {
   });
 }
 
-// WebLLM 모델 (mlc-ai가 모델을 자동 제공 → 별도 호스팅 불필요)
-const MODEL_ID = 'gemma-2-2b-it-q4f16_1-MLC';
-const SYSTEM_PROMPT_AUTO = "너는 '감정쓰레기통' 앱의 AI 친구다. 사용자가 버린 감정 글을 읽고 상태를 먼저 판단한다. 분노·짜증·억울함이 티가 나면 사용자 편에서 함께 강하게 화내주고, 슬픔·외로움·불안·지침이면 따뜻하게 위로한다. 2~3문장, 한국어 반말. 판단 과정은 설명하지 말고 바로 반응만 말한다. 폭력 조장이나 특정인 비난은 하지 않는다.";
+// WebLLM 모델 — 한국어 강함 + 모바일 친화 (mlc-ai 자동 제공)
+const MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
+const SYSTEM_PROMPT_AUTO = "너는 '감정쓰레기통' 앱의 AI 친구다. 사용자가 버린 글을 읽고, 분노/짜증이면 함께 화내고, 슬픔/외로움/불안이면 따뜻하게 위로한다. 반드시 한국어로만 2문장, 반말로. 설명 없이 반응만 말한다.";
 
 // WebGPU 미지원·로딩 실패 시 폴백 답변
 const FALLBACK_RESPONSES = {
@@ -87,21 +87,24 @@ function getAIResponse(text, postId) {
     .then(engine => engine.chat.completions.create({
       messages: [
         { role: 'system', content: SYSTEM_PROMPT_AUTO },
-        { role: 'user', content: (text || '').slice(0, 1000) },
+        { role: 'user', content: (text || '').slice(0, 600) },
       ],
-      max_tokens: 150,
-      temperature: 0.9,
+      max_tokens: 90,
+      temperature: 0.75,
+      top_p: 0.9,
     }))
     .then(r => {
-      const out = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
-      if (out) {
-        responseText.textContent = out;
-        // 공개 글이면 같은 문장을 피드 댓글로 저장 → 웹/앱 모두에서 보임 (AI 표시: 정책 안전)
-        if (postId && typeof window.sbAddComment === 'function') {
-          window.sbAddComment(postId, out, '🤖 AI');
-        }
+      const raw = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
+      // ponytail: 모델이 한국어 대신 쓰레기 토큰 뱉으면 예비 답변으로 대체
+      const hangul = (raw.match(/[가-힣]/g) || []).length;
+      const isGarbage = !raw || raw.length < 5 || /�/.test(raw) || (raw.length > 20 && hangul / raw.length < 0.15);
+      if (isGarbage) { useFallback(); return; }
+      // 2문장 정도로 다듬기 (길면 앞에서 2문장만)
+      const out = raw.split(/(?<=[.!?。])/).slice(0, 2).join('').trim().slice(0, 140) || raw.slice(0, 140);
+      responseText.textContent = out;
+      if (postId && typeof window.sbAddComment === 'function') {
+        window.sbAddComment(postId, out, '🤖 AI');
       }
-      else useFallback();
     })
     .catch(() => useFallback());
 }
