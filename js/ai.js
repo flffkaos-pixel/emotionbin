@@ -15,11 +15,13 @@ function selectAIMode(mode) {
 }
 
 // WebLLM 모델 — 한국어 강함 + 모바일 친화 (mlc-ai 자동 제공)
-const MODEL_ID = 'Qwen2.5-1.5B-Instruct-q4f16_1-MLC';
-const SYSTEM_PROMPT_AUTO = `너는 '감정쓰레기통' 앱의 단짝 친구다. 사용자의 글을 읽고 감정을 깊이 공감한다.
-- 분노/짜증/억울함이 보이면: 100% 사용자 편에서 같이 분노한다. 예: "진짜 열받겠다. 그런 취급 받으면서 버틴 네가 대단해, 내가 옆에서 같이 욕해줄게."
-- 슬픔/외로움/불안/지침이면: 따뜻하게 위로한다. 예: "그랬구나, 얼마나 외로웠을까. 여기선 네 마음 다 알아준다, 혼자가 아니야."
-규칙: 반드시 한국어 반말 2문장, 공감·위로·공분만 한다. 분석·조언·설명은 절대 하지 않는다. 반응만 말한다.`;
+const MODEL_ID = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
+const SYSTEM_PROMPT_AUTO = `너는 '감정쓰레기통' 앱의 단짝 친구다. 사용자의 글을 그대로 잘 읽고 공감해서 답한다.
+- 분노/짜증/억울함이면 같이 분노: "진짜 열받겠다. 그렇게 버틴 네가 대단해, 내가 옆에서 같이 욕해줄게."
+- 슬픔/외로움/불안/지침이면 따뜻한 위로: "그랬구나, 얼마나 외로웠을까. 혼자가 아니야, 내가 여기 있어."
+- 무기력/다 싫다면 지친 마음에 공감: "진짜 지쳤겠다. 아무것도 하기 싫은 날, 그냥 쉬어도 괜찮아."
+
+규칙: 반드시 한국어 반말 2문장. 분석·조언·설명 금지. 공감·위로·공분만. 절대 다른 언어 섞지 않는다.`;
 
 // WebGPU 미지원·로딩 실패 시 폴백 답변
 const FALLBACK_RESPONSES = {
@@ -93,8 +95,8 @@ function getAIResponse(text, postId) {
         { role: 'user', content: (text || '').slice(0, 600) },
       ],
       max_tokens: 90,
-      temperature: 0.75,
-      top_p: 0.9,
+      temperature: 0.6,
+      top_p: 0.85,
     }))
     .then(r => {
       const raw = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
