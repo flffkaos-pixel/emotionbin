@@ -29,61 +29,56 @@ function getPileHeight(x, z) {
   return idx >= 0 ? pileGrid[idx] : 0;
 }
 
-function placeOnPile(category, objHeight) {
-  const baseMinDist = { can: 0.9, box: 1.1, tv: 1.4, fridge: 2.4, car: 3.0 };
-  const minDist = baseMinDist[category] || 1.0;
-  const isLarge = category === 'fridge' || category === 'car';
-  
-  for (let attempt = 0; attempt < 200; attempt++) {
+function placeOnPile(radius, height) {
+  // ponytail: 실제 오브젝트 반지름/높이를 받아 XZ 분리 + Y 쌓기 계산 → 겹침/뚫림 방지
+  const minDist = Math.max(0.5, radius * 0.9);
+  const isLarge = radius > 1.5;
+
+  for (let attempt = 0; attempt < 300; attempt++) {
     const angle = Math.random() * Math.PI * 2;
-    const maxR = isLarge ? PILE_RADIUS * 1.2 : PILE_RADIUS * 1.4;
+    const maxR = isLarge ? PILE_RADIUS * 1.1 : PILE_RADIUS * 1.3;
     const r = Math.sqrt(Math.random()) * maxR;
     const x = Math.cos(angle) * r;
     const z = Math.sin(angle) * r;
-    
+
     let tooClose = false;
     for (const p of placedPositions) {
       const dx = x - p.x, dz = z - p.z;
-      const sep = (minDist + p.minDist) * 1.1;
+      const sep = (minDist + p.minDist) * 1.05;
       if (dx * dx + dz * dz < sep * sep) { tooClose = true; break; }
     }
     if (tooClose) continue;
-    
-    const h = getPileHeight(x, z);
-    if (h < 0) continue; // 지면 아래면 제외
-    
+
     const idx = getPileIdx(x, z);
-    if (idx >= 0) {
-      pileGrid[idx] += objHeight * 2;
-      const xIdx = idx % PILE_GRID;
-      const zIdx = Math.floor(idx / PILE_GRID);
-      const radius = Math.ceil(minDist * 3);
-      for (let dx = -radius; dx <= radius; dx++) {
-        for (let dz = -radius; dz <= radius; dz++) {
-          if (dx === 0 && dz === 0) continue;
-          const ni = xIdx + dx;
-          const nj = zIdx + dz;
-          if (ni >= 0 && ni < PILE_GRID && nj >= 0 && nj < PILE_GRID) {
-            const dist = Math.sqrt(dx * dx + dz * dz);
-            const falloff = Math.max(0, 1 - dist / (minDist * 2.5));
-            pileGrid[ni + nj * PILE_GRID] += objHeight * 0.25 * falloff;
-          }
-        }
+    if (idx < 0) continue;
+
+    // 쌓는 높이: 현재 그리드 높이 + 이 객체 높이 절반(중심) 만큼 위에 안착
+    const h = pileGrid[idx];
+    const xIdx = idx % PILE_GRID;
+    const zIdx = Math.floor(idx / PILE_GRID);
+    const cellR = Math.ceil(minDist * 2.5);
+    for (let dx = -cellR; dx <= cellR; dx++) {
+      for (let dz = -cellR; dz <= cellR; dz++) {
+        const ni = xIdx + dx;
+        const nj = zIdx + dz;
+        if (ni < 0 || ni >= PILE_GRID || nj < 0 || nj >= PILE_GRID) continue;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        const falloff = Math.max(0, 1 - dist / (minDist * 2.5));
+        pileGrid[ni + nj * PILE_GRID] += height * 0.5 * falloff;
       }
     }
+
     placedPositions.push({ x, z, minDist });
-    const jitter = isLarge ? 0.03 : 0.05;
-    return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: Math.max(h + 0.15, objHeight * 0.5) };
+    const jitter = isLarge ? 0.02 : 0.05;
+    return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: h + height * 0.5 };
   }
-  
-  // 폴백: 외곽에 배치
-  const fallbackAngle = Math.random() * Math.PI * 2;
-  const fallbackR = isLarge ? PILE_RADIUS * 1.0 : PILE_RADIUS * 0.7;
-  const fx = Math.cos(fallbackAngle) * fallbackR;
-  const fz = Math.sin(fallbackAngle) * fallbackR;
-  const fh = Math.max(getPileHeight(fx, fz), 0);
-  placedPositions.push({ x: fx, z: fz, minDist: 0.5 });
-  return { x: fx, z: fz, y: Math.max(fh + 0.2, objHeight * 0.5) };
+
+  // 폴백: 중심 근처 낮은 곳
+  const fx = (Math.random() - 0.5) * PILE_RADIUS;
+  const fz = (Math.random() - 0.5) * PILE_RADIUS;
+  const fh = pileGrid[getPileIdx(fx, fz) >= 0 ? getPileIdx(fx, fz) : 0] || 0;
+  placedPositions.push({ x: fx, z: fz, minDist: Math.max(0.5, radius * 0.7) });
+  return { x: fx, z: fz, y: Math.max(fh + height * 0.5, height * 0.5) };
 }
 
 const TRASH_COLORS = {
@@ -236,7 +231,7 @@ function createBaseTrash() {
     const color = colors[i % colors.length];
     const w = [20, 30, 15, 60, 80, 100, 150, 200, 300][i];
     const objHeight = getObjHeight(cat);
-    const pilePos = placeOnPile(cat, objHeight);
+    const pilePos = placeOnPile(getObjRadius(cat), objHeight);
     const mesh = createTrashMesh(w, fakeContentLen, color, [], cat);
     mesh.position.set(pilePos.x, pilePos.y + 0.1, pilePos.z);
     mesh.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, Math.random() * Math.PI * 2);
@@ -749,7 +744,7 @@ const CATEGORY_MAP = {
 
 function createTrashMesh(weight, contentLength, color, tags, forceType) {
   const w = weight / 200;
-  const lenFactor = Math.min(3.0, 1.2 + contentLength / 150);
+  const lenFactor = Math.min(1.5, 1.0 + contentLength / 300);
   const accentColor = color || 0x888888;
   let category;
   if (forceType && forceType !== 'auto') {
@@ -1096,6 +1091,26 @@ function getObjHeight(category) {
   }
 }
 
+function getObjRadius(category) {
+  switch (category) {
+    case 'can': return 0.6;
+    case 'box': return 0.9;
+    case 'tv': return 1.5;
+    case 'fridge': return 2.0;
+    case 'car': return 2.4;
+    default: return 0.7;
+  }
+}
+
+// 메시의 실제 바운딩 크기(반지름·높이) 측정 — 배치에 그대로 사용
+function measureFootprint(group) {
+  const box = new THREE.Box3().setFromObject(group);
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const radius = Math.max(size.x, size.z) * 0.5;
+  return { radius, height: size.y };
+}
+
 let trailParticles = [];
 
 function createTrashItem(data) {
@@ -1129,7 +1144,9 @@ function createTrashItem(data) {
   scene.add(mesh);
 
   const objHeight = getObjHeight(category);
-  const pilePos = placeOnPile(category, objHeight);
+  // 실제 메시 크기로 배치 → 겹침/뚫림 방지 (최종 안착 스케일과 동일하게)
+  const fp = measureFootprint(mesh);
+  const pilePos = placeOnPile(fp.radius, fp.height);
 
   const arcHeight = 5 + Math.random() * 3;
   const duration = 2500 + Math.random() * 1200;
@@ -1216,7 +1233,7 @@ function updateDumpAnimations() {
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 6;
     anim.mesh.rotation.z = anim.startRot.z + anim.wobbleZ * ease;
 
-    const scale = 0.5 + 0.7 * t;
+    const scale = 0.4 + 0.6 * t;
     anim.mesh.scale.set(scale, scale, scale);
 
     if (t > 0.15 && t < 0.95 && Math.random() < 0.3) {
