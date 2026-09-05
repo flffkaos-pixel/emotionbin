@@ -1,9 +1,0 @@
-# 감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화
-
-> 세상 어디에도 말할 수 없는 감정을 익명으로 마음껏 버리는 곳. 게정쓰레기통에서 당신의 분노, 슬픔, 스트레스를 3D 쓰레기산에 실시간으로 시각화하며 배출하세요. 계정 없이 무료.
-
-Canonical URL: https://emotionbin.pages.dev
-Language: ko
-
-## Pages
-- https://emotionbin.pages.dev/ : 감정쓰레기통 - 익명 감정 배출 & 실시간 3D 시각화
