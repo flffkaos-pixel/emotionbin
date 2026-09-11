@@ -455,6 +455,19 @@ function renderMyTrash() {
         <div class="mytrash-meta">
           ${formatTime(item.timestamp)} · ${item.weightBefore}kg → ${item.weightAfter}kg (${item.weightDiff > 0 ? '-' : '+'}${Math.abs(item.weightDiff)}kg)
         </div>
+        ${(() => {
+          const synced = allTrash.find(t => t.id === item.id);
+          const comments = (synced && synced.comments) || item.comments || [];
+          if (!comments.length) return '';
+          return `<div class="mytrash-comments">`
+            + comments.map(c => `
+              <div class="comment-item">
+                <span class="comment-anon">${c.author ? escapeHtml(c.author) : '익명'}</span>
+                <span class="comment-text">${escapeHtml(c.text)}</span>
+              </div>
+            `).join('')
+            + `</div>`;
+        })()}
       </div>
       <div class="mytrash-actions">
         <button class="mytrash-burn" onclick="burnMyTrash(${item.id})">🔥 태우기</button>

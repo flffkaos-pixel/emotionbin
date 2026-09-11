@@ -1,5 +1,6 @@
-// AI 반응 — 브라우저 내 WebGPU(WebLLM)로 생성. 댓글은 Supabase에 저장되어 웹/앱 모두에서 보임.
-// ponytail: WebGPU 미지원·실패 시 정해둔 답변으로 폴백
+// AI 반응 — 브라우저 WebGPU(WebLLM)로 생성. 단, 자동 프리로드 제거(폰 재시작 원인).
+// 피드 댓글은 서버(ai-comment-cron)가 담당 → 여기선 본인 반응만.
+// ponytail: WebGPU 없으면 조용히 예비 답변으로 폴백 (모델 다운로드 자체를 안 함)
 const AI_MODES = {
   auto: { label: '🤖 AI 반응' },
   none: { label: 'AI 끄기' },
@@ -43,8 +44,15 @@ const FALLBACK_RESPONSES = {
 
 let enginePromise = null;
 
+// ponytail: WebGPU 지원하는 데스크탑 브라우저에서만 실제 모델 사용 (모바일은 배제)
+function canUseWebGPU() {
+  if (typeof navigator === 'undefined' || !navigator.gpu) return false;
+  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  return !mobile;
+}
+
 function loadEngine(onProgress) {
-  if (!('gpu' in navigator)) return Promise.reject(new Error('NO_WEBGPU'));
+  if (!canUseWebGPU()) return Promise.reject(new Error('NO_WEBGPU'));
   if (!enginePromise) {
     enginePromise = import('https://esm.run/@mlc-ai/web-llm')
       .then(webllm => webllm.CreateMLCEngine(MODEL_ID, {
@@ -55,19 +63,8 @@ function loadEngine(onProgress) {
 }
 
 function closeAIResponse() {
-  document.getElementById('ai-response').style.display = 'none';
-}
-
-// 페이지 진입 시 백그라운드 프리로드 — 글 쓰기 전에 미리 받아두기
-if ('gpu' in navigator) {
-  const preloadAI = () => {
-    if (selectedAIMode === 'none') return;
-    loadEngine(p => {
-      if (p.progress < 1) console.log(`AI preload ${Math.round(p.progress * 100)}%`);
-    }).catch(() => {});
-  };
-  if ('requestIdleCallback' in window) requestIdleCallback(preloadAI, { timeout: 3000 });
-  else setTimeout(preloadAI, 1500);
+  const el = document.getElementById('ai-response');
+  if (el) el.style.display = 'none';
 }
 
 function getAIResponse(text, postId) {
@@ -107,9 +104,7 @@ function getAIResponse(text, postId) {
       // 2문장 정도로 다듬기 (길면 앞에서 2문장만)
       const out = raw.split(/(?<=[.!?。])/).slice(0, 2).join('').trim().slice(0, 140) || raw.slice(0, 140);
       responseText.textContent = out;
-      if (postId && typeof window.sbAddComment === 'function') {
-        window.sbAddComment(postId, out, '🤖 AI');
-      }
+      // ponytail: 피드 댓글은 서버 크론(ai-comment-cron)이 일괄 생성 → 여기선 본인 반응만 표시
     })
     .catch(() => useFallback());
 }
