@@ -30,7 +30,7 @@ function initDrumScene() {
   drumCamera.position.set(3.5, 2.5, 4.5);
   drumCamera.lookAt(0, 0.5, 0);
 
-  drumRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  drumRenderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
   drumRenderer.setSize(w, h);
   drumRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   drumRenderer.shadowMap.enabled = true;

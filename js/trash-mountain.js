@@ -124,7 +124,7 @@ function initScene() {
   camera.position.set(16, 11, 22);
   camera.lookAt(0, 3, 0);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
   renderer.setSize(w, h);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
@@ -243,7 +243,7 @@ function createBaseTrash() {
 }
 
 function addAtmosphere() {
-  const particleCount = 2000;
+  const particleCount = 500;
   const positions = new Float32Array(particleCount * 3);
   const sizes = new Float32Array(particleCount);
   for (let i = 0; i < particleCount; i++) {
