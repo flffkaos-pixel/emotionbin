@@ -30,7 +30,8 @@
   <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
   <link rel="apple-touch-icon" href="/icon-192.png">
 
-  <script>function setVh(){document.documentElement.style.setProperty('--vh',window.innerHeight*.01+'px')}window.addEventListener('resize',setVh),window.addEventListener('orientationchange',function(){setTimeout(setVh,100)}),setVh()</script>
+  <script>window.addEventListener("error",function(e){try{var d=document.createElement("div");d.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#c00;color:#fff;padding:8px;font-size:12px;z-index:99999;";d.textContent="ERR: "+(e.message||e.error)+" @ "+(e.filename||"")+":"+e.lineno;document.body.appendChild(d);}catch(_){}});window.addEventListener("unhandledrejection",function(e){try{var d=document.createElement("div");d.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#c00;color:#fff;padding:8px;font-size:12px;z-index:99999;";d.textContent="PROMISE ERR: "+(e.reason&&e.reason.message?e.reason.message:e.reason);document.body.appendChild(d);}catch(_){}});</script>
+<script>function setVh(){document.documentElement.style.setProperty('--vh',window.innerHeight*.01+'px')}window.addEventListener('resize',setVh),window.addEventListener('orientationchange',function(){setTimeout(setVh,100)}),setVh()</script>
 
   <link rel="canonical" href="https://emotional-trash-can.app">
   <link rel="alternate" hreflang="ko" href="https://emotional-trash-can.app">
