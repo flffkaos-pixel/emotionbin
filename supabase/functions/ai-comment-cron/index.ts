@@ -23,6 +23,18 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
   try {
+    // 개별 요청 모드: { content, postId } 가 오면 즉시 1건 생성
+    let body = {};
+    try { body = await req.json(); } catch (_) {}
+    if (body && body.content) {
+      const reply = await generateReply(body.content);
+      if (reply && body.postId) await addComment(body.postId, reply);
+      return new Response(JSON.stringify({ ok: true, reply }), {
+        headers: { ...CORS, "Content-Type": "application/json" },
+      });
+    }
+
+    // 크론 모드: 최근 6시간 새 공개 글 일괄 처리
     const posts = await getPostsNeedingComment();
     let commented = 0;
 

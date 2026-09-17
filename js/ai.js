@@ -1,6 +1,6 @@
-// AI 반응 — 브라우저 WebGPU(WebLLM)로 생성. 단, 자동 프리로드 제거(폰 재시작 원인).
-// 피드 댓글은 서버(ai-comment-cron)가 담당 → 여기선 본인 반응만.
-// ponytail: WebGPU 없으면 조용히 예비 답변으로 폴백 (모델 다운로드 자체를 안 함)
+// AI 반응 — 서버(Supabase Edge Function + Groq)로 생성. 폰/앱/웹 모두 동일하게 동작.
+// 피드 댓글도 서버가 즉시 저장 → 모든 곳에서 보임.
+// ponytail: 서버 호출 실패 시 정해둔 답변으로 폴백
 const AI_MODES = {
   auto: { label: '🤖 AI 반응' },
   none: { label: 'AI 끄기' },
@@ -14,15 +14,6 @@ function selectAIMode(mode) {
     btn.classList.toggle('active', btn.dataset.mode === mode);
   });
 }
-
-// WebLLM 모델 — 한국어 강함 + 모바일 친화 (mlc-ai 자동 제공)
-const MODEL_ID = 'Qwen2.5-3B-Instruct-q4f16_1-MLC';
-const SYSTEM_PROMPT_AUTO = `너는 '감정쓰레기통' 앱의 단짝 친구다. 사용자의 글을 그대로 잘 읽고 공감해서 답한다.
-- 분노/짜증/억울함이면 같이 분노: "진짜 열받겠다. 그렇게 버틴 네가 대단해, 내가 옆에서 같이 욕해줄게."
-- 슬픔/외로움/불안/지침이면 따뜻한 위로: "그랬구나, 얼마나 외로웠을까. 혼자가 아니야, 내가 여기 있어."
-- 무기력/다 싫다면 지친 마음에 공감: "진짜 지쳤겠다. 아무것도 하기 싫은 날, 그냥 쉬어도 괜찮아."
-
-규칙: 반드시 한국어 반말 2문장. 분석·조언·설명 금지. 공감·위로·공분만. 절대 다른 언어 섞지 않는다.`;
 
 // WebGPU 미지원·로딩 실패 시 폴백 답변
 const FALLBACK_RESPONSES = {
@@ -42,25 +33,9 @@ const FALLBACK_RESPONSES = {
   ],
 };
 
-let enginePromise = null;
-
-// ponytail: WebGPU 지원하는 데스크탑 브라우저에서만 실제 모델 사용 (모바일은 배제)
-function canUseWebGPU() {
-  if (typeof navigator === 'undefined' || !navigator.gpu) return false;
-  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
-  return !mobile;
-}
-
-function loadEngine(onProgress) {
-  if (!canUseWebGPU()) return Promise.reject(new Error('NO_WEBGPU'));
-  if (!enginePromise) {
-    enginePromise = import('https://esm.run/@mlc-ai/web-llm')
-      .then(webllm => webllm.CreateMLCEngine(MODEL_ID, {
-        initProgressCallback: p => { if (onProgress) onProgress(p); },
-      }));
-  }
-  return enginePromise;
-}
+// 서버 함수 (Supabase Edge Function: rapid-action) — 폰/웹 모두 동일
+const AI_FN_URL = 'https://ufvqbjduffflcijtrkkn.supabase.co/functions/v1/rapid-action';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdnFiamR1ZmZmbGNpanRya2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjM5NDcsImV4cCI6MjA5ODczOTk0N30.Yp2R_4HWxZiDcyHD91Bd03kf6S92qhLkwnw-B6FzkNc';
 
 function closeAIResponse() {
   const el = document.getElementById('ai-response');
@@ -81,30 +56,19 @@ function getAIResponse(text, postId) {
     responseText.textContent = pool[Math.floor(Math.random() * pool.length)];
   };
 
-  loadEngine(p => {
-    if (p.progress < 1) {
-      responseText.textContent = `AI 불러오는 중... ${Math.round(p.progress * 100)}% (첫 1회만 다운로드, 와이파이 권장)`;
-    }
+  fetch(AI_FN_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SB_ANON_KEY,
+      'Authorization': 'Bearer ' + SB_ANON_KEY,
+    },
+    body: JSON.stringify({ content: (text || '').slice(0, 600), postId: postId || null }),
   })
-    .then(engine => engine.chat.completions.create({
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT_AUTO },
-        { role: 'user', content: (text || '').slice(0, 600) },
-      ],
-      max_tokens: 90,
-      temperature: 0.6,
-      top_p: 0.85,
-    }))
-    .then(r => {
-      const raw = r.choices && r.choices[0] && r.choices[0].message ? (r.choices[0].message.content || '').trim() : '';
-      // ponytail: 모델이 한국어 대신 쓰레기 토큰 뱉으면 예비 답변으로 대체
-      const hangul = (raw.match(/[가-힣]/g) || []).length;
-      const isGarbage = !raw || raw.length < 5 || /�/.test(raw) || (raw.length > 20 && hangul / raw.length < 0.15);
-      if (isGarbage) { useFallback(); return; }
-      // 2문장 정도로 다듬기 (길면 앞에서 2문장만)
-      const out = raw.split(/(?<=[.!?。])/).slice(0, 2).join('').trim().slice(0, 140) || raw.slice(0, 140);
-      responseText.textContent = out;
-      // ponytail: 피드 댓글은 서버 크론(ai-comment-cron)이 일괄 생성 → 여기선 본인 반응만 표시
+    .then(r => r.json())
+    .then(d => {
+      if (d && d.reply) responseText.textContent = d.reply;
+      else useFallback();
     })
     .catch(() => useFallback());
 }
