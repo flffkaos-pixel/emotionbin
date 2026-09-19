@@ -30,13 +30,21 @@ function getPileHeight(x, z) {
 }
 
 function placeOnPile(radius, height) {
-  // ponytail: 실제 오브젝트 반지름/높이를 받아 XZ 분리 + Y 쌓기 계산 → 겹침/뚫림 방지
+  // ponytail: 실제 크기 기반 분리 + "가장 낮은 자리 우선" 배치 → 층층이 자연 산 모양
   const minDist = Math.max(0.5, radius * 0.9);
   const isLarge = radius > 1.5;
 
-  for (let attempt = 0; attempt < 300; attempt++) {
+  // 산 전체 평균 높이 — 쌓일수록 배치 반경을 중앙으로 좁혀 봉우리 형성
+  let sum = 0;
+  for (let i = 0; i < pileGrid.length; i++) sum += pileGrid[i];
+  const avgH = sum / pileGrid.length;
+  const shrink = Math.max(0.4, 1 - avgH * 0.06);
+  const maxR = (isLarge ? 1.1 : 1.3) * PILE_RADIUS * shrink;
+
+  // 후보 중 "가장 낮은 지점" 선택 → 낮은 곳부터 메워져 층이 쌓임
+  let best = null;
+  for (let attempt = 0; attempt < 120; attempt++) {
     const angle = Math.random() * Math.PI * 2;
-    const maxR = isLarge ? PILE_RADIUS * 1.1 : PILE_RADIUS * 1.3;
     const r = Math.sqrt(Math.random()) * maxR;
     const x = Math.cos(angle) * r;
     const z = Math.sin(angle) * r;
@@ -51,11 +59,13 @@ function placeOnPile(radius, height) {
 
     const idx = getPileIdx(x, z);
     if (idx < 0) continue;
-
-    // 쌓는 높이: 현재 그리드 높이 + 이 객체 높이 절반(중심) 만큼 위에 안착
     const h = pileGrid[idx];
-    const xIdx = idx % PILE_GRID;
-    const zIdx = Math.floor(idx / PILE_GRID);
+    if (!best || h < best.h) best = { x, z, h, idx };
+  }
+
+  if (best) {
+    const xIdx = best.idx % PILE_GRID;
+    const zIdx = Math.floor(best.idx / PILE_GRID);
     const cellR = Math.ceil(minDist * 2.5);
     for (let dx = -cellR; dx <= cellR; dx++) {
       for (let dz = -cellR; dz <= cellR; dz++) {
@@ -68,9 +78,9 @@ function placeOnPile(radius, height) {
       }
     }
 
-    placedPositions.push({ x, z, minDist });
+    placedPositions.push({ x: best.x, z: best.z, minDist });
     const jitter = isLarge ? 0.02 : 0.05;
-    return { x: x + (Math.random() - 0.5) * jitter, z: z + (Math.random() - 0.5) * jitter, y: h + height * 0.5 };
+    return { x: best.x + (Math.random() - 0.5) * jitter, z: best.z + (Math.random() - 0.5) * jitter, y: best.h + height * 0.5 };
   }
 
   // 폴백: 중심 근처 낮은 곳

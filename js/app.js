@@ -158,7 +158,7 @@ document.querySelectorAll('.tag').forEach(el => {
 });
 
 async function dumpEmotion() {
-  const text = document.getElementById('emotion-text').value.trim();
+  const text = filterProfanity(document.getElementById('emotion-text').value.trim());
   if (!text) {
     showToast('감정을 입력해주세요', 'error');
     return;
@@ -406,7 +406,7 @@ function renderComments(item) {
 }
 
 function submitComment(id, inputEl) {
-  const text = inputEl.value.trim();
+  const text = filterProfanity(inputEl.value.trim());
   if (!text) return;
   const item = allTrash.find(t => t.id === id);
   if (!item) return;
@@ -570,9 +570,20 @@ function rebuildDrumFromStorage() {
   });
 }
 
+// 욕설 → 동물 이모지로 정화 (표시·저장 모두 적용)
+const PROFANITY_WORDS = ['씨발','시발','씨벌','시벌','씨팔','시팔','씨바','ㅅㅂ','병신','ㅂㅅ','개새끼','개세끼','개색끼','개새낀','좆','쌍놈','쌍년','미친놈','미친년','fuck','shit'];
+const ANIMAL_EMOJIS = ['🐶','🐱','🐻','🐰','🦊','🐼','🐹','🦁'];
+const PROFANITY_RE = new RegExp('(' + PROFANITY_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+
+function filterProfanity(text) {
+  if (!text) return text;
+  let i = 0;
+  return String(text).replace(PROFANITY_RE, () => ANIMAL_EMOJIS[i++ % ANIMAL_EMOJIS.length]);
+}
+
 function escapeHtml(text) {
   const div = document.createElement('div');
-  div.textContent = text;
+  div.textContent = filterProfanity(text);
   return div.innerHTML;
 }
 
