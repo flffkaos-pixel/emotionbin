@@ -67,7 +67,7 @@ function getAIResponse(text, postId) {
   })
     .then(r => r.json())
     .then(d => {
-      if (d && d.reply) responseText.textContent = d.reply;
+      if (d && d.reply) responseText.textContent = (typeof filterProfanity === 'function') ? filterProfanity(d.reply) : d.reply;
       else useFallback();
     })
     .catch(() => useFallback());
