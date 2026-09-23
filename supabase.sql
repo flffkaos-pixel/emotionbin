@@ -34,3 +34,6 @@ CREATE POLICY "Anyone can delete" ON public_posts
 
 -- 3. Realtime 활성화
 ALTER PUBLICATION supabase_realtime ADD TABLE public_posts;
+
+-- 4. AI 예약 댓글 지연 시각 (60/90/120분 중 랜덤, 프론트가 저장)
+ALTER TABLE public_posts ADD COLUMN IF NOT EXISTS ai_due_at BIGINT;

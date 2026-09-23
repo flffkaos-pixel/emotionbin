@@ -273,7 +273,7 @@
         "name": "AI 반응 모드는 어떻게 작동하나요?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "AI 반응 모드는 '더 세게 토해내'와 '냉정한 분석' 두 가지가 있습니다. '더 세게 토해내' 모드는 사용자의 감정에 공감하며 함께 분노해주고, '냉정한 분석' 모드는 감정을 객관적이고 건조한 어조로 분석해줍니다. 두 모드 모두 무료이며 API 키가 필요하지 않습니다."
+          "text": "AI는 글을 바로 달지 않고 약 1~2시간 뒤 공개 글에 공감 댓글을 단다. 감정을 버릴 때 예약 알림으로 '몇 시간 후 AI가 댓글을 달 예정'이라고 알려준다. 완전 무료이며 API 키가 필요하지 않다."
         }
       },
       {
@@ -358,7 +358,7 @@
           <dd style="margin-left:1rem;line-height:1.6;">A. 공개 설정을 비공개로 선택하면 오직 본인만 볼 수 있습니다. 어떤 서버에도 개인 정보가 전송되지 않습니다.</dd>
 
           <dt style="color:#ff1744;font-weight:700;margin-top:1rem;">Q. AI 반응은 유료인가요?</dt>
-          <dd style="margin-left:1rem;line-height:1.6;">A. 아니요, 완전 무료입니다. '더 세게 토해내'와 '냉정한 분석' 두 모드 모두 API 키 없이 사용 가능합니다.</dd>
+          <dd style="margin-left:1rem;line-height:1.6;">A. 아니요, 완전 무료입니다. 공개 글에는 약 1~2시간 후 AI가 공감 댓글을 달고, 버릴 때 예약 시각을 알림으로 알려줍니다.</dd>
         </dl>
 
         <h2 style="color:#39ff14;font-size:1.5rem;margin:2rem 0 1rem;">카테고리</h2>
@@ -525,9 +525,9 @@
           </fieldset>
 
           <fieldset class="form-group">
-            <legend class="form-label">AI 반응</legend>
+            <legend class="form-label">AI 댓글 (1~2시간 뒤)</legend>
             <div class="ai-mode-container" id="ai-mode-container" role="group">
-              <button type="button" class="ai-mode-btn active" data-mode="auto" onclick="selectAIMode('auto')">🤖 AI가 자동으로 반응</button>
+              <button type="button" class="ai-mode-btn active" data-mode="auto" onclick="selectAIMode('auto')">🤖 AI가 나중에 댓글</button>
               <button type="button" class="ai-mode-btn" data-mode="none" onclick="selectAIMode('none')">🚫 끄기</button>
             </div>
           </fieldset>
@@ -599,14 +599,14 @@
   }
   </script>
   <script src="js/lang.js?v=2"></script>
-  <script type="module" src="js/supabase-db.js?v=1"></script>
+  <script type="module" src="js/supabase-db.js?v=2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js" defer></script>
   <script src="js/trash-mountain.js?v=17" defer></script>
-      <script src="js/ai.js?v=25" defer></script>
+      <script src="js/ai.js?v=27" defer></script>
   <script src="js/effects.js?v=15" defer></script>
   <script src="js/drum-scene.js?v=15" defer></script>
-  <script src="js/app.js?v=17" defer></script>
+  <script src="js/app.js?v=19" defer></script>
 <div style="text-align:center;padding:14px;font-size:14px"><a href="guide.html" style="font-weight:700;text-decoration:underline">📘 가이드 보기</a></div>
 </body>
 </html>

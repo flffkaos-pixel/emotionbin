@@ -23,6 +23,7 @@ async function sbSavePost(data) {
       timestamp: data.timestamp,
       privacy: data.privacy,
       trashType: data.trashType,
+      ai_due_at: data.aiDueAt || null,
       reactions: {},
       comments: [],
     }]);

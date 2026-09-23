@@ -46,6 +46,7 @@ if (needsSave) {
 
 let selectedTags = [];
 let pendingDumpData = null;
+let lastAiCommentCount = -1;
 
 
 function scrollToTop() {
@@ -171,6 +172,10 @@ async function dumpEmotion() {
   const weightBefore = Math.min(200, 30 + Math.floor(len / 20));
   const weightAfter = Math.max(5, Math.floor(weightBefore * 0.4));
   const privacy = document.querySelector('input[name="privacy"]:checked').value;
+  // AI 댓글 지연: 60/90/120분 중 랜덤 — 알림과 서버가 같은 값을 씀
+  const aiDelayMin = (privacy === 'public' && typeof pickAiDelayMinutes === 'function')
+    ? pickAiDelayMinutes()
+    : null;
 
   const data = {
     id: Date.now(),
@@ -182,6 +187,8 @@ async function dumpEmotion() {
     timestamp: Date.now(),
     privacy,
     trashType: getTrashTypeByLength(len).label,
+    aiDueAt: aiDelayMin ? Date.now() + aiDelayMin * 60 * 1000 : null,
+    aiDelayMin,
   };
 
   myTrash.unshift(data);
@@ -219,7 +226,10 @@ async function dumpEmotion() {
     }
   }, 3000);
 
-  if (typeof getAIResponse === 'function') getAIResponse(text, privacy === 'public' ? data.id : null);
+  // 공개 글만 AI 예약 알림 (비공개엔 AI 댓글 없음)
+  if (privacy === 'public' && typeof getAIResponse === 'function') {
+    getAIResponse(text, data.id, data.aiDelayMin);
+  }
   closeDumpModal();
 }
 
@@ -231,11 +241,11 @@ function resetForm() {
   updateTrashPreview(0);
 }
 
-function showToast(message, type) {
+function showToast(message, type, durationMs = 3000) {
   const toast = document.getElementById('toast');
   toast.textContent = message;
   toast.className = `toast ${type} show`;
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  setTimeout(() => toast.classList.remove('show'), durationMs);
 }
 
 function updateStats() {
@@ -683,6 +693,16 @@ sbLoadPosts().then(list => {
     updateStats();
     updateTicker();
     refreshActiveSection();
+
+    // AI 댓글이 실제로 도착하면 알림 (예약 → 도착)
+    let aiCount = 0;
+    firebasePosts.forEach(p => {
+      (p.comments || []).forEach(c => { if (c.author === '🤖 AI') aiCount++; });
+    });
+    if (lastAiCommentCount >= 0 && aiCount > lastAiCommentCount) {
+      showToast('🤖 AI가 방금 댓글을 달았어요', 'success', 5000);
+    }
+    lastAiCommentCount = aiCount;
   });
 });
 

@@ -1,8 +1,8 @@
-// AI 반응 — 서버(Supabase Edge Function + Groq)로 생성. 폰/앱/웹 모두 동일하게 동작.
-// 피드 댓글도 서버가 즉시 저장 → 모든 곳에서 보임.
-// ponytail: 서버 호출 실패 시 정해둔 답변으로 폴백
+// AI 반응 — 즉시 달지 않고 1~2시간 뒤 예약 댓글.
+// 글 공개 시 알림창에 "몇 시간 후 AI가 댓글을 달 예정"만 안내하고,
+// 실제 댓글은 서버 크론(ai-comment-cron)이 지연 후 공개 글에 단다.
 const AI_MODES = {
-  auto: { label: '🤖 AI 반응' },
+  auto: { label: '🤖 AI 예약 알림' },
   none: { label: 'AI 끄기' },
 };
 
@@ -15,60 +15,69 @@ function selectAIMode(mode) {
   });
 }
 
-// WebGPU 미지원·로딩 실패 시 폴백 답변
-const FALLBACK_RESPONSES = {
-  warm: [
-    '여기까지 버리러 와줘서 고마워. 그 감정, 충분히 무거웠을 것 같아.',
-    '참아온 시간들도 다 의미 있었어. 오늘은 여기 두고 가볍게 가자.',
-    '그렇게 느끼는 게 당연해. 너무 나 자신을 몰아붙이지 말자.',
-    '오늘 하루도 정말 고생했어. 이 감정은 여기서 안전하게 쉬게 해줄게.',
-    '버렸으니까 됐어. 남은 하루는 조금만 더 너를 돌보자.',
-  ],
-  rage: [
-    '맞아, 그 감정 전부 정당해. 더 화내도 돼. 세상이 얄미운 건 사실이니까.',
-    '좋아, 다 토해내. 참지 마. 너가 느끼는 그 모든 감정은 다 정당해.',
-    '그래, 인생이 열받지. 근데 그게 끝은 아니야. 더 세게 분노해도 돼.',
-    '오늘 하루도 참느라 고생했어. 이제 여기서 다 쏟아버려. 아무도 너를 판단하지 않아.',
-    '참지마. 터져. 니 감정은 소중하니까. 여기서는 자유롭게 썩어도 돼.',
-  ],
-};
+// 지연 후보: 60 / 90 / 120분 — 글마다 랜덤 (사용자 선택 아님)
+const AI_DELAY_STEPS_MIN = [60, 90, 120];
 
-// 서버 함수 (Supabase Edge Function: rapid-action) — 폰/웹 모두 동일
-const AI_FN_URL = 'https://ufvqbjduffflcijtrkkn.supabase.co/functions/v1/rapid-action';
-const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdnFiamR1ZmZmbGNpanRya2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjM5NDcsImV4cCI6MjA5ODczOTk0N30.Yp2R_4HWxZiDcyHD91Bd03kf6S92qhLkwnw-B6FzkNc';
+function pickAiDelayMinutes() {
+  return AI_DELAY_STEPS_MIN[Math.floor(Math.random() * AI_DELAY_STEPS_MIN.length)];
+}
+
+function formatAiDelayLabel(delayMin) {
+  const lang = (typeof LANG !== 'undefined' && LANG) ? LANG : 'ko';
+  if (lang === 'en') {
+    if (delayMin < 90) return 'in about 1 hour';
+    if (delayMin < 120) return 'in about 1 hour 30 min';
+    return 'in about 2 hours';
+  }
+  if (lang === 'ja') {
+    if (delayMin < 90) return '約1時間後';
+    if (delayMin < 120) return '約1時間30分後';
+    return '約2時間後';
+  }
+  if (delayMin < 90) return '약 1시간 후';
+  if (delayMin < 120) return '약 1시간 30분 후';
+  return '약 2시간 후';
+}
+
+function buildAiScheduleMessage(delayMin) {
+  const when = formatAiDelayLabel(delayMin);
+  const lang = (typeof LANG !== 'undefined' && LANG) ? LANG : 'ko';
+  if (lang === 'en') {
+    return `AI will leave an empathy comment on this post ${when}.\nIt will not appear right away — take your time.`;
+  }
+  if (lang === 'ja') {
+    return `AIがこの投稿に共感コメントを${when}付けます。\nすぐには出ません — ゆっくりしてください。`;
+  }
+  return `AI가 ${when} 이 글에 공감 댓글을 달아줘요.\n지금은 바로 달리지 않아요 — 천천히 올게요.`;
+}
 
 function closeAIResponse() {
   const el = document.getElementById('ai-response');
   if (el) el.style.display = 'none';
 }
 
-function getAIResponse(text, postId) {
+// 즉시 생성하지 않고 예약 알림만 표시 (댓글은 서버가 1~2시간 뒤 단다)
+// delayMin: 버릴 때 뽑은 랜덤 값 (app.js에서 전달, 서버 ai_due_at와 동일)
+function getAIResponse(text, postId, delayMin) {
   if (selectedAIMode === 'none') return;
   const box = document.getElementById('ai-response');
   const responseText = document.getElementById('ai-response-text');
   const labelSpan = document.getElementById('ai-mode-label');
+  if (!box || !responseText || !labelSpan) return;
+
+  const delay = Number(delayMin) > 0 ? Number(delayMin) : pickAiDelayMinutes();
   box.style.display = 'block';
-  labelSpan.textContent = AI_MODES[selectedAIMode].label;
-  responseText.textContent = '감정 읽는 중...';
+  labelSpan.textContent = '⏱️ ' + AI_MODES[selectedAIMode].label;
+  responseText.textContent = buildAiScheduleMessage(delay);
 
-  const useFallback = () => {
-    const pool = Math.random() < 0.5 ? FALLBACK_RESPONSES.warm : FALLBACK_RESPONSES.rage;
-    responseText.textContent = pool[Math.floor(Math.random() * pool.length)];
-  };
-
-  fetch(AI_FN_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': SB_ANON_KEY,
-      'Authorization': 'Bearer ' + SB_ANON_KEY,
-    },
-    body: JSON.stringify({ content: (text || '').slice(0, 600), postId: postId || null }),
-  })
-    .then(r => r.json())
-    .then(d => {
-      if (d && d.reply) responseText.textContent = (typeof filterProfanity === 'function') ? filterProfanity(d.reply) : d.reply;
-      else useFallback();
-    })
-    .catch(() => useFallback());
+  if (typeof showToast === 'function') {
+    const when = formatAiDelayLabel(delay);
+    const lang = (typeof LANG !== 'undefined' && LANG) ? LANG : 'ko';
+    const toastMsg = lang === 'en'
+      ? `🤖 AI will comment ${when}`
+      : lang === 'ja'
+        ? `🤖 AIが${when}コメントします`
+        : `🤖 AI가 ${when} 댓글을 달아요`;
+    showToast(toastMsg, 'success', 6000);
+  }
 }

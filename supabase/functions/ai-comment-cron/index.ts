@@ -1,11 +1,38 @@
-// Supabase Edge Function — 공개 글에 AI 공감 댓글 자동 생성
-// Groq API(Qwen3.6)로 공감·위로·공분 댓글 만들고 새 공개 글에 일괄 저장
+// Supabase Edge Function — 공개 글에 AI 공감 댓글 자동 생성 (지연 1~2시간)
+// 즉시 달지 않고, 글 올라온 뒤 60/90/120분 지나야 크론이 달아줌.
+// 프론트 getAIResponse도 같은 지연값을 알림창에 보여준다.
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 
 const GROQ_KEY = Deno.env.get("GROQ_API_KEY") || "";
 const GROQ_MODEL = Deno.env.get("GROQ_MODEL") || "qwen/qwen3.6-27b";
 const SB_URL = Deno.env.get("SB_URL") || "";
 const SB_KEY = Deno.env.get("SB_SERVICE_ROLE_KEY") || "";
+
+// 지연 후보: 60 / 90 / 120분. 새 글은 프론트가 뽑은 랜덤을 ai_due_at에 저장해 그걸 쓰고,
+// 옛 글엔 없으면 그때 랜덤으로 정해 한 번 계산에 씀(크론 재실행해도 같은 값).
+const AI_DELAY_STEPS_MIN = [60, 90, 120];
+
+function fallbackDelayMinutes(postId) {
+  const n = Math.abs(Number(postId) || 0);
+  const idx = Number.isFinite(n) && n > 0 ? Math.floor(n) % AI_DELAY_STEPS_MIN.length : 1;
+  return AI_DELAY_STEPS_MIN[idx];
+}
+
+function delayMinutesFor(post) {
+  const due = Number(post.ai_due_at || 0);
+  if (due > 0) {
+    const ts = Number(post.timestamp || 0);
+    const min = Math.round((due - ts) / 60000);
+    if (AI_DELAY_STEPS_MIN.includes(min)) return min;
+  }
+  return fallbackDelayMinutes(post.id);
+}
+
+function formatWhen(delayMin) {
+  if (delayMin < 90) return "약 1시간 후";
+  if (delayMin < 120) return "약 1시간 30분 후";
+  return "약 2시간 후";
+}
 
 const SYSTEM = `너는 '감정쓰레기통' 앱의 단짝 친구다. 사용자의 글을 그대로 잘 읽고 공감해서 답한다.
 - 분노/짜증/억울함이면 같이 분노: "진짜 열받겠다. 그렇게 버틴 네가 대단해, 내가 옆에서 같이 욕해줄게."
@@ -23,18 +50,23 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
 
   try {
-    // 개별 요청 모드: { content, postId } 가 오면 즉시 1건 생성
+    // 개별 요청: 즉시 생성하지 않고 예약 안내만 (지연 강제)
     let body = {};
     try { body = await req.json(); } catch (_) {}
-    if (body && body.content) {
-      const reply = await generateReply(body.content);
-      if (reply && body.postId) await addComment(body.postId, reply);
-      return new Response(JSON.stringify({ ok: true, reply }), {
+    if (body && (body.content || body.postId)) {
+      const delayMin = fallbackDelayMinutes(body.postId);
+      const reply = `AI가 ${formatWhen(delayMin)} 이 글에 공감 댓글을 달아줘요. 지금은 바로 달리지 않아요.`;
+      return new Response(JSON.stringify({
+        ok: true,
+        scheduled: true,
+        delayMinutes: delayMin,
+        reply,
+      }), {
         headers: { ...CORS, "Content-Type": "application/json" },
       });
     }
 
-    // 크론 모드: 최근 6시간 새 공개 글 일괄 처리
+    // 크론 모드: 지연(1~2시간) 지난 공개 글 일괄 처리
     const posts = await getPostsNeedingComment();
     let commented = 0;
 
@@ -57,15 +89,22 @@ serve(async (req) => {
 });
 
 async function getPostsNeedingComment() {
-  const since = new Date(Date.now() - 6 * 3600 * 1000).getTime();
+  const now = Date.now();
+  const since = now - 48 * 3600 * 1000;
   const r = await fetch(
-    `${SB_URL}/rest/v1/public_posts?select=id,content,comments&privacy=eq.public&order=timestamp.desc&limit=50`,
+    `${SB_URL}/rest/v1/public_posts?select=id,content,comments,timestamp,ai_due_at&privacy=eq.public&order=timestamp.desc&limit=50`,
     { headers: { apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` } }
   );
   const rows = await r.json();
   return (rows || []).filter(p => {
     const hasAI = (p.comments || []).some(c => c.author === "🤖 AI");
-    return !hasAI && (p.timestamp >= since);
+    if (hasAI) return false;
+    const ts = Number(p.timestamp || 0);
+    if (ts < since) return false;
+    const due = Number(p.ai_due_at || 0);
+    if (due > 0) return now >= due;
+    const age = now - ts;
+    return age >= delayMinutesFor(p) * 60 * 1000;
   });
 }
 
@@ -103,6 +142,7 @@ async function addComment(postId, text) {
   });
   const rows = await r.json();
   const existing = rows?.[0]?.comments ?? [];
+  if (existing.some(c => c.author === "🤖 AI")) return;
   const comment = { text: text.slice(0, 300), timestamp: Date.now(), author: "🤖 AI" };
   await fetch(`${SB_URL}/rest/v1/public_posts?id=eq.${postId}`, {
     method: "PATCH",
