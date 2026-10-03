@@ -16,7 +16,7 @@ jobs:
           ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVmdnFiamR1ZmZmbGNpanRya2tuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxNjM5NDcsImV4cCI6MjA5ODczOTk0N30.Yp2R_4HWxZiDcyHD91Bd03kf6S92qhLkwnw-B6FzkNc
         run: |
           curl -sS -X POST \
-            "https://ufvqbjduffflcijtrkkn.supabase.co/functions/v1/ai-comment-cron" \
+            "https://ufvqbjduffflcijtrkkn.supabase.co/functions/v1/rapid-action" \
             -H "Content-Type: application/json" \
             -H "apikey: $ANON_KEY" \
             -H "Authorization: Bearer $ANON_KEY" \
