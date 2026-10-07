@@ -42,6 +42,10 @@ const i18n = {
   'footer-terms': { ko: '이용약관', en: 'Terms of Service', ja: '利用規約' },
   'footer-disclaimer': { ko: '면책조항', en: 'Disclaimer', ja: '免責事項' },
   'footer-copy': { ko: '© 2026 감정쓰레기통. 모든 데이터는 브라우저에 로컬 저장됩니다 · 익명성 보장', en: '© 2026 Emotional Trash Can. All data stored locally in browser · Anonymity guaranteed', ja: '© 2026 感情ゴミ箱. すべてのデータはブラウザにローカル保存・匿名性保証' },
+  'app-promo-title': { ko: '감정쓰레기통 앱 출시', en: 'Emotional Trash Can App', ja: '感情ゴミ箱 アプリ公開' },
+  'app-promo-desc': { ko: '계정 없이 무료 · 어디서나 감정 버리기', en: 'Free, no account needed · dump anywhere', ja: '登録不要で無料・どこでも捨てられる' },
+  'app-promo-cta': { ko: 'Google Play 다운로드', en: 'Get it on Google Play', ja: 'Google Play で入手' },
+  'footer-playstore': { ko: 'Google Play 앱', en: 'Google Play app', ja: 'Google Play アプリ' },
 };
 
 // tags display names

@@ -719,3 +719,21 @@ setTimeout(() => {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
 }
+
+// Google Play app promo (remembers dismissal for 7 days)
+(function initAppPromo() {
+  const KEY = 'appPromoDismissedAt';
+  const el = document.getElementById('app-promo');
+  if (!el) return;
+  let at = 0;
+  try { at = parseInt(localStorage.getItem(KEY) || '0', 10) || 0; } catch (e) {}
+  if (Date.now() - at < 7 * 86400000) return;
+  el.hidden = false;
+  setTimeout(() => el.classList.add('show'), 3500);
+  const closeBtn = el.querySelector('.app-promo-close');
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    el.classList.remove('show');
+    try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {}
+    setTimeout(() => { el.hidden = true; }, 700);
+  });
+})();
