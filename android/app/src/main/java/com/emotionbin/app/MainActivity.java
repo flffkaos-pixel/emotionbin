@@ -38,8 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String BANNER_ID = "ca-app-pub-1955893232253258/6745392770";
     private static final String INTERSTITIAL_ID = "ca-app-pub-1955893232253258/4261815186";
-    // TODO: AdMob에서 만든 네이티브 광고 단위 ID로 교체 필요
-    private static final String NATIVE_ID = "ca-app-pub-1955893232253258/0000000000";
+    private static final String NATIVE_ID = "ca-app-pub-1955893232253258/2582616018";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
