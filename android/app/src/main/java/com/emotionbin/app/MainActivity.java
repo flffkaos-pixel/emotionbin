@@ -107,7 +107,12 @@ public class MainActivity extends AppCompatActivity {
                     populateNativeAd(ad);
                     feedAdContainer.setVisibility(View.VISIBLE);
                 })
-                .withAdLoadErrorCallback(error -> feedAdContainer.setVisibility(View.GONE))
+                .withAdListener(new AdListener() {
+                    @Override
+                    public void onAdFailedToLoad(LoadAdError error) {
+                        feedAdContainer.setVisibility(View.GONE);
+                    }
+                })
                 .build();
         loader.loadAd(new AdRequest.Builder().build());
     }
