@@ -6,12 +6,17 @@ import android.webkit.JavascriptInterface;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
@@ -19,12 +24,22 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
+import com.google.android.gms.ads.nativead.NativeAd;
+import com.google.android.gms.ads.nativead.NativeAdView;
 
 public class MainActivity extends AppCompatActivity {
     private WebView webView;
-    private AdView adView;
+    private AdView adView;              // 하단 배너
+    private AdView adViewModal;          // 글쓰기 모달용 300x250
+    private LinearLayout feedAdContainer; // 피드 네이티브 카드
     private InterstitialAd interstitialAd;
+    private NativeAd nativeAd;
     private boolean interstitialShownThisSession = false;
+
+    private static final String BANNER_ID = "ca-app-pub-1955893232253258/6745392770";
+    private static final String INTERSTITIAL_ID = "ca-app-pub-1955893232253258/4261815186";
+    // TODO: AdMob에서 만든 네이티브 광고 단위 ID로 교체 필요
+    private static final String NATIVE_ID = "ca-app-pub-1955893232253258/0000000000";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,13 +63,26 @@ public class MainActivity extends AppCompatActivity {
         webView.loadUrl("https://emotionbin.pages.dev");
 
         MobileAds.initialize(this);
+
+        // 하단 배너
         adView = findViewById(R.id.adview);
         adView.loadAd(new AdRequest.Builder().build());
+
+        // 모달 사각 광고 (열릴 때 로드·표시)
+        adViewModal = findViewById(R.id.adview_modal);
+        adViewModal.setAdListener(new AdListener() {
+            @Override
+            public void onAdFailedToLoad(LoadAdError error) {
+                adViewModal.setVisibility(View.GONE);
+            }
+        });
+
+        feedAdContainer = findViewById(R.id.feed_ad_container);
         loadInterstitial();
     }
 
     private void loadInterstitial() {
-        InterstitialAd.load(this, "ca-app-pub-1955893232253258/4261815186",
+        InterstitialAd.load(this, INTERSTITIAL_ID,
                 new AdRequest.Builder().build(),
                 new InterstitialAdLoadCallback() {
                     @Override
@@ -67,6 +95,49 @@ public class MainActivity extends AppCompatActivity {
                         interstitialAd = null;
                     }
                 });
+    }
+
+    // ===== 피드 네이티브 광고 =====
+    private void loadNativeAd() {
+        com.google.android.gms.ads.AdLoader loader = new com.google.android.gms.ads.AdLoader.Builder(this, NATIVE_ID)
+                .forNativeAd(ad -> {
+                    if (isFinishing()) { ad.destroy(); return; }
+                    if (nativeAd != null) nativeAd.destroy();
+                    nativeAd = ad;
+                    populateNativeAd(ad);
+                    feedAdContainer.setVisibility(View.VISIBLE);
+                })
+                .withAdLoadErrorCallback(error -> feedAdContainer.setVisibility(View.GONE))
+                .build();
+        loader.loadAd(new AdRequest.Builder().build());
+    }
+
+    private void populateNativeAd(NativeAd ad) {
+        NativeAdView adViewNative = (NativeAdView) getLayoutInflater().inflate(R.layout.ad_native_card, feedAdContainer, false);
+
+        TextView headline = adViewNative.findViewById(R.id.ad_headline);
+        TextView body = adViewNative.findViewById(R.id.ad_body);
+        TextView advertiser = adViewNative.findViewById(R.id.ad_advertiser);
+        Button cta = adViewNative.findViewById(R.id.ad_cta);
+        com.google.android.gms.ads.nativead.MediaView media = adViewNative.findViewById(R.id.ad_media);
+
+        adViewNative.setHeadlineView(headline);
+        adViewNative.setBodyView(body);
+        adViewNative.setAdvertiserView(advertiser);
+        adViewNative.setCallToActionView(cta);
+        adViewNative.setMediaView(media);
+
+        headline.setText(ad.getHeadline() != null ? ad.getHeadline() : "");
+        if (ad.getBody() == null) body.setVisibility(View.GONE);
+        else { body.setText(ad.getBody()); body.setVisibility(View.VISIBLE); }
+        if (ad.getAdvertiser() == null) advertiser.setVisibility(View.GONE);
+        else { advertiser.setText(ad.getAdvertiser()); advertiser.setVisibility(View.VISIBLE); }
+        if (ad.getCallToAction() == null) cta.setText("자세히 보기");
+        else cta.setText(ad.getCallToAction());
+
+        adViewNative.setNativeAd(ad);
+        feedAdContainer.removeAllViews();
+        feedAdContainer.addView(adViewNative);
     }
 
     class AndroidBridge {
@@ -96,14 +167,36 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+        // 글쓰기 모달: 하단 배너 숨기고 300x250 사각 광고 표시
         @JavascriptInterface
-        public void hideBanner() {
-            runOnUiThread(() -> adView.setVisibility(android.view.View.GONE));
+        public void showModalAd() {
+            runOnUiThread(() -> {
+                adView.setVisibility(View.GONE);
+                adViewModal.setVisibility(View.VISIBLE);
+                adViewModal.loadAd(new AdRequest.Builder().build());
+            });
         }
 
         @JavascriptInterface
-        public void showBanner() {
-            runOnUiThread(() -> adView.setVisibility(android.view.View.VISIBLE));
+        public void hideModalAd() {
+            runOnUiThread(() -> {
+                adViewModal.setVisibility(View.GONE);
+                adView.setVisibility(View.VISIBLE);
+            });
+        }
+
+        // 피드 탐색 중 네이티브 카드 표시/숨김
+        @JavascriptInterface
+        public void showFeedAd() {
+            runOnUiThread(() -> loadNativeAd());
+        }
+
+        @JavascriptInterface
+        public void hideFeedAd() {
+            runOnUiThread(() -> {
+                feedAdContainer.setVisibility(View.GONE);
+                if (nativeAd != null) { nativeAd.destroy(); nativeAd = null; }
+            });
         }
     }
 
@@ -111,5 +204,11 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (webView.canGoBack()) webView.goBack();
         else super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (nativeAd != null) nativeAd.destroy();
+        super.onDestroy();
     }
 }

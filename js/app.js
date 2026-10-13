@@ -71,6 +71,14 @@ function showSection(id) {
       setTimeout(() => rebuildDrumFromStorage(), 600);
     }
   }
+
+  // 공개 피드 탐색 중에만 네이티브 광고 카드 표시 (앱)
+  try {
+    if (window.AndroidBridge) {
+      if (id === 'feed' && AndroidBridge.showFeedAd) AndroidBridge.showFeedAd();
+      else if (AndroidBridge.hideFeedAd) AndroidBridge.hideFeedAd();
+    }
+  } catch (e) {}
 }
 
 function openDumpModal() {
@@ -78,13 +86,13 @@ function openDumpModal() {
   document.getElementById('dump-btn').classList.remove('loading');
   document.getElementById('ai-response').style.display = 'none';
   document.body.style.overflow = 'hidden';
-  try { if (window.AndroidBridge && AndroidBridge.hideBanner) AndroidBridge.hideBanner(); } catch (e) {}
+  try { if (window.AndroidBridge && AndroidBridge.showModalAd) AndroidBridge.showModalAd(); } catch (e) {}
 }
 
 function closeDumpModal() {
   document.getElementById('dump-modal').classList.remove('active');
   document.body.style.overflow = '';
-  try { if (window.AndroidBridge && AndroidBridge.showBanner) AndroidBridge.showBanner(); } catch (e) {}
+  try { if (window.AndroidBridge && AndroidBridge.hideModalAd) AndroidBridge.hideModalAd(); } catch (e) {}
   resetForm();
 
   if (pendingDumpData) {
