@@ -589,9 +589,23 @@ function rebuildDrumFromStorage() {
 }
 
 // 욕설 → 동물 이모지로 정화 (표시·저장 모두 적용)
-const PROFANITY_WORDS = ['씨발','시발','씨벌','시벌','씨팔','시팔','씨바','ㅅㅂ','병신','ㅂㅅ','개새끼','개세끼','개색끼','개새낀','좆','쌍놈','쌍년','미친놈','미친년','fuck','shit'];
+const PROFANITY_WORDS = [
+  '개새끼','개세끼','개색끼','개새낀','씹새끼','씹새야','씹새끼야','뒤져버리','뒤질래','미친새끼','미친놈','미친년','한남',
+  '새끼야','새끼','쌍놈','쌍년','씨발','시발','씨벌','시벌','씨팔','시팔','씨바','병신','느금마','느금',
+  '좆같','ㅈ같','좆까','지랄','지럴','뒤져','뒤질','씹새','씨부','꺼져',
+  'ㅅㅂ','ㅂㅅ','ㅅㄲ','ㅈㄴ','ㅁㅊ','씹',
+  'fuck','shit','bitch','whore','fucker'
+].map(w => w.trim()).filter(Boolean);
 const ANIMAL_EMOJIS = ['🐶','🐱','🐻','🐰','🦊','🐼','🐹','🦁'];
-const PROFANITY_RE = new RegExp('(' + PROFANITY_WORDS.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+// 긴 단어 우선 매칭 (예: 씹새끼가 씹새에 잘리지 않게)
+const PROFANITY_RE = new RegExp(
+  '(' + PROFANITY_WORDS
+    .slice()
+    .sort((a, b) => b.length - a.length)
+    .map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|') + ')',
+  'gi'
+);
 
 function filterProfanity(text) {
   if (!text) return text;
