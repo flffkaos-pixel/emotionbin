@@ -6,8 +6,8 @@ android {
         applicationId 'com.emotionbin.app'
         minSdk 21
         targetSdk 36
-        versionCode 16
-        versionName '1.2.0'
+        versionCode 17
+        versionName '1.2.1'
     }
     signingConfigs {
         release {
@@ -24,12 +24,12 @@ android {
             signingConfig signingConfigs.release
         }
     }
-    packagingOptions {
+    packaging {
         exclude 'META-INF/*.kotlin_module'
     }
 }
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'androidx.activity:activity:1.9.2'
-    implementation 'com.google.android.gms:play-services-ads:23.6.0'
+    implementation 'com.google.android.gms:play-services-ads:25.5.0'
 }
