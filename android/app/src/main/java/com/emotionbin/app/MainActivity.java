@@ -61,23 +61,28 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient());
         webView.loadUrl("https://emotionbin.pages.dev");
 
-        MobileAds.initialize(this);
+        // 광고 초기화 — 광고가 어떤 이유로 실패해도 앱은 죽지 않게 격리 (Error까지 잡음)
+        try {
+            MobileAds.initialize(this);
 
-        // 하단 배너
-        adView = findViewById(R.id.adview);
-        adView.loadAd(new AdRequest.Builder().build());
+            // 하단 배너
+            adView = findViewById(R.id.adview);
+            adView.loadAd(new AdRequest.Builder().build());
 
-        // 모달 사각 광고 (열릴 때 로드·표시)
-        adViewModal = findViewById(R.id.adview_modal);
-        adViewModal.setAdListener(new AdListener() {
-            @Override
-            public void onAdFailedToLoad(LoadAdError error) {
-                adViewModal.setVisibility(View.GONE);
-            }
-        });
+            // 모달 사각 광고 (열릴 때 로드·표시)
+            adViewModal = findViewById(R.id.adview_modal);
+            adViewModal.setAdListener(new AdListener() {
+                @Override
+                public void onAdFailedToLoad(LoadAdError error) {
+                    adViewModal.setVisibility(View.GONE);
+                }
+            });
 
-        feedAdContainer = findViewById(R.id.feed_ad_container);
-        loadInterstitial();
+            feedAdContainer = findViewById(R.id.feed_ad_container);
+            loadInterstitial();
+        } catch (Throwable t) {
+            // 광고 실패는 치명 아님 — 앱은 계속 실행
+        }
     }
 
     private void loadInterstitial() {
@@ -175,15 +180,19 @@ public class MainActivity extends AppCompatActivity {
         @JavascriptInterface
         public void showModalAd() {
             runOnUiThread(() -> {
-                adView.setVisibility(View.GONE);
-                adViewModal.setVisibility(View.VISIBLE);
-                adViewModal.loadAd(new AdRequest.Builder().build());
+                if (adView == null || adViewModal == null) return;
+                try {
+                    adView.setVisibility(View.GONE);
+                    adViewModal.setVisibility(View.VISIBLE);
+                    adViewModal.loadAd(new AdRequest.Builder().build());
+                } catch (Throwable t) { }
             });
         }
 
         @JavascriptInterface
         public void hideModalAd() {
             runOnUiThread(() -> {
+                if (adView == null || adViewModal == null) return;
                 adViewModal.setVisibility(View.GONE);
                 adView.setVisibility(View.VISIBLE);
             });
@@ -192,14 +201,20 @@ public class MainActivity extends AppCompatActivity {
         // 피드 탐색 중 네이티브 카드 표시/숨김
         @JavascriptInterface
         public void showFeedAd() {
-            runOnUiThread(() -> loadNativeAd());
+            runOnUiThread(() -> {
+                if (feedAdContainer == null) return;
+                try { loadNativeAd(); } catch (Throwable t) { }
+            });
         }
 
         @JavascriptInterface
         public void hideFeedAd() {
             runOnUiThread(() -> {
-                feedAdContainer.setVisibility(View.GONE);
-                if (nativeAd != null) { nativeAd.destroy(); nativeAd = null; }
+                if (feedAdContainer == null) return;
+                try {
+                    feedAdContainer.setVisibility(View.GONE);
+                    if (nativeAd != null) { nativeAd.destroy(); nativeAd = null; }
+                } catch (Throwable t) { }
             });
         }
     }
