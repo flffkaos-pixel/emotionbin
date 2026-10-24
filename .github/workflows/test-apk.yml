@@ -56,14 +56,14 @@ jobs:
       - name: Launch on Android emulator and verify no crash
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 30
+          api-level: 34
           target: google_apis
           arch: x86_64
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
           script: |
             n=0; until adb shell pm list packages >/dev/null 2>&1; do sleep 5; n=$((n+1)); if [ $n -ge 36 ]; then echo "PKG_TIMEOUT"; exit 1; fi; done; echo "PKGS_READY"
-            adb install -r android/app/build/outputs/apk/release/app-release.apk
+            sleep 20; m=0; until adb install -r android/app/build/outputs/apk/release/app-release.apk >/dev/null 2>&1; do sleep 15; m=$((m+1)); if [ $m -ge 5 ]; then echo "INSTALL_FAILED"; adb install -r android/app/build/outputs/apk/release/app-release.apk; exit 1; fi; done; echo "INSTALL_OK"
             adb logcat -c
             adb shell am start -W -n com.emotionbin.app/.MainActivity
             sleep 25
