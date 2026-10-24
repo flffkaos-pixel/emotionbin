@@ -61,34 +61,11 @@ jobs:
           arch: x86_64
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
           script: |
-            # 부팅 플래그 후에도 package 서비스가 늦게 뜨는 경우 대기 (최대 3분)
-            echo "Waiting for package service..."
-            n=0
-            until adb shell pm list packages >/dev/null 2>&1; do
-              sleep 5
-              n=$((n+1))
-              if [ $n -ge 36 ]; then echo "package service timeout"; exit 1; fi
-            done
-            echo "Package service ready"
-
+            n=0; until adb shell pm list packages >/dev/null 2>&1; do sleep 5; n=$((n+1)); if [ $n -ge 36 ]; then echo "PKG_TIMEOUT"; exit 1; fi; done; echo "PKGS_READY"
             adb install -r android/app/build/outputs/apk/release/app-release.apk
             adb logcat -c
             adb shell am start -W -n com.emotionbin.app/.MainActivity
-            echo "App started. Waiting 25s (WebView load + ads init)..."
             sleep 25
-
-            if adb shell pidof com.emotionbin.app >/dev/null 2>&1; then
-              echo "✓ APP ALIVE — 크래시 없음"
-            else
-              echo "✗ APP CRASHED"
-              adb logcat -d | grep -E -A 20 "FATAL EXCEPTION" | head -60
-              exit 1
-            fi
-
-            CRASH_COUNT=$(adb logcat -d | grep -c "FATAL EXCEPTION" || true)
-            if [ "$CRASH_COUNT" -gt 0 ]; then
-              echo "✗ FATAL EXCEPTION 발견"
-              adb logcat -d | grep -A 20 "FATAL EXCEPTION" | head -60
-              exit 1
-            fi
-            echo "✓ NO CRASH — 테스트 통과"
+            adb shell pidof com.emotionbin.app | grep -q . && echo "APP_ALIVE" || exit 1
+            adb logcat -d | grep "FATAL EXCEPTION" | head -20; adb logcat -d | grep -q "FATAL EXCEPTION" && exit 1 || echo "NO_FATAL_CRASH_OK"
+            echo "ALL_TESTS_PASSED"
