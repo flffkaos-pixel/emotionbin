@@ -11,6 +11,7 @@ on:
 jobs:
   emulator-test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
@@ -51,11 +52,11 @@ jobs:
           gradle wrapper --gradle-version=9.8.1
           ./gradlew assembleRelease --no-daemon
 
-      # API 25 (Android 7) = 크래시 재현 레벨. java.time 없음 → 디슈가링 검증
-      - name: Launch on Android 7 emulator and verify no crash
+      # API 30 — 러너에 사전설치된 빠른 이미지 (KVM 부팅 ~2분). 크래시-오프닝 회귀 검증
+      - name: Launch on Android emulator and verify no crash
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 25
+          api-level: 30
           target: google_apis
           arch: x86_64
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
