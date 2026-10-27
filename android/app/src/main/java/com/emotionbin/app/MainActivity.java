@@ -59,30 +59,42 @@ public class MainActivity extends AppCompatActivity {
         s.setDomStorageEnabled(true);
         webView.addJavascriptInterface(new AndroidBridge(), "AndroidBridge");
         webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("https://emotionbin.pages.dev");
-
-        // 광고 초기화 — 광고가 어떤 이유로 실패해도 앱은 죽지 않게 격리 (Error까지 잡음)
         try {
-            MobileAds.initialize(this);
+            webView.loadUrl("https://emotionbin.pages.dev");
+        } catch (Throwable t) {
+            // WebView 초기화 실패해도 앱은 죽지 않게
+        }
 
-            // 하단 배너
-            adView = findViewById(R.id.adview);
-            adView.loadAd(new AdRequest.Builder().build());
+        // 광고 뷰는 먼저 찾아두고(메인 스레드), 초기화·로드는 백그라운드로 미룸
+        adView = findViewById(R.id.adview);
+        adViewModal = findViewById(R.id.adview_modal);
+        feedAdContainer = findViewById(R.id.feed_ad_container);
 
-            // 모달 사각 광고 (열릴 때 로드·표시)
-            adViewModal = findViewById(R.id.adview_modal);
-            adViewModal.setAdListener(new AdListener() {
-                @Override
-                public void onAdFailedToLoad(LoadAdError error) {
-                    adViewModal.setVisibility(View.GONE);
+        // ponytail: MobileAds.initialize는 무거운 작업 — 구형 기기(Android 7)에서
+        // 메인 스레드를 막아 ANR/크래시를 유발하므로 별도 스레드에서 초기화한다.
+        new Thread(() -> {
+            try {
+                MobileAds.initialize(MainActivity.this);
+            } catch (Throwable t) {
+                return; // 광고 실패는 치명 아님
+            }
+            runOnUiThread(() -> {
+                try {
+                    if (adView != null) adView.loadAd(new AdRequest.Builder().build());
+                    if (adViewModal != null) {
+                        adViewModal.setAdListener(new AdListener() {
+                            @Override
+                            public void onAdFailedToLoad(LoadAdError error) {
+                                adViewModal.setVisibility(View.GONE);
+                            }
+                        });
+                    }
+                    loadInterstitial();
+                } catch (Throwable t) {
+                    // 광고 로드 실패는 앱 동작에 영향 없음
                 }
             });
-
-            feedAdContainer = findViewById(R.id.feed_ad_container);
-            loadInterstitial();
-        } catch (Throwable t) {
-            // 광고 실패는 치명 아님 — 앱은 계속 실행
-        }
+        }, "ads-init").start();
     }
 
     private void loadInterstitial() {

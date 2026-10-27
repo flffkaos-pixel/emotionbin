@@ -73,11 +73,16 @@ jobs:
             n=0; until adb shell pm list packages >/dev/null 2>&1; do sleep 5; n=$((n+1)); if [ $n -ge 36 ]; then echo "PKG_TIMEOUT"; exit 1; fi; done; echo "PKGS_READY"
             sleep 15; m=0; until adb install -r android/app/build/outputs/apk/release/app-release.apk >/dev/null 2>&1; do sleep 15; m=$((m+1)); if [ $m -ge 5 ]; then echo "INSTALL_FAILED"; adb install -r android/app/build/outputs/apk/release/app-release.apk; exit 1; fi; done; echo "INSTALL_OK"
             adb logcat -c
-            adb shell am start -W -n com.emotionbin.app/.MainActivity
-            echo "앱 실행됨 — 30초 대기 (WebView 로드 + 광고 초기화)"
-            sleep 30
-            echo "--- 크래시 관련 로그 ---"
-            adb logcat -d | grep -E "AndroidRuntime|FATAL" | head -40 || echo "(크래시 로그 없음)"
-            if adb shell pidof com.emotionbin.app | grep -q .; then echo "APP_ALIVE"; else echo "APP_CRASHED"; exit 1; fi
-            if adb logcat -d | grep -q "FATAL EXCEPTION"; then echo "FATAL_EXCEPTION_FOUND"; adb logcat -d | grep -A 25 "FATAL EXCEPTION" | head -70; exit 1; fi
-            echo "NO_CRASH_TESTS_PASSED"
+            # -W는 런치 완료까지 블록되어 구형 에뮬레이터에서 무한 대기 → 논블로킹 실행 + 폴링
+            timeout 60 adb shell am start -n com.emotionbin.app/.MainActivity || echo "am start 반환 지연(무시)"
+            echo "앱 실행 — 60초 대기 (WebView 로드 + 광고 초기화)"
+            sleep 60
+            echo "--- 프로세스 상태 ---"
+            adb shell pidof com.emotionbin.app || echo "(프로세스 없음)"
+            echo "--- 크래시/ANR 로그 ---"
+            adb logcat -d | grep -E "AndroidRuntime|FATAL|ANR in com.emotionbin.app" | head -50 || echo "(크래시 로그 없음)"
+            FAIL=0
+            if ! adb shell pidof com.emotionbin.app | grep -q .; then echo "APP_CRASHED"; FAIL=1; fi
+            if adb logcat -d | grep -q "FATAL EXCEPTION"; then echo "FATAL_EXCEPTION_FOUND"; adb logcat -d | grep -A 25 "FATAL EXCEPTION" | head -80; FAIL=1; fi
+            if [ "$FAIL" -eq 0 ]; then echo "APP_ALIVE_NO_CRASH_TESTS_PASSED"; fi
+            exit $FAIL
