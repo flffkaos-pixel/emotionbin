@@ -2,12 +2,16 @@ name: Test APK
 
 on:
   workflow_dispatch:
-  # ponytail: GitHub 러너 KVM 없음 → 에뮬레이터 불안정. 자동 트리거 끄고 수동 실행만
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/test-apk.yml'
 
 jobs:
   emulator-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
 
@@ -48,21 +52,32 @@ jobs:
           gradle wrapper --gradle-version=9.8.1
           ./gradlew assembleRelease --no-daemon
 
-      # API 30 — 러너에 사전설치된 빠른 이미지 (KVM 부팅 ~2분). 크래시-오프닝 회귀 검증
-      - name: Launch on Android emulator and verify no crash
+      # GitHub 러너는 KVM 권한이 없어 에뮬레이터 부팅 실패 → udev 규칙으로 허용
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
+      # API 25 (Android 7.1) = v17 크래시 재현 레벨. java.time 없음 → 디슈가링 검증
+      - name: Launch on Android 7 emulator and verify no crash
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: 34
+          api-level: 25
           target: google_apis
           arch: x86_64
           disable-animations: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot -camera-back none
           script: |
             n=0; until adb shell pm list packages >/dev/null 2>&1; do sleep 5; n=$((n+1)); if [ $n -ge 36 ]; then echo "PKG_TIMEOUT"; exit 1; fi; done; echo "PKGS_READY"
-            sleep 20; m=0; until adb install -r android/app/build/outputs/apk/release/app-release.apk >/dev/null 2>&1; do sleep 15; m=$((m+1)); if [ $m -ge 5 ]; then echo "INSTALL_FAILED"; adb install -r android/app/build/outputs/apk/release/app-release.apk; exit 1; fi; done; echo "INSTALL_OK"
+            sleep 15; m=0; until adb install -r android/app/build/outputs/apk/release/app-release.apk >/dev/null 2>&1; do sleep 15; m=$((m+1)); if [ $m -ge 5 ]; then echo "INSTALL_FAILED"; adb install -r android/app/build/outputs/apk/release/app-release.apk; exit 1; fi; done; echo "INSTALL_OK"
             adb logcat -c
             adb shell am start -W -n com.emotionbin.app/.MainActivity
-            sleep 25
-            adb shell pidof com.emotionbin.app | grep -q . && echo "APP_ALIVE" || exit 1
-            adb logcat -d | grep "FATAL EXCEPTION" | head -20; adb logcat -d | grep -q "FATAL EXCEPTION" && exit 1 || echo "NO_FATAL_CRASH_OK"
-            echo "ALL_TESTS_PASSED"
+            echo "앱 실행됨 — 30초 대기 (WebView 로드 + 광고 초기화)"
+            sleep 30
+            echo "--- 크래시 관련 로그 ---"
+            adb logcat -d | grep -E "AndroidRuntime|FATAL" | head -40 || echo "(크래시 로그 없음)"
+            if adb shell pidof com.emotionbin.app | grep -q .; then echo "APP_ALIVE"; else echo "APP_CRASHED"; exit 1; fi
+            if adb logcat -d | grep -q "FATAL EXCEPTION"; then echo "FATAL_EXCEPTION_FOUND"; adb logcat -d | grep -A 25 "FATAL EXCEPTION" | head -70; exit 1; fi
+            echo "NO_CRASH_TESTS_PASSED"
