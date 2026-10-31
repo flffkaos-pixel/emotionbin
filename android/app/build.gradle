@@ -6,8 +6,8 @@ android {
         applicationId 'com.emotionbin.app'
         minSdk 24
         targetSdk 36
-        versionCode 18
-        versionName '1.2.2'
+        versionCode 19
+        versionName '1.2.3'
     }
     compileOptions {
         // 필수: ads SDK 25가 java.time 사용 — API 26 미만(Android 7) 크래시 방지
