@@ -6,8 +6,8 @@ android {
         applicationId 'com.emotionbin.app'
         minSdk 24
         targetSdk 36
-        versionCode 19
-        versionName '1.2.3'
+        versionCode 20
+        versionName '1.2.4'
     }
     compileOptions {
         // 필수: ads SDK 25가 java.time 사용 — API 26 미만(Android 7) 크래시 방지
@@ -25,7 +25,7 @@ android {
         release {
             // ponytail: R8이 Room/SQLite 초기화 클래스를 제거해 WorkManager가 시작 시
             // 크래시(Failed to create WorkDatabase) → WebView 래퍼 앱은 난독화 이득이 없어 끔
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
