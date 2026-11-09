@@ -2,6 +2,53 @@ let myTrash = JSON.parse(localStorage.getItem('emotional_trash') || '[]');
 let allTrash = JSON.parse(localStorage.getItem('all_emotional_trash') || '[]');
 let firebasePosts = [];
 
+// ===== 관리자 모드 =====
+// 사용법: 사이트 주소 뒤에 ?admin=<키> 붙이면 관리자 모드 ON (삭제 버튼 표시)
+//        ?admin=off 로 해제. 브라우저에 기억됩니다.
+const ADMIN_KEY = 'eb-admin-9f3a7c2026';
+let isAdmin = false;
+(function initAdmin() {
+  try {
+    const q = new URLSearchParams(location.search).get('admin');
+    if (q === 'off') localStorage.removeItem('eb_admin');
+    else if (q) { if (q === ADMIN_KEY) localStorage.setItem('eb_admin', ADMIN_KEY); }
+    isAdmin = localStorage.getItem('eb_admin') === ADMIN_KEY;
+  } catch (e) { isAdmin = false; }
+  if (isAdmin) {
+    document.documentElement.classList.add('admin-mode');
+    setTimeout(() => { try { showToast('🔧 관리자 모드 ON', 'success', 2500); } catch (e) {} }, 1200);
+  }
+})();
+
+function adminDeletePost(id) {
+  if (!isAdmin) return;
+  const item = allTrash.find(t => t.id === id) || myTrash.find(t => t.id === id);
+  const preview = item ? item.content.replace(/\s+/g, ' ').slice(0, 60) : '';
+  if (!confirm(`이 글을 삭제할까요?\n\n"${preview}${preview.length >= 60 ? '…' : ''}"`)) return;
+
+  allTrash = allTrash.filter(t => t.id !== id);
+  myTrash = myTrash.filter(t => t.id !== id);
+  firebasePosts = firebasePosts.filter(t => t.id !== id);
+  try {
+    localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+    localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+  } catch (e) {}
+
+  if (typeof sbDeletePost === 'function') sbDeletePost(id);
+  if (typeof updateStats === 'function') updateStats();
+  if (typeof renderFeed === 'function') renderFeed();
+  if (typeof renderTop10 === 'function') renderTop10();
+  if (typeof renderMyTrash === 'function') renderMyTrash();
+  if (typeof updateTicker === 'function') updateTicker();
+  showToast('🗑️ 관리자: 글을 삭제했습니다', 'success');
+}
+
+function adminDeleteButton(id) {
+  return isAdmin
+    ? `<button class="admin-del" onclick="adminDeletePost(${id})" title="관리자 삭제">🗑 삭제</button>`
+    : '';
+}
+
 function syncFromFirebase(fbList) {
   const fbIds = new Set(fbList.map(p => p.id));
   allTrash = allTrash.filter(t => t.privacy !== 'public' || fbIds.has(t.id));
@@ -303,7 +350,7 @@ function renderTop10() {
           <span class="top10-rank-badge">#${i + 1}</span>
           <span class="feed-anon">익명</span>
         </span>
-        <span class="feed-time">${formatTime(item.timestamp)}</span>
+        <span class="feed-time">${formatTime(item.timestamp)}${adminDeleteButton(item.id)}</span>
       </div>
       <div class="feed-text">${escapeHtml(item.content)}</div>
       ${item.tags && item.tags.length ? `
@@ -351,7 +398,7 @@ container.innerHTML = recent.map((item, i) => `
     <div class="feed-item" style="animation-delay: ${i * 0.03}s" data-id="${item.id}">
       <div class="feed-header">
         <span class="feed-anon">익명</span>
-        <span class="feed-time">${formatTime(item.timestamp)}</span>
+        <span class="feed-time">${formatTime(item.timestamp)}${adminDeleteButton(item.id)}</span>
       </div>
       <div class="feed-text">${escapeHtml(item.content)}</div>
       ${item.tags && item.tags.length ? `

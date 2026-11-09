@@ -1649,3 +1649,21 @@ body {
   .app-promo-link { padding: 12px 32px 12px 12px; }
   .ai-response-box { bottom: 160px; }
 }
+
+/* admin mode */
+.admin-del {
+  margin-left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid var(--neon-red);
+  background: rgba(255, 23, 68, 0.12);
+  color: var(--neon-red);
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  vertical-align: middle;
+}
+.admin-del:hover { background: var(--neon-red); color: #fff; }
+.admin-mode #navbar { border-bottom-color: rgba(255, 23, 68, 0.5); }
