@@ -7,8 +7,8 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 9.5;
-const TRASH_SCALE = 0.78; // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
+const PILE_RADIUS = 8.5;
+const TRASH_SCALE = 0.82; // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
@@ -39,10 +39,25 @@ function nearbyPlaced(x, z) {
   return out;
 }
 
+// 배치 격자(규칙적인 간격) — 아무 데나 흩뿌리지 않고 차곡차곡 쌓이게
+let pileLattice = [];
+function buildPileLattice() {
+  if (pileLattice.length) return;
+  const step = 1.08;
+  for (let x = -PILE_RADIUS; x <= PILE_RADIUS + 0.001; x += step) {
+    for (let z = -PILE_RADIUS; z <= PILE_RADIUS + 0.001; z += step) {
+      const d = Math.hypot(x, z);
+      if (d <= PILE_RADIUS) pileLattice.push({ x, z, d });
+    }
+  }
+  pileLattice.sort((a, b) => a.d - b.d); // 중심 → 외곽 순
+}
+
 function initPileGrid() {
   pileGrid.fill(0);
   placedPositions = [];
   placedHash.clear();
+  buildPileLattice();
 }
 
 function getPileIdx(x, z) {
@@ -90,10 +105,6 @@ function placeOnPile(radius, height) {
   const isLarge = radius > 1.5;
   const hEff = Math.min(height, PILE_BLOCK_H); // 쌓임 계산에는 상한 높이 사용
 
-  // 반경은 고정, "가장 낮은 표면"에 내려놓기 → 원판이 고르게 차오르며 자연스러운 원뿔
-  const maxR = PILE_RADIUS * (isLarge ? 0.95 : 1.0);
-  const attempts = 220;
-
   const BIG = 1.4;                    // 냉장고·자동차급
   const big = radius > BIG;
 
@@ -101,7 +112,7 @@ function placeOnPile(radius, height) {
   function surfaceAt(x, z, r) {
     const idx = getPileIdx(x, z);
     let h = idx >= 0 ? pileGrid[idx] : 0;
-    const factor = big ? 0.95 : 0.82;  // 큰 물건은 확실히 떨어뜨려 관통 방지
+    const factor = big ? 0.92 : 0.75;  // 큰 물건은 확실히 떨어뜨려 관통 방지
     for (const p of nearbyPlaced(x, z)) {
       const pr = p.radius || Math.max(0.6, p.minDist);
       const d = Math.hypot(x - p.x, z - p.z);
@@ -111,23 +122,18 @@ function placeOnPile(radius, height) {
     return h;
   }
 
+  // 격자점을 "중심 → 외곽" 순으로 훑어 가장 낮은 자리를 찾음
+  // (같은 높이면 중심에 가까운 칸 우선) → 흩뿌리지 않고 차곡차곡 쌓임
+  const minCenterDist = big ? PILE_RADIUS * 0.4 : 0;
   let best = null;
-  for (let attempt = 0; attempt < attempts; attempt++) {
-    const angle = Math.random() * Math.PI * 2;
-    // 큰 물건은 산 외곽(낮은 곳) 위주로, 작은 물건은 산 전체에 고르게
-    const r = big
-      ? maxR * (0.45 + 0.55 * Math.random())
-      : Math.sqrt(Math.random()) * maxR;
-    const x = Math.cos(angle) * r;
-    const z = Math.sin(angle) * r;
-    if (getPileIdx(x, z) < 0) continue;
-
-    const h = surfaceAt(x, z, radius);
-    if (big && h > 1.5) { dbg('skipBig'); continue; }  // 큰 물건은 맨 아래층만
+  for (const p of pileLattice) {
+    if (p.d < minCenterDist) continue;   // 큰 물건은 외곽에만
+    const h = surfaceAt(p.x, p.z, radius);
+    if (big && h > 1.4) { dbg('skipBig'); continue; }
     if (h > PILE_HEIGHT_CAP) { dbg('skipHigh'); continue; }
-
-    if (!best || h < best.h) best = { x, z, h };
-    if (best.h <= 0.05) break; // 바닥 빈자리 찾으면 즉시
+    if (!best || h < best.h - 0.001 || (Math.abs(h - best.h) <= 0.001 && p.d < best.d)) {
+      best = { x: p.x, z: p.z, h, d: p.d };
+    }
   }
 
   if (!best) {
@@ -153,7 +159,7 @@ function placeOnPile(radius, height) {
   depositPileHeight(best.x, best.z, radius, hEff);
   addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
 
-  const jitter = isLarge ? 0.02 : 0.06;
+  const jitter = isLarge ? 0.01 : 0.02;
   return {
     x: best.x + (Math.random() - 0.5) * jitter,
     z: best.z + (Math.random() - 0.5) * jitter,
@@ -1237,7 +1243,12 @@ function createTrashItem(data) {
     startY,
     Math.sin(angle) * dist
   );
-  mesh.rotation.set(Math.random() * Math.PI * 2, Math.random() * Math.PI * 2, 0);
+  // 세우고, 큰 물건(냉장고·자동차)은 90도 단위로 정렬해 반듯하게
+  const rotBox = new THREE.Box3().setFromObject(mesh);
+  const rotSize = new THREE.Vector3();
+  rotBox.getSize(rotSize);
+  const bigPiece = Math.max(rotSize.x, rotSize.z) > 2.6;
+  mesh.rotation.set(0, bigPiece ? Math.floor(Math.random() * 4) * Math.PI / 2 : Math.random() * Math.PI * 2, 0);
 
   scene.add(mesh);
 
@@ -1250,8 +1261,8 @@ function createTrashItem(data) {
   const arcHeight = 5 + Math.random() * 3;
   const duration = 2500 + Math.random() * 1200;
   const startTime = Date.now();
-  const wobbleX = (Math.random() - 0.5) * 1.2;
-  const wobbleZ = (Math.random() - 0.5) * 1.2;
+  const wobbleX = (Math.random() - 0.5) * 0.15;
+  const wobbleZ = (Math.random() - 0.5) * 0.15;
 
   mesh.scale.setScalar(0.3 * TRASH_SCALE);
 

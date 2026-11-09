@@ -77,7 +77,10 @@ const waitMs = Number(process.env.STATS_WAIT_MS || 30000);
 
 const prep = await ev(`(function(){
   if (typeof allTrash === 'undefined' || typeof createTrashItem !== 'function')
-    return JSON.stringify({ok:false, reason:'globals missing'});
+    return JSON.stringify({ok:false, reason:'globals missing', allTrash: typeof allTrash,
+      createTrashItem: typeof createTrashItem, seedTrashItems: typeof seedTrashItems,
+      sceneReady: typeof isSceneReady !== 'undefined' ? isSceneReady : 'n/a',
+      pileLattice: typeof pileLattice !== 'undefined' ? pileLattice.length : 'n/a'});
   const ov = document.getElementById('canvas-overlay');
   if (ov) ov.style.display = 'none';
   const tk = document.getElementById('ticker');
