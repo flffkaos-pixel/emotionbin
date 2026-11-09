@@ -7,7 +7,8 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 11;
+const PILE_RADIUS = 9.5;
+const TRASH_SCALE = 0.78; // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
@@ -89,13 +90,9 @@ function placeOnPile(radius, height) {
   const isLarge = radius > 1.5;
   const hEff = Math.min(height, PILE_BLOCK_H); // 쌓임 계산에는 상한 높이 사용
 
-  // 산 전체 평균 높이 — 쌓일수록 배치 반경을 중앙으로 좁혀 봉우리 형성
-  let sum = 0;
-  for (let i = 0; i < pileGrid.length; i++) sum += pileGrid[i];
-  const avgH = sum / pileGrid.length;
-  const shrink = Math.max(0.6, 1 - avgH * 0.03);
-  const maxR = (isLarge ? 0.95 : 1.1) * PILE_RADIUS * shrink;
-  const attempts = placedPositions.length > 60 ? 260 : 160;
+  // 반경은 고정, "가장 낮은 표면"에 내려놓기 → 원판이 고르게 차오르며 자연스러운 원뿔
+  const maxR = PILE_RADIUS * (isLarge ? 0.95 : 1.0);
+  const attempts = 220;
 
   const BIG = 1.4;                    // 냉장고·자동차급
   const big = radius > BIG;
@@ -104,12 +101,12 @@ function placeOnPile(radius, height) {
   function surfaceAt(x, z, r) {
     const idx = getPileIdx(x, z);
     let h = idx >= 0 ? pileGrid[idx] : 0;
-    const factor = big ? 1.02 : 0.9;   // 큰 물건은 확실히 떨어뜨려 관통 방지
+    const factor = big ? 0.95 : 0.82;  // 큰 물건은 확실히 떨어뜨려 관통 방지
     for (const p of nearbyPlaced(x, z)) {
       const pr = p.radius || Math.max(0.6, p.minDist);
       const d = Math.hypot(x - p.x, z - p.z);
       if (d < (r + pr) * factor) h = Math.max(h, p.topY);            // 위로 얹힘
-      else if (d < (r + pr) * factor + 0.5) h = Math.max(h, p.topY - 0.5); // 모서리 걸침
+      else if (d < (r + pr) * factor + 0.3) h = Math.max(h, p.topY - 0.5); // 모서리 걸침
     }
     return h;
   }
@@ -134,16 +131,20 @@ function placeOnPile(radius, height) {
   }
 
   if (!best) {
-    // 폴백: 그리드에서 가장 낮은 셀에 그대로 얹는다 (관통 없음)
-    let loIdx = 0, loVal = Infinity;
-    for (let i = 0; i < pileGrid.length; i++) {
-      if (pileGrid[i] < loVal) { loVal = pileGrid[i]; loIdx = i; }
-    }
+    // 폴백: 원판 안에서 가장 낮은 셀에 얹는다 (모서리로 튀지 않게 반경 제한)
     const cellPerUnit = PILE_GRID / (PILE_RADIUS * 2);
-    const gx = (loIdx % PILE_GRID) / cellPerUnit - PILE_RADIUS;
-    const gz = Math.floor(loIdx / PILE_GRID) / cellPerUnit - PILE_RADIUS;
+    let loVal = Infinity, loX = 0, loZ = 0;
+    for (let j = 0; j < PILE_GRID; j++) {
+      for (let i = 0; i < PILE_GRID; i++) {
+        const x = i / cellPerUnit - PILE_RADIUS;
+        const z = j / cellPerUnit - PILE_RADIUS;
+        if (x * x + z * z > PILE_RADIUS * PILE_RADIUS) continue;
+        const v = pileGrid[i + j * PILE_GRID];
+        if (v < loVal) { loVal = v; loX = x; loZ = z; }
+      }
+    }
     dbg('fallback');
-    best = { x: gx, z: gz, h: surfaceAt(gx, gz, radius) };
+    best = { x: loX, z: loZ, h: surfaceAt(loX, loZ, radius) };
   }
 
   window.__pileDebug.placed++;
@@ -197,10 +198,10 @@ function initScene() {
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x0a0a0a);
-  scene.fog = new THREE.Fog(0x0a0a0a, 45, 95);
+  scene.fog = new THREE.Fog(0x0a0a0a, 48, 100);
 
   camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 200);
-  camera.position.set(26, 16, 34);
+  camera.position.set(23, 14, 30);
   camera.lookAt(0, 4, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
@@ -217,8 +218,8 @@ function initScene() {
   controls.dampingFactor = 0.05;
   controls.maxPolarAngle = Math.PI / 2.2;
   controls.minPolarAngle = 0.1;
-  controls.maxDistance = 70;
-  controls.minDistance = 10;
+  controls.maxDistance = 60;
+  controls.minDistance = 8;
   controls.target.set(0, 4, 0);
   controls.autoRotate = true;
   controls.autoRotateSpeed = 0.5;
@@ -262,7 +263,7 @@ function setupLights() {
 }
 
 function createGround() {
-  const geo = new THREE.CircleGeometry(34, 64);
+  const geo = new THREE.CircleGeometry(27, 64);
   const mat = new THREE.MeshStandardMaterial({
     color: 0x111111,
     roughness: 0.9,
@@ -1148,15 +1149,32 @@ function createTrashMesh(weight, contentLength, color, tags, forceType) {
 }
 
 let pendingDumps = [];
+let dumpBurst = 0; // 시드(초기 채우기) 중에는 여러 개씩 빠르게 소화
 
 function scheduleTrashItem(data) {
   pendingDumps.push(data);
 }
 
+// 페이지 로드 시 저장된 감정들로 산을 "다시" 쌓는다 (씬은 매번 새로 만들어지므로)
+function seedTrashItems(list) {
+  if (!list || !list.length) return;
+  if (!isSceneReady) {
+    setTimeout(() => seedTrashItems(list), 500);
+    return;
+  }
+  const sorted = list.slice().sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+  sorted.forEach((d) => pendingDumps.push(d));
+  dumpBurst = sorted.length;
+}
+
 function processDumpAnimation() {
   if (pendingDumps.length === 0) return;
-  const data = pendingDumps.shift();
-  createTrashItem(data);
+  const perTick = dumpBurst > 0 ? 3 : 1;
+  for (let i = 0; i < perTick && pendingDumps.length > 0; i++) {
+    const data = pendingDumps.shift();
+    createTrashItem(data);
+  }
+  if (dumpBurst > 0) dumpBurst -= perTick;
 }
 
 function getObjHeight(category) {
@@ -1225,6 +1243,7 @@ function createTrashItem(data) {
 
   const objHeight = getObjHeight(category);
   // 실제 메시 크기로 배치 → 겹침/뚫림 방지 (최종 안착 스케일과 동일하게)
+  mesh.scale.setScalar(TRASH_SCALE);   // 최종 크기로 미리 스케일 → 실제 크기로 배치 계산
   const fp = measureFootprint(mesh);
   const pilePos = placeOnPile(fp.radius, fp.height);
 
@@ -1234,7 +1253,7 @@ function createTrashItem(data) {
   const wobbleX = (Math.random() - 0.5) * 1.2;
   const wobbleZ = (Math.random() - 0.5) * 1.2;
 
-  mesh.scale.set(0.3, 0.3, 0.3);
+  mesh.scale.setScalar(0.3 * TRASH_SCALE);
 
   dumpAnimations.push({
     mesh,
@@ -1313,7 +1332,7 @@ function updateDumpAnimations() {
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 6;
     anim.mesh.rotation.z = anim.startRot.z + anim.wobbleZ * ease;
 
-    const scale = 0.4 + 0.6 * t;
+    const scale = (0.4 + 0.6 * t) * TRASH_SCALE;
     anim.mesh.scale.set(scale, scale, scale);
 
     if (t > 0.15 && t < 0.95 && Math.random() < 0.3) {

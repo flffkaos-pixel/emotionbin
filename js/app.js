@@ -63,12 +63,23 @@ function syncFromFirebase(fbList) {
     } else {
       allTrash.push(p);
       localIds.add(p.id);
-      if (typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
+      // 초기 시드 전에는 여기서 예약하지 않음(중복 방지) — 시드 이후 새 글만 실시간 추가
+      if (window.__mountainSeeded && typeof scheduleTrashItem === 'function') scheduleTrashItem(p);
     }
   });
   allTrash.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
   if (allTrash.length > 500) allTrash = allTrash.slice(0, 500);
   localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+}
+
+// 저장된 공개 감정들로 3D 쓰레기산을 다시 쌓는다 (한 번만)
+function seedMountain() {
+  if (window.__mountainSeeded) return;
+  const pubs = allTrash.filter(t => t.privacy === 'public');
+  window.__mountainSeeded = true;
+  if (pubs.length && typeof seedTrashItems === 'function') {
+    seedTrashItems(pubs.slice(0, 160)); // 최신 160개(정렬은 seed 내부에서 오래된 순)
+  }
 }
 
 function normalizeWeight(item) {
@@ -744,12 +755,12 @@ sbLoadPosts().then(list => {
       { content: '너만 행복하면 다야? 나는? 나는 버려도 돼?', tags: ['서운함', '상처'], weightBefore: 95, weightAfter: 45, timestamp: Date.now() - 3600000, privacy: 'public', id: Date.now() - 5 },
       { content: '오늘 회사에서 또 당했다. 팀장은 내 아이디어를 자기가 낸 것처럼 발표했고, 옆자리 XX는 내 실수를 사무실 전체에 알렸다. 점심때는 혼자 먹었고, 핸드폰을 봐도 연락하는 사람은 아무도 없었다. 퇴근 길에 비까지 맞았다. 집에 와서도 할 일은 산더미다. 내일도 똑같은 하루가 반복될 생각을 하니 숨이 막힌다. 이 지긋지긋한 일상 언제까지 버텨야 할까. 나는 왜 이렇게 사는 걸까. 세상에 너무 많은 사람이 있는데 왜 나는 혼자인 기분일까. 다들 행복해 보이는데 나만 제자리다. 뭘 해도 재미없고, 뭘 먹어도 맛없고, 누굴 만나도 시시하다. 이게 우울증이라는 건 알지만, 극복할 의지조차 없다. 그냥 모든 게 귀찮다. 숨 쉬는 것조차 귀찮다. 아무것도 하기 싫다. 다 던져버리고 싶다. 모든 걸. 회사도, 인간관계도, 이 도시도, 나 자신도. 우주 어딘가에 아무도 없는 곳으로 떠나고 싶다.', tags: ['분노', '짜증', '스트레스', '외로움', '무기력'], weightBefore: 195, weightAfter: 75, timestamp: Date.now() - 7200000, privacy: 'public', id: Date.now() - 6 },
     ];
-    sampleTrash.forEach(d => {
-      allTrash.push(d);
-      scheduleTrashItem(d);
-    });
+    sampleTrash.forEach(d => { allTrash.push(d); });
     localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
   }
+
+  // 3D 산은 매 로드마다 새로 만들어지므로, 저장된 감정들로 산을 다시 쌓아준다
+  seedMountain();
   updateStats();
   updateTicker();
   refreshActiveSection();

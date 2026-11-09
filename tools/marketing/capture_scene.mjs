@@ -94,11 +94,24 @@ console.log('scene:', prep.result.value);
 
 await sleep(waitMs);
 
+// 모든 아이템이 낙하를 마치고 자리를 잡을 때까지 대기 (떨어지는 중인 것 제외하고 측정)
+for (let i = 0; i < 90; i++) {
+  const q = await ev(`JSON.stringify({p: (typeof pendingDumps!=='undefined'?pendingDumps.length:-1), a:(typeof dumpAnimations!=='undefined'?dumpAnimations.length:-1)})`);
+  try {
+    const o = JSON.parse(q.result.value);
+    if (o.p === 0 && o.a === 0) break;
+  } catch (e) {}
+  await sleep(1000);
+}
+await sleep(1500);
+
 const stats = await ev(`(function(){
   if (typeof trashObjects === 'undefined') return JSON.stringify({ok:false});
   const v = new THREE.Vector3();
   // 媛??ㅻ툕?앺듃??"諛붾떏 ?믪씠" = 以묒떖 y - ?ㅼ젣 ?믪씠/2  (?뺤갑 ???ㅼ젣 ?곸옱 ?믪씠)
-  const bases = trashObjects.map(o => {
+  const animSet = new Set((typeof dumpAnimations !== 'undefined' ? dumpAnimations : []).map(a => a.mesh));
+  const settled = trashObjects.filter(o => !animSet.has(o));
+  const bases = settled.map(o => {
     const box = new THREE.Box3().setFromObject(o);
     box.getSize(v);
     return o.position.y - v.y / 2;
@@ -106,10 +119,10 @@ const stats = await ev(`(function(){
   const sorted = bases.slice().sort((a,b)=>a-b);
   const grid = Array.from(pileGrid);
   const nz = grid.filter(x => x > 0.01);
-  const radii = trashObjects.map(o => Math.hypot(o.position.x, o.position.z));
+  const radii = settled.map(o => Math.hypot(o.position.x, o.position.z));
 
   // ??臾쇨굔(?됱옣怨졖룹옄?숈감湲??쇰━ 愿??寃뱀묠 媛쒖닔 痢≪젙
-  const items = trashObjects.map(o => {
+  const items = settled.map(o => {
     const box = new THREE.Box3().setFromObject(o);
     const size = new THREE.Vector3(); box.getSize(size);
     const c = new THREE.Vector3(); box.getCenter(c);
