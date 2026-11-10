@@ -154,20 +154,14 @@ function placeOnPile(radius, height) {
   }
 
   if (!best) {
-    // 폴백: 원판 안에서 가장 낮은 셀에 얹는다 (모서리로 튀지 않게 반경 제한)
-    const cellPerUnit = PILE_GRID / (PILE_RADIUS * 2);
-    let loVal = Infinity, loX = 0, loZ = 0;
-    for (let j = 0; j < PILE_GRID; j++) {
-      for (let i = 0; i < PILE_GRID; i++) {
-        const x = i / cellPerUnit - PILE_RADIUS;
-        const z = j / cellPerUnit - PILE_RADIUS;
-        if (x * x + z * z > PILE_RADIUS * PILE_RADIUS) continue;
-        const v = pileGrid[i + j * PILE_GRID];
-        if (v < loVal) { loVal = v; loX = x; loZ = z; }
-      }
+    // 폴백: 상한을 풀고 "가장 낮은 표면"을 다시 찾는다 (탑이 생기지 않게)
+    let loH = Infinity, loX = 0, loZ = 0;
+    for (const p of pileLattice) {
+      const h = surfaceAt(p.x, p.z, radius);
+      if (h < loH) { loH = h; loX = p.x; loZ = p.z; }
     }
     dbg('fallback');
-    best = { x: loX, z: loZ, h: surfaceAt(loX, loZ, radius) };
+    best = { x: loX, z: loZ, h: loH };
   }
 
   window.__pileDebug.placed++;
@@ -1260,14 +1254,17 @@ function createTrashItem(data) {
     startY,
     Math.sin(angle) * dist
   );
-  // 세우고, 큰 물건(냉장고·자동차)은 90도 단위로 정렬해 반듯하게
+  // 쓰레기처럼 자연스럽게 기울여 놓기 (큰 물건은 덜 기울게)
   const rotBox = new THREE.Box3().setFromObject(mesh);
   const rotSize = new THREE.Vector3();
   rotBox.getSize(rotSize);
   const bigPiece = Math.max(rotSize.x, rotSize.z) > 2.6;
-  mesh.rotation.set(0, bigPiece
-    ? Math.floor(Math.random() * 4) * Math.PI / 2 + (Math.random() - 0.5) * 0.35
-    : Math.random() * Math.PI * 2, 0);
+  const lean = bigPiece ? 0.55 : Math.PI * 1.35;   // 최대 기울기(라디안)
+  mesh.rotation.set(
+    (Math.random() - 0.5) * lean,
+    Math.random() * Math.PI * 2,
+    (Math.random() - 0.5) * lean
+  );
 
   scene.add(mesh);
 
