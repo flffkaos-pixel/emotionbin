@@ -44,14 +44,28 @@ function nearbyPlaced(x, z) {
 let pileLattice = [];
 function buildPileLattice() {
   if (pileLattice.length) return;
-  const step = 1.08;
-  for (let x = -PILE_RADIUS; x <= PILE_RADIUS + 0.001; x += step) {
-    for (let z = -PILE_RADIUS; z <= PILE_RADIUS + 0.001; z += step) {
-      const d = Math.hypot(x, z);
-      if (d <= PILE_RADIUS) pileLattice.push({ x, z, d });
+  const step = 1.05;
+  const frac = (s) => s - Math.floor(s);          // [0,1) 의사난수
+  const rotation = Math.random() * Math.PI * 2;   // 격자 전체를 임의 각도로 회전
+  const ca = Math.cos(rotation), sa = Math.sin(rotation);
+  let row = 0;
+  for (let z = -PILE_RADIUS; z <= PILE_RADIUS + 0.001; z += step, row++) {
+    const stagger = (row % 2) * step * 0.5;       // 홀수 행 엇갈림(육각 느낌)
+    for (let x = -PILE_RADIUS; x <= PILE_RADIUS + 0.001; x += step) {
+      const px = x + stagger, pz = z;
+      // 셀마다 살짝 흔들어 규칙적인 줄무늬가 보이지 않게
+      const jx = (frac(Math.sin(px * 12.9898 + pz * 78.233) * 43758.5453) - 0.5) * 0.55;
+      const jz = (frac(Math.sin(px * 39.3468 + pz * 11.135) * 24634.6345) - 0.5) * 0.55;
+      const rx = ca * px - sa * pz + jx;
+      const rz = sa * px + ca * pz + jz;
+      const d = Math.hypot(rx, rz);
+      if (d <= PILE_RADIUS) pileLattice.push({ x: rx, z: rz, d });
     }
   }
-  pileLattice.sort((a, b) => a.d - b.d); // 중심 → 외곽 순
+  // 중심 → 외곽이되, 위치에 따라 순서가 살짝 흐트러지게 (동심원 티 제거)
+  pileLattice.sort((a, b) =>
+    (a.d + frac(Math.sin(a.x * 3.1) * 0.37) * 1.2) -
+    (b.d + frac(Math.sin(b.x * 3.1) * 0.37) * 1.2));
 }
 
 function initPileGrid() {
@@ -132,6 +146,7 @@ function placeOnPile(radius, height) {
     const h = surfaceAt(p.x, p.z, radius);
     if (big && h > 1.4) { dbg('skipBig'); continue; }
     if (h > PILE_HEIGHT_CAP) { dbg('skipHigh'); continue; }
+    if (h > 6.5) { dbg('skipHigh'); continue; } // 뾰족한 탑 방지 — 너무 높은 자리는 피함(퍼지게)
     const wobble = 0.45 * Math.sin(p.x * 0.62 + 1.7) * Math.cos(p.z * 0.55 - 0.4)
                  + 0.22 * Math.sin(p.d * 1.3 + 0.8);
     const score = h + CONE_SLOPE * p.d + wobble;
@@ -161,7 +176,7 @@ function placeOnPile(radius, height) {
   depositPileHeight(best.x, best.z, radius, hEff);
   addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
 
-  const jitter = isLarge ? 0.06 : 0.12; // 유기적인 배치(딱 맞는 격자 느낌 제거)
+  const jitter = isLarge ? 0.08 : 0.16; // 유기적인 배치(딱 맞는 격자 느낌 제거)
   return {
     x: best.x + (Math.random() - 0.5) * jitter,
     z: best.z + (Math.random() - 0.5) * jitter,
@@ -1250,7 +1265,9 @@ function createTrashItem(data) {
   const rotSize = new THREE.Vector3();
   rotBox.getSize(rotSize);
   const bigPiece = Math.max(rotSize.x, rotSize.z) > 2.6;
-  mesh.rotation.set(0, bigPiece ? Math.floor(Math.random() * 4) * Math.PI / 2 : Math.random() * Math.PI * 2, 0);
+  mesh.rotation.set(0, bigPiece
+    ? Math.floor(Math.random() * 4) * Math.PI / 2 + (Math.random() - 0.5) * 0.35
+    : Math.random() * Math.PI * 2, 0);
 
   scene.add(mesh);
 
