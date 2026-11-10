@@ -225,11 +225,17 @@ document.querySelectorAll('.tag').forEach(el => {
 });
 
 async function dumpEmotion() {
-  const text = filterProfanity(document.getElementById('emotion-text').value.trim());
-  if (!text) {
+  const rawText = document.getElementById('emotion-text').value.trim();
+  if (!rawText) {
     showToast('감정을 입력해주세요', 'error');
     return;
   }
+  // 홍보·광고·모집 글은 저장하지 않고 차단창을 띄운다
+  if (detectPromo(rawText)) {
+    showPromoBlocked();
+    return;
+  }
+  const text = filterProfanity(rawText);
 
   const btn = document.getElementById('dump-btn');
   btn.classList.add('loading');
@@ -322,6 +328,47 @@ function resetForm() {
   selectedTags = [];
   document.querySelectorAll('.tag.active').forEach(el => el.classList.remove('active'));
   updateTrashPreview(0);
+}
+
+// ===== 홍보·광고·모집 글 차단 =====
+// 감정 배출 공간이므로 홍보/모집/링크 글은 작성 자체를 막는다.
+const PROMO_PATTERNS = [
+  /돈\s*필요한\s*여자/i,                 // 이번 스팸 문구
+  /조건\s*만남|성인\s*(오픈|모집|만남)/i,
+  /선불\s*후불|후불\s*가능/i,
+  /(오픈\s*채팅|오픈챗|텔레그램|t\.me)/i,
+  /\b(?:ider|아이디|텔레|카톡|kakao|tele|line)\s*[:：]?\s*[a-z0-9_]{4,}/i, // ider732 같은 홍보 아이디
+  /카톡\s*(아이디|주세요|문의)|라인\s*(아이디|주세요)/i,
+  /(토토|바카라|카지노|도박\s*사이트|먹튀)/i,
+  /(광고|홍보)\s*(문의|주세요|합니다|배너)/i,
+  /(쪽지|디엠|DM)\s*주세요/i,
+  /(https?:\/\/|www\.|\.xyz|\.shop|\.top|bit\.ly|t\.me\/)/i,
+];
+
+function detectPromo(text) {
+  if (!text) return null;
+  const t = String(text);
+  for (const re of PROMO_PATTERNS) {
+    if (re.test(t)) return re.source;
+  }
+  return null;
+}
+
+function showPromoBlocked() {
+  const el = document.getElementById('promo-modal');
+  if (el) {
+    el.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  } else {
+    showToast('🚫 홍보·광고성 글은 쓸 수 없습니다', 'error', 4500);
+  }
+  try { localStorage.setItem('promo_blocked_at', String(Date.now())); } catch (e) {}
+}
+
+function closePromoModal() {
+  const el = document.getElementById('promo-modal');
+  if (el) el.classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 function showToast(message, type, durationMs = 3000) {
@@ -499,8 +546,13 @@ function renderComments(item) {
 }
 
 function submitComment(id, inputEl) {
-  const text = filterProfanity(inputEl.value.trim());
-  if (!text) return;
+  const raw = inputEl.value.trim();
+  if (!raw) return;
+  if (detectPromo(raw)) {
+    showPromoBlocked();
+    return;
+  }
+  const text = filterProfanity(raw);
   const item = allTrash.find(t => t.id === id);
   if (!item) return;
   if (!item.comments) item.comments = [];

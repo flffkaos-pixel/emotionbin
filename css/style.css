@@ -1667,3 +1667,8 @@ body {
 }
 .admin-del:hover { background: var(--neon-red); color: #fff; }
 .admin-mode #navbar { border-bottom-color: rgba(255, 23, 68, 0.5); }
+
+/* promo block modal */
+.promo-modal-content { border-color: rgba(255, 23, 68, 0.5); }
+.promo-msg { font-size: 0.92rem; line-height: 1.7; color: var(--text-secondary); margin-bottom: 1.2rem; white-space: pre-line; }
+.promo-msg strong { color: var(--neon-red); }
