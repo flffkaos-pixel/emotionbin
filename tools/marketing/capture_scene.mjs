@@ -161,6 +161,14 @@ const stats = await ev(`(function(){
     bigItems: bigCount,
     bigPairs,
     clipPairs,
+    uprightCount: settled.filter(o => {
+      const v = new THREE.Vector3(0, 1, 0).applyQuaternion(o.quaternion);
+      return v.dot(new THREE.Vector3(0, 1, 0)) > 0.9;
+    }).length,
+    uprightMean: +(settled.reduce((a, o) => {
+      const v = new THREE.Vector3(0, 1, 0).applyQuaternion(o.quaternion);
+      return a + v.dot(new THREE.Vector3(0, 1, 0));
+    }, 0) / Math.max(1, settled.length)).toFixed(3),
   });
 })()`);
 console.log('SCENE STATS:', stats.result.value);
