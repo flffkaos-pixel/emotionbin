@@ -28,10 +28,15 @@ async function sbSavePost(data) {
       comments: [],
     }]);
     if (error) throw error;
-    return data.id;
+    return { ok: true, id: data.id };
   } catch (e) {
     console.warn('[SB] save error:', e);
-    return null;
+    const msg = String((e && e.message) || e);
+    // 서버(트리거)에서 차단한 경우 — 화면에서도 지워준다
+    if (/banned_ip|blocked_content|rate_limited/i.test(msg)) {
+      return { ok: false, blocked: true, reason: msg };
+    }
+    return { ok: false };
   }
 }
 

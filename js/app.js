@@ -268,7 +268,24 @@ async function dumpEmotion() {
       firebasePosts.unshift(data);
     }
     if (typeof sbSavePost === 'function') {
-      sbSavePost(data);
+      Promise.resolve(sbSavePost(data)).then(res => {
+        if (res && res.blocked) {
+          // 서버에서 차단된 글(차단 IP/금칙어) → 흔적 남기지 않고 되돌린다
+          allTrash = allTrash.filter(t => t.id !== data.id);
+          myTrash = myTrash.filter(t => t.id !== data.id);
+          firebasePosts = firebasePosts.filter(t => t.id !== data.id);
+          try {
+            localStorage.setItem('all_emotional_trash', JSON.stringify(allTrash));
+            localStorage.setItem('emotional_trash', JSON.stringify(myTrash));
+          } catch (e) {}
+          if (typeof renderFeed === 'function') renderFeed();
+          if (typeof renderTop10 === 'function') renderTop10();
+          if (typeof renderMyTrash === 'function') renderMyTrash();
+          if (typeof updateStats === 'function') updateStats();
+          if (typeof updateTicker === 'function') updateTicker();
+          showToast('🚫 이 글은 차단되었습니다', 'error', 5000);
+        }
+      });
     }
   }
 

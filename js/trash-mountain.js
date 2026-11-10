@@ -8,7 +8,8 @@ let placedPositions = [];
 
 const PILE_GRID = 72;
 const PILE_RADIUS = 8.5;
-const TRASH_SCALE = 0.82; // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
+const TRASH_SCALE = 0.82;
+const CONE_SLOPE = 0.62;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
@@ -122,8 +123,8 @@ function placeOnPile(radius, height) {
     return h;
   }
 
-  // 격자점을 "중심 → 외곽" 순으로 훑어 가장 낮은 자리를 찾음
-  // (같은 높이면 중심에 가까운 칸 우선) → 흩뿌리지 않고 차곡차곡 쌓임
+  // 산 모양: 점수 = (표면 높이) + (기울기 × 중심거리) + 유기적 굴곡
+  // → 중심이 높고 외곽이 낮은 원뿔이 되면서, 완전히 균일하진 않게 된다.
   const minCenterDist = big ? PILE_RADIUS * 0.4 : 0;
   let best = null;
   for (const p of pileLattice) {
@@ -131,9 +132,10 @@ function placeOnPile(radius, height) {
     const h = surfaceAt(p.x, p.z, radius);
     if (big && h > 1.4) { dbg('skipBig'); continue; }
     if (h > PILE_HEIGHT_CAP) { dbg('skipHigh'); continue; }
-    if (!best || h < best.h - 0.001 || (Math.abs(h - best.h) <= 0.001 && p.d < best.d)) {
-      best = { x: p.x, z: p.z, h, d: p.d };
-    }
+    const wobble = 0.45 * Math.sin(p.x * 0.62 + 1.7) * Math.cos(p.z * 0.55 - 0.4)
+                 + 0.22 * Math.sin(p.d * 1.3 + 0.8);
+    const score = h + CONE_SLOPE * p.d + wobble;
+    if (!best || score < best.score) best = { x: p.x, z: p.z, h, d: p.d, score };
   }
 
   if (!best) {
@@ -159,7 +161,7 @@ function placeOnPile(radius, height) {
   depositPileHeight(best.x, best.z, radius, hEff);
   addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
 
-  const jitter = isLarge ? 0.01 : 0.02;
+  const jitter = isLarge ? 0.06 : 0.12; // 유기적인 배치(딱 맞는 격자 느낌 제거)
   return {
     x: best.x + (Math.random() - 0.5) * jitter,
     z: best.z + (Math.random() - 0.5) * jitter,
