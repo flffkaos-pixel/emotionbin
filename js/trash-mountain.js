@@ -149,7 +149,7 @@ function placeOnPile(radius, height) {
     if (h > 9.5) { dbg('skipHigh'); continue; } // 뾰족한 탑 방지 — 너무 높은 자리는 피함(퍼지게)
     const wobble = 0.45 * Math.sin(p.x * 0.62 + 1.7) * Math.cos(p.z * 0.55 - 0.4)
                  + 0.22 * Math.sin(p.d * 1.3 + 0.8);
-    const score = h + CONE_SLOPE * p.d + wobble;
+    const score = h + CONE_SLOPE * p.d + wobble + Math.random() * 0.45;
     if (!best || score < best.score) best = { x: p.x, z: p.z, h, d: p.d, score };
   }
 
@@ -170,11 +170,11 @@ function placeOnPile(radius, height) {
   depositPileHeight(best.x, best.z, radius, hEff);
   addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
 
-  const jitter = isLarge ? 0.04 : 0.05; // 유기적인 배치(딱 맞는 격자 느낌 제거)
+  const jitter = isLarge ? 0.1 : 0.14; // 유기적인 배치(딱 맞는 격자 느낌 제거)
   return {
     x: best.x + (Math.random() - 0.5) * jitter,
     z: best.z + (Math.random() - 0.5) * jitter,
-    y: best.h + height * 0.5,   // 바닥이 표면에 닿도록 중심 보정
+    y: best.h + height * 0.5 + Math.random() * 0.12,   // 바닥이 표면에 닿도록 중심 보정
   };
 }
 
@@ -1270,7 +1270,10 @@ function createTrashItem(data) {
 
   const objHeight = getObjHeight(category);
   // 실제 메시 크기로 배치 → 겹침/뚫림 방지 (최종 안착 스케일과 동일하게)
-  mesh.scale.setScalar(TRASH_SCALE);   // 최종 크기로 미리 스케일 → 실제 크기로 배치 계산
+  // 물건마다 크기를 조금씩 다르게 → 기계적으로 똑같아 보이지 않게 자연스럽게
+  const itemScale = TRASH_SCALE * (0.82 + Math.random() * 0.4);
+  mesh.userData.itemScale = itemScale;
+  mesh.scale.setScalar(itemScale);     // 최종 크기로 미리 스케일 → 실제 크기로 배치 계산
   const fp = measureFootprint(mesh);
   const pilePos = placeOnPile(fp.radius, fp.height);
 
@@ -1280,7 +1283,7 @@ function createTrashItem(data) {
   const wobbleX = (Math.random() - 0.5) * 0.15;
   const wobbleZ = (Math.random() - 0.5) * 0.15;
 
-  mesh.scale.setScalar(0.3 * TRASH_SCALE);
+  mesh.scale.setScalar(0.3 * itemScale);
 
   dumpAnimations.push({
     mesh,
@@ -1296,6 +1299,7 @@ function createTrashItem(data) {
     startTime,
     duration,
     trailColor: color,
+    itemScale,
   });
 
   trashObjects.push(mesh);
@@ -1359,7 +1363,7 @@ function updateDumpAnimations() {
     anim.mesh.rotation.y = anim.startRot.y + t * Math.PI * 6;
     anim.mesh.rotation.z = anim.startRot.z + anim.wobbleZ * ease;
 
-    const scale = (0.4 + 0.6 * t) * TRASH_SCALE;
+    const scale = (0.4 + 0.6 * t) * (anim.itemScale || TRASH_SCALE);
     anim.mesh.scale.set(scale, scale, scale);
 
     if (t > 0.15 && t < 0.95 && Math.random() < 0.3) {
