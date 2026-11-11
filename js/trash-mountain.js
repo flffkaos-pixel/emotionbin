@@ -6,8 +6,8 @@ let isSceneReady = false;
 let dumpAnimations = [];
 let placedPositions = [];
 
-const PILE_GRID = 72;
-const PILE_RADIUS = 8.2;
+const PILE_GRID = 84;
+const PILE_RADIUS = 15;   // 초록 원(22)의 약 70%
 const TRASH_SCALE = 0.98;
 const CONE_SLOPE = 1.05;
 const LAYER_TAPER = 0.15;   // 층마다 반경이 줄어드는 비율 (피라미드 경사)
@@ -47,7 +47,7 @@ function nearbyPlaced(x, z) {
 let pileLattice = [];
 function buildPileLattice() {
   if (pileLattice.length) return;
-  const step = 0.6;
+  const step = 0.75;
   const frac = (s) => s - Math.floor(s);          // [0,1) 의사난수
   const rotation = Math.random() * Math.PI * 2;   // 격자 전체를 임의 각도로 회전
   const ca = Math.cos(rotation), sa = Math.sin(rotation);
@@ -247,7 +247,7 @@ function initScene() {
   scene.fog = new THREE.Fog(0x0a0a0a, 48, 100);
 
   camera = new THREE.PerspectiveCamera(55, w / h, 0.1, 200);
-  camera.position.set(23, 14, 30);
+  camera.position.set(27, 16, 34);
   camera.lookAt(0, 4, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: 'high-performance' });
