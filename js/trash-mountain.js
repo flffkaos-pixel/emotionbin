@@ -7,9 +7,9 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 6.5;
-const TRASH_SCALE = 0.92;
-const CONE_SLOPE = 0.62;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
+const PILE_RADIUS = 7.6;
+const TRASH_SCALE = 0.88;
+const CONE_SLOPE = 0.34;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
