@@ -7,10 +7,12 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 6.4;
+const PILE_RADIUS = 8.5;
 const TRASH_SCALE = 0.98;
 const CONE_SLOPE = 1.05;
-const PEAK_HEIGHT = 9.5;   // 산 꼭대기 높이 (원뿔 봉투 기준)  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
+const LAYER_TAPER = 0.17;   // 층마다 반경이 줄어드는 비율 (피라미드 경사)
+const LAYER_HEIGHT = 1.75;  // 층 단차 높이
+const PEAK_HEIGHT = 9.5;    // 참고값(더 이상 사용 안 함)  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
@@ -71,6 +73,7 @@ function buildPileLattice() {
 
 function initPileGrid() {
   pileGrid.fill(0);
+  pileLayer = 0;
   placedPositions = [];
   placedHash.clear();
   buildPileLattice();
@@ -115,69 +118,92 @@ function depositPileHeight(x, z, radius, height) {
 window.__pileDebug = window.__pileDebug || { placed: 0, fallback: 0, skipBig: 0, skipBlocked: 0, hSum: 0, hN: 0 };
 function dbg(k) { try { window.__pileDebug[k]++; } catch (e) {} }
 
-// 실제 크기 기반 분리 + "낮은 자리 우선" + 윗면에 올려 쌓기 → 층층이 쌓이는 쓰레기산
+// ===== 피라미드식 층 쌓기 =====
+// 아래층은 넓게, 한 층이 꽉 차면 한 단 위의 좁은 층으로 올라간다.
+// → 질서 있게 쌓이면서 "점점 쌓여 올라가는" 게 눈에 보인다.
+let pileLayer = 0;
+
 function placeOnPile(radius, height) {
   const minDist = Math.max(0.5, Math.min(radius, 2.2) * 0.85);
   const isLarge = radius > 1.5;
-  const hEff = Math.min(height, PILE_BLOCK_H); // 쌓임 계산에는 상한 높이 사용
+  const hEff = Math.min(height, PILE_BLOCK_H);
+  const big = radius > 1.4;           // 냉장고·자동차급
 
-  const BIG = 1.4;                    // 냉장고·자동차급
-  const big = radius > BIG;
-
-  // 주어진 위치에 놓았을 때 "얹히는 높이"(관통 없이 올라탈 표면) 계산
+  // 주어진 위치에서 주변 물건 윗면(관통 방지용)
   function surfaceAt(x, z, r) {
-    const idx = getPileIdx(x, z);
-    let h = idx >= 0 ? pileGrid[idx] : 0;
-    const factor = big ? 0.72 : 0.42;  // 큰 물건은 확실히 떨어뜨려 관통 방지
+    let h = 0;
     for (const p of nearbyPlaced(x, z)) {
       const pr = p.radius || Math.max(0.6, p.minDist);
       const d = Math.hypot(x - p.x, z - p.z);
-      if (d < (r + pr) * factor) h = Math.max(h, p.topY);            // 위로 얹힘
-      else if (d < (r + pr) * factor + 0.1) h = Math.max(h, p.topY - 0.4); // 모서리 걸침
+      if (d < (r + pr) * 0.7) h = Math.max(h, p.topY);
     }
     return h;
   }
 
-  // 산 모양: 점수 = (표면 높이) + (기울기 × 중심거리) + 유기적 굴곡
-  // → 중심이 높고 외곽이 낮은 원뿔이 되면서, 완전히 균일하진 않게 된다.
-  const minCenterDist = big ? PILE_RADIUS * 0.4 : 0;
-  let best = null;
-  for (const p of pileLattice) {
-    if (p.d < minCenterDist) continue;   // 큰 물건은 외곽에만
-    const h = surfaceAt(p.x, p.z, radius);
-    if (big && h > 1.4) { dbg('skipBig'); continue; }
-    if (h > PILE_HEIGHT_CAP) { dbg('skipHigh'); continue; }
-    // 원뿔 봉투: 반경이 커질수록 허용 높이가 낮아짐 → 위가 평평한 원통이 아니라 산(뾰족한) 모양
-    const coneLimit = PEAK_HEIGHT * (1 - p.d / PILE_RADIUS);
-    if (h > coneLimit) { dbg('skipHigh'); continue; } // 뾰족한 탑 방지 — 너무 높은 자리는 피함(퍼지게)
-    const wobble = 0.45 * Math.sin(p.x * 0.62 + 1.7) * Math.cos(p.z * 0.55 - 0.4)
-                 + 0.22 * Math.sin(p.d * 1.3 + 0.8);
-    const score = h + CONE_SLOPE * p.d + wobble + Math.random() * 0.3;
-    if (!best || score < best.score) best = { x: p.x, z: p.z, h, d: p.d, score };
+  // L번째 층에서 아직 비어 있는 자리 찾기 (중심 → 외곽 순)
+  function freeSpotInLayer(L, r) {
+    if (big && L > 0) return null;                       // 큰 물건은 맨 아래층만
+    const RL = PILE_RADIUS * (1 - L * LAYER_TAPER);
+    if (RL < 0.9) return null;
+    const layerY = L * LAYER_HEIGHT;
+    for (const p of pileLattice) {
+      if (p.d > RL) break;                               // 격자는 중심→외곽 정렬
+      if (big && p.d < RL * 0.45) continue;              // 큰 물건은 층 안에서도 외곽
+      let occupied = false;
+      for (const q of nearbyPlaced(p.x, p.z)) {
+        if (Math.abs((q.layerY || 0) - layerY) > LAYER_HEIGHT * 0.55) continue; // 다른 층은 무관
+        const pr = q.radius || Math.max(0.6, q.minDist);
+        const sep = (r + pr) * (big ? 0.85 : 0.62);
+        const dx = p.x - q.x, dz = p.z - q.z;
+        if (dx * dx + dz * dz < sep * sep) { occupied = true; break; }
+      }
+      if (!occupied) return { x: p.x, z: p.z, d: p.d, layerY, L };
+    }
+    return null;
   }
 
-  if (!best) {
-    // 폴백: 상한을 풀고 "가장 낮은 표면"을 다시 찾는다 (탑이 생기지 않게)
+  // 큰 물건은 맨 아래층에만 시도 (층 포인터를 건드리지 않음)
+  // 작은 물건은 현재 층부터 위로 올라가며 빈 자리를 찾는다.
+  const maxLayer = 5;
+  let spot = null;
+  if (big) {
+    spot = freeSpotInLayer(0, radius);
+    if (!spot) dbg('bigFallback');
+  } else {
+    for (let L = pileLayer; L <= maxLayer && !spot; L++) {
+      spot = freeSpotInLayer(L, radius);
+      if (spot) { pileLayer = L; break; }
+      if (L === pileLayer) { pileLayer = Math.min(L + 1, maxLayer); dbg('layerUp'); }
+    }
+  }
+
+  let x, z, baseY;
+  if (spot) {
+    x = spot.x; z = spot.z;
+    // 같은 층 단차에 놓되, 아래 물건이 튀어나와 있으면 그 위로 살짝
+    baseY = Math.max(spot.layerY, surfaceAt(x, z, radius) - 0.3);
+  } else {
+    dbg('fallback');
     let loH = Infinity, loX = 0, loZ = 0;
     for (const p of pileLattice) {
       const h = surfaceAt(p.x, p.z, radius);
       if (h < loH) { loH = h; loX = p.x; loZ = p.z; }
     }
-    dbg('fallback');
-    best = { x: loX, z: loZ, h: loH };
+    x = loX; z = loZ; baseY = loH;
   }
 
+  const layerY = spot ? spot.layerY : baseY;
   window.__pileDebug.placed++;
-  window.__pileDebug.hSum += best.h;
+  window.__pileDebug.hSum += baseY;
   window.__pileDebug.hN++;
-  depositPileHeight(best.x, best.z, radius, hEff);
-  addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
+  depositPileHeight(x, z, radius, hEff);
+  addPlaced({ x, z, minDist, radius, topY: baseY + hEff, layerY });
 
-  const jitter = isLarge ? 0.1 : 0.14; // 유기적인 배치(딱 맞는 격자 느낌 제거)
+  const jitter = isLarge ? 0.05 : 0.08;   // 규칙적이되 딱 맞지는 않게
   return {
-    x: best.x + (Math.random() - 0.5) * jitter,
-    z: best.z + (Math.random() - 0.5) * jitter,
-    y: best.h + height * 0.5 + Math.random() * 0.12,   // 바닥이 표면에 닿도록 중심 보정
+    x: x + (Math.random() - 0.5) * jitter,
+    z: z + (Math.random() - 0.5) * jitter,
+    y: baseY + height * 0.5,
   };
 }
 
