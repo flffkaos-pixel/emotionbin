@@ -7,11 +7,11 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 8.5;
+const PILE_RADIUS = 8.2;
 const TRASH_SCALE = 0.98;
 const CONE_SLOPE = 1.05;
-const LAYER_TAPER = 0.17;   // 층마다 반경이 줄어드는 비율 (피라미드 경사)
-const LAYER_HEIGHT = 1.75;  // 층 단차 높이
+const LAYER_TAPER = 0.15;   // 층마다 반경이 줄어드는 비율 (피라미드 경사)
+const LAYER_HEIGHT = 1.5;  // 층 단차 높이
 const PEAK_HEIGHT = 9.5;    // 참고값(더 이상 사용 안 함)  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
@@ -153,7 +153,7 @@ function placeOnPile(radius, height) {
       for (const q of nearbyPlaced(p.x, p.z)) {
         if (Math.abs((q.layerY || 0) - layerY) > LAYER_HEIGHT * 0.55) continue; // 다른 층은 무관
         const pr = q.radius || Math.max(0.6, q.minDist);
-        const sep = (r + pr) * (big ? 0.85 : 0.62);
+        const sep = (r + pr) * (big ? 0.88 : 0.68);
         const dx = p.x - q.x, dz = p.z - q.z;
         if (dx * dx + dz * dz < sep * sep) { occupied = true; break; }
       }
