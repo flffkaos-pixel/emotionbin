@@ -7,8 +7,8 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 8;
-const TRASH_SCALE = 0.82;
+const PILE_RADIUS = 6.5;
+const TRASH_SCALE = 0.92;
 const CONE_SLOPE = 0.62;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
@@ -44,7 +44,7 @@ function nearbyPlaced(x, z) {
 let pileLattice = [];
 function buildPileLattice() {
   if (pileLattice.length) return;
-  const step = 0.85;
+  const step = 0.7;
   const frac = (s) => s - Math.floor(s);          // [0,1) 의사난수
   const rotation = Math.random() * Math.PI * 2;   // 격자 전체를 임의 각도로 회전
   const ca = Math.cos(rotation), sa = Math.sin(rotation);
@@ -127,7 +127,7 @@ function placeOnPile(radius, height) {
   function surfaceAt(x, z, r) {
     const idx = getPileIdx(x, z);
     let h = idx >= 0 ? pileGrid[idx] : 0;
-    const factor = big ? 0.85 : 0.62;  // 큰 물건은 확실히 떨어뜨려 관통 방지
+    const factor = big ? 0.82 : 0.52;  // 큰 물건은 확실히 떨어뜨려 관통 방지
     for (const p of nearbyPlaced(x, z)) {
       const pr = p.radius || Math.max(0.6, p.minDist);
       const d = Math.hypot(x - p.x, z - p.z);
@@ -170,7 +170,7 @@ function placeOnPile(radius, height) {
   depositPileHeight(best.x, best.z, radius, hEff);
   addPlaced({ x: best.x, z: best.z, minDist, radius, topY: best.h + hEff });
 
-  const jitter = isLarge ? 0.08 : 0.16; // 유기적인 배치(딱 맞는 격자 느낌 제거)
+  const jitter = isLarge ? 0.05 : 0.07; // 유기적인 배치(딱 맞는 격자 느낌 제거)
   return {
     x: best.x + (Math.random() - 0.5) * jitter,
     z: best.z + (Math.random() - 0.5) * jitter,
