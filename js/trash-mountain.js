@@ -7,9 +7,9 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 72;
-const PILE_RADIUS = 7.6;
+const PILE_RADIUS = 7.2;
 const TRASH_SCALE = 0.88;
-const CONE_SLOPE = 0.34;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
+const CONE_SLOPE = 1.05;  // 클수록 뾰족한 산 (중심 높이 / 반경) // 오브젝트 전체 크기 — 너무 크면 층이 많이 생겨 산이 솟음
 // 그리드 누적 상한 — 무게로 커진 대형 오브젝트가 쌓임 높이를 폭주시키지 않게
 const PILE_HEIGHT_CAP = 18;
 const PILE_BLOCK_H = 2.6;
@@ -146,7 +146,7 @@ function placeOnPile(radius, height) {
     const h = surfaceAt(p.x, p.z, radius);
     if (big && h > 1.4) { dbg('skipBig'); continue; }
     if (h > PILE_HEIGHT_CAP) { dbg('skipHigh'); continue; }
-    if (h > 6.5) { dbg('skipHigh'); continue; } // 뾰족한 탑 방지 — 너무 높은 자리는 피함(퍼지게)
+    if (h > 9.5) { dbg('skipHigh'); continue; } // 뾰족한 탑 방지 — 너무 높은 자리는 피함(퍼지게)
     const wobble = 0.45 * Math.sin(p.x * 0.62 + 1.7) * Math.cos(p.z * 0.55 - 0.4)
                  + 0.22 * Math.sin(p.d * 1.3 + 0.8);
     const score = h + CONE_SLOPE * p.d + wobble;
