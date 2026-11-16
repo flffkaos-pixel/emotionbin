@@ -7,7 +7,7 @@ let dumpAnimations = [];
 let placedPositions = [];
 
 const PILE_GRID = 84;
-const PILE_RADIUS = 15;   // 초록 원(22)의 약 70%
+const PILE_RADIUS = 12;   // 초록 원(22)의 약 70%
 const TRASH_SCALE = 0.98;
 const CONE_SLOPE = 1.05;
 const LAYER_TAPER = 0.15;   // 층마다 반경이 줄어드는 비율 (피라미드 경사)
